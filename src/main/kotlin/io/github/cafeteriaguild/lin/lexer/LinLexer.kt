@@ -27,15 +27,22 @@ val linStdLexer = createLexer<Token<TokenType>> {
     "::" { process(makeToken(DOUBLE_COLON, 2)) }
     ':' { process(makeToken(COLON)) }
     ';' { process(makeToken(SEMICOLON)) }
+    "+=" { process(makeToken(PLUS_ASSIGN, 2)) }
+    "++" { process(makeToken(INCREMENT, 2)) }
     '+' { process(makeToken(PLUS)) }
     "->" { process(makeToken(ARROW, 2)) }
+    "-=" { process(makeToken(MINUS_ASSIGN, 2)) }
+    "--" { process(makeToken(DECREMENT, 2)) }
     '-' { process(makeToken(MINUS)) }
+    "%=" { process(makeToken(REM_ASSIGN, 2)) }
     '%' { process(makeToken(REM)) }
+    "*=" { process(makeToken(ASTERISK_ASSIGN, 2)) }
     '*' { process(makeToken(ASTERISK)) }
     "//" { while (hasNext()) if (next() == '\n') break }
     "/*" { while (hasNext()) if (next() == '*' && match('/')) break }
-    '/' { process(makeToken(F_SLASH)) }
-    '\\' { process(makeToken(B_SLASH)) }
+    "/=" { process(makeToken(SLASH_ASSIGN, 2)) }
+    '/' { process(makeToken(SLASH)) }
+    '\\' { process(makeToken(BACKSLASH)) }
     "!=" { process(makeToken(NEQ, 2)) }
     '!' { process(makeToken(BANG)) }
     "?:" { process(makeToken(ELVIS)) }
@@ -63,6 +70,7 @@ val linStdLexer = createLexer<Token<TokenType>> {
     matching { it.isLetter() || it == '_' || it == '@' }.configure {
         process(
             when (val s = readLinIdentifier(it)) {
+                // Kotlin keywords
                 "as" -> makeToken(AS, 2)
                 "break" -> makeToken(BREAK, 5)
                 "class" -> makeToken(CLASS, 5)
@@ -91,6 +99,8 @@ val linStdLexer = createLexer<Token<TokenType>> {
                 "var" -> makeToken(VAR, 3)
                 "when" -> makeToken(WHEN, 4)
                 "while" -> makeToken(WHILE, 5)
+                // Lin keywords
+                "import" -> makeToken(IMPORT, 6)
                 else -> makeToken(IDENTIFIER, s)
             }
         )

@@ -26,15 +26,22 @@ enum class TokenType {
     PLUS, // +
     MINUS, // -
     ASTERISK, // *
-    F_SLASH, // /
-    B_SLASH, // \
+    SLASH, // /
+    BACKSLASH, // \
     REM, // %
 
     ASSIGN, // =
+    PLUS_ASSIGN, // +=
+    MINUS_ASSIGN, // -=
+    ASTERISK_ASSIGN, // *=
+    SLASH_ASSIGN, // /=
+    REM_ASSIGN, // %=
     QUESTION, // ?
     ELVIS, // ?:
     BANG, // !
     ARROW, // ->
+    INCREMENT, // ++
+    DECREMENT, // --
 
     STRING,
     CHAR,
@@ -82,6 +89,8 @@ enum class TokenType {
     VAR,
     WHEN,
     WHILE,
+
+    IMPORT,
 
     INVALID,
     RESERVED

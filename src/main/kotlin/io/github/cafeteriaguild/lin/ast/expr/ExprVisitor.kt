@@ -10,6 +10,8 @@ import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.MultiExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.UnitExpr
 import io.github.cafeteriaguild.lin.ast.expr.nodes.*
+import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
+import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperation
 
 interface ExprVisitor<R> {
     fun visit(expr: NullExpr): R
@@ -31,4 +33,6 @@ interface ExprVisitor<R> {
     fun visit(expr: InvokeExpr): R
     fun visit(expr: InvokeLocalExpr): R
     fun visit(expr: InvokeMemberExpr): R
+    fun visit(expr: BinaryOperation): R
+    fun visit(expr: UnaryOperation): R
 }

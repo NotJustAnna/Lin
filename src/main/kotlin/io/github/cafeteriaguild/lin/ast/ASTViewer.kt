@@ -260,7 +260,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        expr.target.ast(tail = true)
 //    }
 
-//    override fun visit(expr: BinaryOperation) {
+//    override fun visit(expr: io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation) {
 //        base("binary ${expr.operator}")
 //
 //        expr.left.ast(tail = false)

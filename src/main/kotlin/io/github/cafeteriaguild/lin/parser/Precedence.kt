@@ -1,40 +1,48 @@
 package io.github.cafeteriaguild.lin.parser
 
 object Precedence {
-    const val DOT = 14
+    /* a++ | a-- | a.b | a?.b | A? */
+    const val POSTFIX = 15
 
-    /* a(b) */
-    const val POSTFIX = 13
+    /* -a | +a | ++a | --a | !a */
+    const val PREFIX = 14
 
-    /* a ^ b */
-    const val EXPONENTIAL = 11
-
-    /* -a | +a | !a | ~a */
-    const val PREFIX = 10
+    /* : A | b as A | b as? A */
+    const val TYPE_RHS = 13
 
     /* a * b | a / b | a % b */
-    const val MULTIPLICATIVE = 9
+    const val MULTIPLICATIVE = 12
 
     /* a + b | a - b */
-    const val ADDITIVE = 8
-
-    const val SHIFT = 7
+    const val ADDITIVE = 11
 
     /* a..b */
-    const val RANGE_TO = 6
+    const val RANGE = 10
 
-    /* Unused */
-    const val INFIX = 5
+    /* a to b */
+    const val INFIX = 9
+
+    /* a ?: b */
+    const val ELVIS = 8
+
+    /* a in b | a !in b | a is b | a !is b */
+    const val NAMED_CHECKS = 7
 
     /* a > b | a < b | a >= b | a <= b */
-    const val COMPARISON = 4
+    const val COMPARISON = 6
 
     /* a == b | a != b */
-    const val EQUALITY = 3
+    const val EQUALITY = 5
 
     /* a && b */
-    const val CONJUNCTION = 2
+    const val CONJUNCTION = 4
 
     /* a || b */
-    const val DISJUNCTION = 1
+    const val DISJUNCTION = 3
+
+    /* *array */
+    const val SPREAD_OPERATOR = 2
+
+    /* a = b | a += b | a -= b | a *= b | a /= b | a %= b */
+    const val ASSIGNMENT = 1
 }
