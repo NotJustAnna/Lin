@@ -1,6 +1,5 @@
 package io.github.cafeteriaguild.lin.rt.coroutines
 
-import io.github.cafeteriaguild.lin.rt.LinThrowable
 import io.github.cafeteriaguild.lin.rt.coroutines.LinResult.Companion.supplier
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 
@@ -109,7 +108,8 @@ sealed class LinContinuation {
         fun compute(block: () -> LObj): LinContinuation = supplying(supplier(block))
         fun empty() = Done(LinResult.Empty)
         fun of(obj: LObj): LinContinuation = Done(LinResult.Value(obj))
-        fun ofError(t: LinThrowable): LinContinuation = Done(LinResult.Throwable(t))
+        fun ofError(t: _root_ide_package_.io.github.cafeteriaguild.lin.rt.LinThrowable): LinContinuation =
+            Done(LinResult.Throwable(t))
     }
 }
 

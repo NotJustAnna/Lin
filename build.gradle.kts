@@ -1,20 +1,24 @@
 plugins {
     java
+    application
     kotlin("jvm") version "1.3.72"
+    id("com.github.johnrengelman.shadow") version "6.0.0"
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+group = "io.github.cafeteriaguild"
+version = "0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
     jcenter()
 }
 
+application.mainClassName = "io.github.cafeteriaguild.lin.LinUtilsKt"
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("net.notjustanna:tartar:1.3")
-    implementation("it.unimi.dsi:fastutil:8.3.1")
+    //implementation("it.unimi.dsi:fastutil:8.3.1")
 }
 
 configure<JavaPluginConvention> {

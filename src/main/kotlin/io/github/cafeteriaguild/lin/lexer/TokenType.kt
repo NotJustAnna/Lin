@@ -28,6 +28,7 @@ enum class TokenType {
     ASTERISK, // *
     F_SLASH, // /
     B_SLASH, // \
+    REM, // %
 
     ASSIGN, // =
     QUESTION, // ?
@@ -37,7 +38,7 @@ enum class TokenType {
 
     STRING,
     CHAR,
-    IDENT,
+    IDENTIFIER,
 
     INT,
     LONG,
@@ -46,6 +47,7 @@ enum class TokenType {
 
     TRUE,
     FALSE,
+    NULL,
 
     DOT,
     COMMA,
@@ -55,22 +57,30 @@ enum class TokenType {
 
     NL,
 
-    STRUCT,
-    USE,
     AS,
-    IS,
     BREAK,
-    EXTERNAL,
-    MOD,
-    MUT,
-    RETURN,
-    VAL,
-    VAR,
+    CLASS,
+    CONTINUE,
+    DO,
+    ELSE,
+    FOR,
     FUN,
     IF,
-    ELSE,
-    NULL,
-    TYPE,
+    IN,
+    INTERFACE,
+    IS,
+    OBJECT,
+    PACKAGE,
+    RETURN,
+    SUPER,
+    THIS,
+    THROW,
+    TRY,
+    TYPEALIAS,
+    TYPEOF,
+    VAL,
+    VAR,
+    WHEN,
     WHILE,
 
     INVALID,

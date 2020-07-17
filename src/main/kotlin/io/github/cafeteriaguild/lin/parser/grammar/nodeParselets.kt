@@ -13,7 +13,7 @@ fun GrammarDSL<TokenType, Expr>.nodeParselets() {
     prefix(NULL) { NullExpr(it.section) }
     prefix(TRUE) { BooleanExpr(true, it.section) }
     prefix(FALSE) { BooleanExpr(false, it.section) }
-    prefix(IDENT) {
+    prefix(IDENTIFIER) {
         if (match(ASSIGN)) {
             AssignExpr(
                 it.value,

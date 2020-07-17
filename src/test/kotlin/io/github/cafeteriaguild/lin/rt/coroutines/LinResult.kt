@@ -1,6 +1,5 @@
 package io.github.cafeteriaguild.lin.rt.coroutines
 
-import io.github.cafeteriaguild.lin.rt.LinThrowable
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 import io.github.cafeteriaguild.lin.rt.lib.LUnit
 
@@ -13,7 +12,7 @@ sealed class LinResult {
         override fun toString() = "Value($value)"
     }
 
-    class Throwable(val throwable: LinThrowable) : LinResult() {
+    class Throwable(val throwable: _root_ide_package_.io.github.cafeteriaguild.lin.rt.LinThrowable) : LinResult() {
         override fun toString() = "Throwable($throwable)"
     }
 
@@ -34,7 +33,7 @@ sealed class LinResult {
             try {
                 block()
                 Empty
-            } catch (t: LinThrowable) {
+            } catch (t: _root_ide_package_.io.github.cafeteriaguild.lin.rt.LinThrowable) {
                 Throwable(t)
             }
         }
@@ -42,7 +41,7 @@ sealed class LinResult {
         fun supplier(block: () -> LObj): () -> LinResult = {
             try {
                 Value(block())
-            } catch (t: LinThrowable) {
+            } catch (t: _root_ide_package_.io.github.cafeteriaguild.lin.rt.LinThrowable) {
                 Throwable(t)
             }
         }
@@ -51,7 +50,7 @@ sealed class LinResult {
             try {
                 block(it.unwrap() ?: error("Result is empty."))
                 Empty
-            } catch (t: LinThrowable) {
+            } catch (t: _root_ide_package_.io.github.cafeteriaguild.lin.rt.LinThrowable) {
                 Throwable(t)
             }
         }
@@ -59,7 +58,7 @@ sealed class LinResult {
         fun function(block: (LObj) -> LObj): (LinResult) -> LinResult = {
             try {
                 Value(block(it.unwrap() ?: error("Result is empty.")))
-            } catch (t: LinThrowable) {
+            } catch (t: _root_ide_package_.io.github.cafeteriaguild.lin.rt.LinThrowable) {
                 Throwable(t)
             }
         }

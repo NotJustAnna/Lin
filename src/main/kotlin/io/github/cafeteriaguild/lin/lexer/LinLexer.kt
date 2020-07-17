@@ -2,7 +2,10 @@ package io.github.cafeteriaguild.lin.lexer
 
 import net.notjustanna.tartar.api.parser.Token
 import net.notjustanna.tartar.createLexer
-import net.notjustanna.tartar.extensions.*
+import net.notjustanna.tartar.extensions.LexicalNumber
+import net.notjustanna.tartar.extensions.makeToken
+import net.notjustanna.tartar.extensions.readNumber
+import net.notjustanna.tartar.extensions.readString
 import io.github.cafeteriaguild.lin.lexer.TokenType.*
 
 val linStdLexer = createLexer<Token<TokenType>> {
@@ -27,6 +30,7 @@ val linStdLexer = createLexer<Token<TokenType>> {
     '+' { process(makeToken(PLUS)) }
     "->" { process(makeToken(ARROW, 2)) }
     '-' { process(makeToken(MINUS)) }
+    '%' { process(makeToken(REM)) }
     '*' { process(makeToken(ASTERISK)) }
     "//" { while (hasNext()) if (next() == '\n') break }
     "/*" { while (hasNext()) if (next() == '*' && match('/')) break }
@@ -44,8 +48,9 @@ val linStdLexer = createLexer<Token<TokenType>> {
     '<' { process(makeToken(LT)) }
     ">=" { process(makeToken(GTE, 2)) }
     '>' { process(makeToken(GT)) }
-    '\'' { process(makeToken(CHAR, readString(it))) }
-    '"' { process(makeToken(STRING, readString(it))) }
+    '\'' { process(makeToken(CHAR, readLinString(it))) }
+    '"' { process(makeToken(STRING, readLinString(it))) }
+    "`" { process(makeToken(IDENTIFIER, readString(it))) }
     matching { it.isDigit() }.configure {
         process(
             when (val n = readNumber(it)) {
@@ -55,30 +60,40 @@ val linStdLexer = createLexer<Token<TokenType>> {
             }
         )
     }
-    matching { it.isLetter() || it == '_' }.configure {
+    matching { it.isLetter() || it == '_' || it == '@' }.configure {
         process(
-            when (val s = readIdentifier(it)) {
-                "use" -> makeToken(USE, 3)
-                "true" -> makeToken(TRUE, 4)
+            when (val s = readLinIdentifier(it)) {
+                "as" -> makeToken(AS, 2)
+                "break" -> makeToken(BREAK, 5)
+                "class" -> makeToken(CLASS, 5)
+                "continue" -> makeToken(CONTINUE, 8)
+                "do" -> makeToken(DO, 2)
+                "else" -> makeToken(ELSE, 4)
                 "false" -> makeToken(FALSE, 4)
+                "for" -> makeToken(FOR, 3)
+                "fun" -> makeToken(FUN, 3)
+                "if" -> makeToken(IF, 2)
+                "in" -> makeToken(IN, 2)
+                "interface" -> makeToken(INTERFACE, 9)
+                "is" -> makeToken(IS, 2)
+                "null" -> makeToken(NULL, 4)
+                "object" -> makeToken(OBJECT, 6)
+                "package" -> makeToken(PACKAGE, 7)
+                "return" -> makeToken(RETURN, 6)
+                "super" -> makeToken(SUPER, 5)
+                "this" -> makeToken(THIS, 4)
+                "throw" -> makeToken(THROW, 5)
+                "true" -> makeToken(TRUE, 4)
+                "try" -> makeToken(TRY, 3)
+                "typealias" -> makeToken(TYPEALIAS, 9)
+                "typeof" -> makeToken(TYPEOF, 6)
                 "val" -> makeToken(VAL, 3)
                 "var" -> makeToken(VAR, 3)
-                "mut" -> makeToken(MUT, 3)
-                "return" -> makeToken(RETURN, 6)
-                "mod" -> makeToken(MOD, 3)
-                "if" -> makeToken(IF, 2)
-                "else" -> makeToken(ELSE, 4)
-                "null" -> makeToken(NULL, 4)
-                "type" -> makeToken(TYPE, 4)
-                "fun" -> makeToken(FUN, 3)
-                "external" -> makeToken(EXTERNAL, 8)
-                "struct" -> makeToken(STRUCT, 6)
-                "break" -> makeToken(BREAK, 5)
+                "when" -> makeToken(WHEN, 4)
                 "while" -> makeToken(WHILE, 5)
-                "is" -> makeToken(IS, 2)
-                else -> makeToken(IDENT, s)
+                else -> makeToken(IDENTIFIER, s)
             }
         )
     }
-    configure { process(makeToken(INVALID, it.toString())) }
+    configure { process(makeToken(INVALID, next().toString())) }
 }

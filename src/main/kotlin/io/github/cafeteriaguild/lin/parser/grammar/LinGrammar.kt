@@ -43,7 +43,7 @@ val linStdGrammar = createGrammar<TokenType, Expr> {
             //    val index = ident.value.toInt()
             //    TupleIndexAccessExpr(left, index, left.span(ident))
             //}
-            IDENT -> {
+            IDENTIFIER -> {
                 val name = ident.value
                 if (match(ASSIGN)) {
                     val value = parseExpression()
