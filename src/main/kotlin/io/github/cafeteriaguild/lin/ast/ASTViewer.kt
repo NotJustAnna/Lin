@@ -7,9 +7,7 @@ import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberExpr
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
-import io.github.cafeteriaguild.lin.ast.expr.misc.MultiExpr
-import io.github.cafeteriaguild.lin.ast.expr.misc.UnitExpr
+import io.github.cafeteriaguild.lin.ast.expr.misc.*
 import io.github.cafeteriaguild.lin.ast.expr.nodes.*
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperation
@@ -137,7 +135,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 
     override fun visit(expr: DeclareVariableExpr) {
         base(if (expr.mutable) "var" else "val")
-        label("name: ${expr.name}", tail = expr.value != null)
+        label("name: ${expr.name}", tail = expr.value == null)
         expr.value?.astLabel("value", tail = true)
     }
 
@@ -273,23 +271,23 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.value.ast(tail = true)
     }
 
-//    override fun visit(expr: IfExpr) {
-//        base("if")
-//
-//        expr.condition.astLabel("condition", tail = false)
-//        expr.thenBranch.astLabel("then", tail = expr.elseBranch == null)
-//
-//        if (expr.elseBranch != null) {
-//            expr.elseBranch.astLabel("else", tail = true)
-//        }
-//    }
+    override fun visit(expr: IfExpr) {
+        base("if")
 
-//    override fun visit(expr: WhileExpr) {
-//        base("while")
-//
-//        expr.condition.astLabel("condition", tail = false)
-//        expr.body.astLabel("body", tail = true)
-//    }
+        expr.condition.astLabel("condition", tail = false)
+        expr.thenBranch.astLabel("then", tail = expr.elseBranch == null)
+
+        if (expr.elseBranch != null) {
+            expr.elseBranch.astLabel("else", tail = true)
+        }
+    }
+
+    override fun visit(expr: WhileExpr) {
+        base("while")
+
+        expr.condition.astLabel("condition", tail = false)
+        expr.body.astLabel("body", tail = true)
+    }
 
     override fun visit(expr: SubscriptAccessExpr) {
         base("subscript access")

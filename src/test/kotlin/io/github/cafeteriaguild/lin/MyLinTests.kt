@@ -8,8 +8,12 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-        a = b
-        1 + 2 * 3 - 4 / 5
+        while (true) {
+            val result = mySequence
+                .filter()
+                .map()
+                .toList()
+        }
     """.trimIndent()
     )
 

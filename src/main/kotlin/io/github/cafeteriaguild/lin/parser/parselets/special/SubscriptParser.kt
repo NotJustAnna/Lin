@@ -8,6 +8,7 @@ import io.github.cafeteriaguild.lin.ast.expr.access.SubscriptAccessExpr
 import io.github.cafeteriaguild.lin.ast.expr.access.SubscriptAssignExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.Precedence
+import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
 object SubscriptParser : InfixParser<TokenType, Expr> {
     override val precedence: Int = Precedence.POSTFIX
@@ -28,8 +29,10 @@ object SubscriptParser : InfixParser<TokenType, Expr> {
         // TL;DR "a[b] += c" is completely valid...
         return if (ctx.match(TokenType.ASSIGN)) {
             val value = ctx.parseExpression()
+            ctx.maybeIgnoreNL()
             SubscriptAssignExpr(left, arguments, value, left.span(value))
         } else {
+            ctx.maybeIgnoreNL()
             SubscriptAccessExpr(left, arguments, left.span(rBracket))
         }
     }

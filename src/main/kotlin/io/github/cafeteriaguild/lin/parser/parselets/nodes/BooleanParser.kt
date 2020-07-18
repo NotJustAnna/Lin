@@ -6,9 +6,11 @@ import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.nodes.BooleanExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
+import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
 class BooleanParser(val value: Boolean) : PrefixParser<TokenType, Expr> {
     override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
+        ctx.maybeIgnoreNL()
         return BooleanExpr(value, token.section)
     }
 }

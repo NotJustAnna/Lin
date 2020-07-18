@@ -7,6 +7,7 @@ import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.access.AssignExpr
 import io.github.cafeteriaguild.lin.ast.expr.nodes.IdentifierExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
+import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
 object IdentifierParser : PrefixParser<TokenType, Expr> {
     override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
@@ -17,8 +18,7 @@ object IdentifierParser : PrefixParser<TokenType, Expr> {
 
             return AssignExpr(name, expr, token.section)
         }
-
+        ctx.maybeIgnoreNL()
         return IdentifierExpr(name, token.section)
-
     }
 }

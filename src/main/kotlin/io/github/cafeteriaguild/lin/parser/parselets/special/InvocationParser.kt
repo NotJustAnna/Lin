@@ -11,6 +11,7 @@ import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberExpr
 import io.github.cafeteriaguild.lin.ast.expr.nodes.IdentifierExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.Precedence
+import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
 object InvocationParser : InfixParser<TokenType, Expr> {
     override val precedence: Int = Precedence.POSTFIX
@@ -27,7 +28,9 @@ object InvocationParser : InfixParser<TokenType, Expr> {
 
         val rParen = ctx.last
 
-        val position = left.span(rParen)
+        val position = token.span(rParen)
+
+        ctx.maybeIgnoreNL()
 
         if (left is PropertyAccessExpr) {
             return InvokeMemberExpr(left.target, left.name, arguments, position)

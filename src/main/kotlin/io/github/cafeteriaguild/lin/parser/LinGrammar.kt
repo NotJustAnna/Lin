@@ -10,9 +10,7 @@ import io.github.cafeteriaguild.lin.parser.parselets.BinaryOperatorParser
 import io.github.cafeteriaguild.lin.parser.parselets.UnaryOperatorParser
 import io.github.cafeteriaguild.lin.parser.parselets.declarations.DeclareVariableParser
 import io.github.cafeteriaguild.lin.parser.parselets.nodes.*
-import io.github.cafeteriaguild.lin.parser.parselets.special.DotParser
-import io.github.cafeteriaguild.lin.parser.parselets.special.InvocationParser
-import io.github.cafeteriaguild.lin.parser.parselets.special.SubscriptParser
+import io.github.cafeteriaguild.lin.parser.parselets.special.*
 
 val linStdGrammar = createGrammar<TokenType, Expr> {
     // Nodes
@@ -47,4 +45,8 @@ val linStdGrammar = createGrammar<TokenType, Expr> {
     infix(L_PAREN, InvocationParser)
     infix(L_BRACKET, SubscriptParser)
     infix(DOT, DotParser)
+
+    prefix(RETURN, ReturnParser)
+    prefix(IF, IfParser)
+    prefix(WHILE, WhileParser)
 }

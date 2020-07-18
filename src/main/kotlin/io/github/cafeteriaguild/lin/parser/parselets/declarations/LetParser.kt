@@ -12,8 +12,9 @@ class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Expr
         val ident = ctx.eat(TokenType.IDENTIFIER)
 
         if (ctx.match(TokenType.ASSIGN)) {
+            val last = ctx.last
             val expr = ctx.parseExpression()
-            return DeclareVariableExpr(ident.value, mutable, expr, token.span(expr))
+            return DeclareVariableExpr(ident.value, mutable, expr, token.span(last))
         }
         return DeclareVariableExpr(ident.value, mutable, null, token.span(ident))
     }

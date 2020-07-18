@@ -7,6 +7,7 @@ import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperationType
 import io.github.cafeteriaguild.lin.lexer.TokenType
+import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
 class BinaryOperatorParser(
     override val precedence: Int,
@@ -15,6 +16,7 @@ class BinaryOperatorParser(
 ) : InfixParser<TokenType, Expr> {
     override fun parse(ctx: ParserContext<TokenType, Expr>, left: Expr, token: Token<TokenType>): Expr {
         val right = ctx.parseExpression(precedence - if (leftAssoc) 0 else 1)
+        ctx.maybeIgnoreNL()
         return BinaryOperation(left, right, operator, left.span(right))
     }
 }
