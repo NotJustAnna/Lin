@@ -19,7 +19,7 @@ fun main() {
         )
         )
         {
-        
+            ++1
         }
         
     """.trimIndent()

@@ -4,8 +4,8 @@ import net.notjustanna.tartar.api.parser.InfixParser
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
+import io.github.cafeteriaguild.lin.ast.expr.AccessNode
 import io.github.cafeteriaguild.lin.ast.expr.Expr
-import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.ast.expr.ops.PostAssignUnaryOperation
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryAssignOperationType
@@ -16,11 +16,11 @@ import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 class PostAssignUnaryOperatorParser(private val operator: UnaryAssignOperationType) : InfixParser<TokenType, Expr> {
     override val precedence: Int = Precedence.POSTFIX
     override fun parse(ctx: ParserContext<TokenType, Expr>, left: Expr, token: Token<TokenType>): Expr {
-        if (left !is Node) {
+        if (left !is AccessNode) {
             return InvalidExpr {
                 section(token.section)
                 child(left)
-                error(SyntaxException("Expected a node but got a statement instead", left.section))
+                error(SyntaxException("Expected an accessor", left.section))
             }
         }
         ctx.maybeIgnoreNL()

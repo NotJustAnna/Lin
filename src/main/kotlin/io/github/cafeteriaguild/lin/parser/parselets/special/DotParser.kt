@@ -22,7 +22,7 @@ class DotParser(val nullSafe: Boolean) : InfixParser<TokenType, Expr> {
             return InvalidExpr {
                 section(token.section)
                 child(left)
-                error(SyntaxException("Expected a node but got a statement instead", left.section))
+                error(SyntaxException("Expected a node", left.section))
             }
         }
 
@@ -37,7 +37,7 @@ class DotParser(val nullSafe: Boolean) : InfixParser<TokenType, Expr> {
                     it as? Node ?: return InvalidExpr {
                         section(token.section)
                         child(it)
-                        error(SyntaxException("Expected a node but got a statement instead", it.section))
+                        error(SyntaxException("Expected a node", it.section))
                     }
                 }
                 ctx.maybeIgnoreNL()

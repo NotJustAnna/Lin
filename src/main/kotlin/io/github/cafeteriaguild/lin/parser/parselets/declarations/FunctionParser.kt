@@ -34,7 +34,7 @@ object FunctionParser : PrefixParser<TokenType, Expr> {
                         it as? Node ?: return InvalidExpr {
                             section(token.section)
                             child(it)
-                            error(SyntaxException("Expected a node but got a statement instead", it.section))
+                            error(SyntaxException("Expected a node", it.section))
                         }
                     }
                 } else null
@@ -51,7 +51,7 @@ object FunctionParser : PrefixParser<TokenType, Expr> {
                 it as? Node ?: return InvalidExpr {
                     section(token.section)
                     child(it)
-                    error(SyntaxException("Expected a node but got a statement instead", it.section))
+                    error(SyntaxException("Expected a node", it.section))
                 }
             }
         } else {
