@@ -3,10 +3,13 @@ package io.github.cafeteriaguild.lin.parser
 import net.notjustanna.tartar.createGrammar
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperationType
+import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryAssignOperationType
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperationType
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.lexer.TokenType.*
 import io.github.cafeteriaguild.lin.parser.parselets.BinaryOperatorParser
+import io.github.cafeteriaguild.lin.parser.parselets.PostAssignUnaryOperatorParser
+import io.github.cafeteriaguild.lin.parser.parselets.PreAssignUnaryOperatorParser
 import io.github.cafeteriaguild.lin.parser.parselets.UnaryOperatorParser
 import io.github.cafeteriaguild.lin.parser.parselets.declarations.DeclareVariableParser
 import io.github.cafeteriaguild.lin.parser.parselets.declarations.FunctionParser
@@ -43,6 +46,12 @@ val linStdGrammar = createGrammar<TokenType, Expr> {
     infix(LTE, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.LTE))
     infix(GT, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.GT))
     infix(GTE, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.GTE))
+
+    // Increment/decrement
+    prefix(DECREMENT, PreAssignUnaryOperatorParser(UnaryAssignOperationType.DECREMENT))
+    prefix(INCREMENT, PreAssignUnaryOperatorParser(UnaryAssignOperationType.INCREMENT))
+    infix(DECREMENT, PostAssignUnaryOperatorParser(UnaryAssignOperationType.DECREMENT))
+    infix(INCREMENT, PostAssignUnaryOperatorParser(UnaryAssignOperationType.INCREMENT))
 
     prefix(VAL, DeclareVariableParser(false))
     prefix(VAR, DeclareVariableParser(true))

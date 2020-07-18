@@ -10,6 +10,8 @@ import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeNode
 import io.github.cafeteriaguild.lin.ast.expr.misc.*
 import io.github.cafeteriaguild.lin.ast.expr.nodes.*
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
+import io.github.cafeteriaguild.lin.ast.expr.ops.PostAssignUnaryOperation
+import io.github.cafeteriaguild.lin.ast.expr.ops.PreAssignUnaryOperation
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperation
 
 class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boolean) : ExprVisitor<Unit> {
@@ -270,6 +272,18 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 
     override fun visit(expr: UnaryOperation) {
         base("unary ${expr.operator}")
+
+        expr.target.ast(tail = true)
+    }
+
+    override fun visit(expr: PreAssignUnaryOperation) {
+        base("pre-assign unary ${expr.operator}")
+
+        expr.target.ast(tail = true)
+    }
+
+    override fun visit(expr: PostAssignUnaryOperation) {
+        base("post-assign unary ${expr.operator}")
 
         expr.target.ast(tail = true)
     }
