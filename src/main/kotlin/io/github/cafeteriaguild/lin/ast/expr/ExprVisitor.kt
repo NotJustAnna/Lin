@@ -20,7 +20,9 @@ interface ExprVisitor<R> {
     fun visit(expr: AssignExpr): R
     fun visit(expr: IdentifierNode): R
     fun visit(expr: DeclareVariableExpr): R
-    fun visit(expr: ReturnExpr): R
+    fun visit(expr: ReturnNode): R
+    fun visit(expr: ThrowNode): R
+    fun visit(expr: ElvisNode): R
     fun visit(expr: CharNode): R
     fun visit(expr: StringNode): R
     fun visit(expr: UnitNode): R
@@ -36,6 +38,7 @@ interface ExprVisitor<R> {
     fun visit(expr: InvokeMemberNode): R
     fun visit(expr: IfExpr): R
     fun visit(expr: IfNode): R
+    fun visit(expr: NotNullNode): R
     fun visit(expr: DoWhileExpr): R
     fun visit(expr: WhileExpr): R
     fun visit(expr: BinaryOperation): R

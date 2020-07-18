@@ -7,7 +7,7 @@ import io.github.cafeteriaguild.lin.ast.expr.ExprVisitor
 import io.github.cafeteriaguild.lin.ast.expr.Node
 
 class InvokeMemberNode(
-    val target: Node, val name: String, val arguments: List<Node>,
+    val target: Node, val nullSafe: Boolean, val name: String, val arguments: List<Node>,
     section: Section
 ) : AbstractExpr(section), Node {
     override fun <R> accept(visitor: ExprVisitor<R>) = visitor.visit(this)

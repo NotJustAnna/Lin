@@ -44,8 +44,10 @@ val linStdLexer = createLexer<Token<TokenType>> {
     '/' { process(makeToken(SLASH)) }
     '\\' { process(makeToken(BACKSLASH)) }
     "!=" { process(makeToken(NEQ, 2)) }
+    "!!" { process(makeToken(DOUBLE_BANG, 2)) }
     '!' { process(makeToken(BANG)) }
     "?:" { process(makeToken(ELVIS)) }
+    "?." { process(makeToken(QUESTION_DOT, 2)) }
     '?' { process(makeToken(QUESTION)) }
     "==" { process(makeToken(EQ, 2)) }
     '=' { process(makeToken(ASSIGN)) }

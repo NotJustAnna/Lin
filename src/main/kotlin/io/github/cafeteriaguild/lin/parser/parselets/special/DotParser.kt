@@ -14,7 +14,7 @@ import io.github.cafeteriaguild.lin.parser.Precedence
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
-object DotParser : InfixParser<TokenType, Expr> {
+class DotParser(val nullSafe: Boolean) : InfixParser<TokenType, Expr> {
     override val precedence: Int = Precedence.POSTFIX
 
     override fun parse(ctx: ParserContext<TokenType, Expr>, left: Expr, token: Token<TokenType>): Expr {
@@ -25,6 +25,7 @@ object DotParser : InfixParser<TokenType, Expr> {
                 error(SyntaxException("Expected a node but got a statement instead.", left.section))
             }
         }
+
         ctx.matchAll(TokenType.NL)
         val identifier = ctx.eat()
         if (identifier.type == TokenType.IDENTIFIER) {
@@ -40,10 +41,10 @@ object DotParser : InfixParser<TokenType, Expr> {
                     }
                 }
                 ctx.maybeIgnoreNL()
-                PropertyAssignExpr(left, name, value, token.section)
+                PropertyAssignExpr(left, nullSafe, name, value, token.section)
             } else {
                 ctx.maybeIgnoreNL()
-                PropertyAccessNode(left, name, token.section)
+                PropertyAccessNode(left, nullSafe, name, token.section)
             }
         }
         return InvalidExpr {

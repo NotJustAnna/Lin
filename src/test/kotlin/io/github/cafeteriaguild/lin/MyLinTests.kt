@@ -10,15 +10,7 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-        
-        fun main(args = arrayOf()) {
-            do {
-                val result = mySequence
-                    .filter()
-                    .map()
-                    .toList()
-            } while (shouldContinue())
-        }
+            return a ?: throw b
     """.trimIndent()
     )
 

@@ -263,6 +263,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         base("invoke member function")
 
         expr.target.astLabel("target", tail = false)
+        label("null safe: ${expr.nullSafe}", tail = false)
         label("name: ${expr.name}", expr.arguments.isEmpty())
         expr.arguments.astGroup("arguments", tail = true)
     }
@@ -280,8 +281,27 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.right.ast(tail = true)
     }
 
-    override fun visit(expr: ReturnExpr) {
+    override fun visit(expr: ReturnNode) {
         base("return")
+
+        expr.value.ast(tail = true)
+    }
+
+    override fun visit(expr: ThrowNode) {
+        base("throw")
+
+        expr.value.ast(tail = true)
+    }
+
+    override fun visit(expr: ElvisNode) {
+        base("elvis")
+
+        expr.left.ast(tail = false)
+        expr.right.ast(tail = true)
+    }
+
+    override fun visit(expr: NotNullNode) {
+        base("not null")
 
         expr.value.ast(tail = true)
     }
@@ -345,6 +365,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         base("property access")
 
         expr.target.astLabel("target", tail = false)
+        label("null safe: ${expr.nullSafe}", tail = false)
         label("name: ${expr.name}", true)
     }
 
@@ -352,6 +373,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         base("property access")
 
         expr.target.astLabel("target", tail = false)
+        label("null safe: ${expr.nullSafe}", tail = false)
         label("name: ${expr.name}", true)
         expr.value.astLabel("value", tail = true)
     }

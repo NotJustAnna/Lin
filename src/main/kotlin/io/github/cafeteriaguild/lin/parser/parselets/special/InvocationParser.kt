@@ -51,7 +51,7 @@ object InvocationParser : InfixParser<TokenType, Expr> {
         ctx.maybeIgnoreNL()
 
         if (left is PropertyAccessNode) {
-            return InvokeMemberNode(left.target, left.name, arguments, token.section)
+            return InvokeMemberNode(left.target, left.nullSafe, left.name, arguments, token.section)
         } else if (left is IdentifierNode) {
             return InvokeLocalNode(left.name, arguments, token.section)
         }

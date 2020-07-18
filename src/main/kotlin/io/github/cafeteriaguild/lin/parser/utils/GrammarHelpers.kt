@@ -11,7 +11,7 @@ import io.github.cafeteriaguild.lin.lexer.TokenType
  * Hacky method to ignore newlines in case of method chains
  */
 fun ParserContext<TokenType, Expr>.maybeIgnoreNL() {
-    skipNewLinesUntil(TokenType.DOT)
+    skipNewLinesUntil(TokenType.DOT, TokenType.QUESTION_DOT)
 }
 
 fun ParserContext<TokenType, Expr>.skipNewLinesUntil(vararg type: TokenType) {

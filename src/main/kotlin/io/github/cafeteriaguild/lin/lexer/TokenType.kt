@@ -37,7 +37,9 @@ enum class TokenType {
     SLASH_ASSIGN, // /=
     REM_ASSIGN, // %=
     QUESTION, // ?
+    QUESTION_DOT, // ?.
     ELVIS, // ?:
+    DOUBLE_BANG, // !!
     BANG, // !
     ARROW, // ->
     INCREMENT, // ++
