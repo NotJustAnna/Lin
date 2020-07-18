@@ -1,4 +1,4 @@
-package io.github.cafeteriaguild.lin.parser.grammar.nodes
+package io.github.cafeteriaguild.lin.parser.parselets.nodes
 
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.PrefixParser
@@ -8,7 +8,7 @@ import io.github.cafeteriaguild.lin.ast.expr.nodes.BooleanExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 
 class BooleanParser(val value: Boolean) : PrefixParser<TokenType, Expr> {
-    override fun parse(parser: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
+    override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
         return BooleanExpr(value, token.section)
     }
 }

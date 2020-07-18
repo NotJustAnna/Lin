@@ -1,4 +1,4 @@
-package io.github.cafeteriaguild.lin.parser.grammar
+package io.github.cafeteriaguild.lin.parser.parselets
 
 import net.notjustanna.tartar.api.parser.InfixParser
 import net.notjustanna.tartar.api.parser.ParserContext

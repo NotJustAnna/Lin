@@ -1,7 +1,7 @@
 package io.github.cafeteriaguild.lin.parser
 
 object Precedence {
-    /* a++ | a-- | a.b | a?.b | A? */
+    /* a++ | a-- | a.b | a?.b | A? | a(b) | a[b] */
     const val POSTFIX = 15
 
     /* -a | +a | ++a | --a | !a */

@@ -2,9 +2,8 @@ package io.github.cafeteriaguild.lin.ast
 
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.ExprVisitor
-import io.github.cafeteriaguild.lin.ast.expr.access.AssignExpr
-import io.github.cafeteriaguild.lin.ast.expr.access.PropertyAccessExpr
-import io.github.cafeteriaguild.lin.ast.expr.access.PropertyAssignExpr
+import io.github.cafeteriaguild.lin.ast.expr.access.*
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberExpr
@@ -12,6 +11,8 @@ import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.MultiExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.UnitExpr
 import io.github.cafeteriaguild.lin.ast.expr.nodes.*
+import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
+import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperation
 
 class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boolean) : ExprVisitor<Unit> {
     fun Expr.ast(indent: String = this@ASTViewer.indent + if (isTail) "    " else "│   ", tail: Boolean) =
@@ -82,7 +83,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        if (expr.fileModules.isNotEmpty()) expr.fileModules.astGroup("files", tail = true)
 //    }
 
-    override fun visit(expr: IdentExpr) = base("reference ${expr.name}")
+    override fun visit(expr: IdentifierExpr) = base("reference ${expr.name}")
 
     override fun visit(expr: NullExpr) = base("null ref")
 
@@ -134,12 +135,11 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        expr.body.astLabel("body", tail = true)
 //    }
 
-//    override fun visit(expr: DeclareLetExpr) {
-//        base("let")
-//
-//        label("${expr.pattern}", tail = false)
-//        expr.value.astLabel("value", tail = true)
-//    }
+    override fun visit(expr: DeclareVariableExpr) {
+        base(if (expr.mutable) "var" else "val")
+        label("name: ${expr.name}", tail = expr.value != null)
+        expr.value?.astLabel("value", tail = true)
+    }
 
 //    override fun visit(expr: TypeAliasExpr) {
 //        base("typealias")
@@ -254,18 +254,18 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.arguments.astGroup("arguments", tail = true)
     }
 
-//    override fun visit(expr: UnaryOperation) {
-//        base("unary ${expr.operator}")
-//
-//        expr.target.ast(tail = true)
-//    }
+    override fun visit(expr: UnaryOperation) {
+        base("unary ${expr.operator}")
 
-//    override fun visit(expr: io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation) {
-//        base("binary ${expr.operator}")
-//
-//        expr.left.ast(tail = false)
-//        expr.right.ast(tail = true)
-//    }
+        expr.target.ast(tail = true)
+    }
+
+    override fun visit(expr: BinaryOperation) {
+        base("binary ${expr.operator}")
+
+        expr.left.ast(tail = false)
+        expr.right.ast(tail = true)
+    }
 
     override fun visit(expr: ReturnExpr) {
         base("return")
@@ -291,20 +291,20 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        expr.body.astLabel("body", tail = true)
 //    }
 
-//    override fun visit(expr: SubscriptAccessExpr) {
-//        base("subscript access")
-//
-//        expr.target.astLabel("target", tail = false)
-//        expr.index.astLabel("index", tail = true)
-//    }
+    override fun visit(expr: SubscriptAccessExpr) {
+        base("subscript access")
 
-//    override fun visit(expr: SubscriptAssignExpr) {
-//        base("subscript assign")
-//
-//        expr.target.astLabel("target", tail = false)
-//        expr.index.astLabel("index", tail = false)
-//        expr.value.astLabel("value", tail = true)
-//    }
+        expr.target.astLabel("target", tail = false)
+        expr.arguments.astGroup("arguments", tail = true)
+    }
+
+    override fun visit(expr: SubscriptAssignExpr) {
+        base("subscript assign")
+
+        expr.target.astLabel("target", tail = false)
+        expr.arguments.astGroup("arguments", tail = false)
+        expr.value.astLabel("value", tail = true)
+    }
 
 //    override fun visit(expr: TupleIndexAccessExpr) {
 //        base("tuple index access")
