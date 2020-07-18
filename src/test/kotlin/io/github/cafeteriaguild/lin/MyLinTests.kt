@@ -11,15 +11,8 @@ fun main() {
     val source = Source(
         """
         
-        for (
-        a
-        in
-        listOf(
-        
-        )
-        )
-        {
-            ++1
+        for (a in 0 until 30) {
+            return a
         }
         
     """.trimIndent()

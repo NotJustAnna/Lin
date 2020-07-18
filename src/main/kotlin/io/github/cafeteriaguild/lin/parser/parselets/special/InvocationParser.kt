@@ -46,8 +46,6 @@ object InvocationParser : InfixParser<TokenType, Expr> {
             ctx.eat(TokenType.R_PAREN)
         }
 
-        val rParen = ctx.last
-
         ctx.maybeIgnoreNL()
 
         if (left is PropertyAccessNode) {

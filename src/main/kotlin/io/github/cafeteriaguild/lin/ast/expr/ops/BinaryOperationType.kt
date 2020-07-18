@@ -14,5 +14,6 @@ enum class BinaryOperationType {
     GT,
     GTE,
     ELVIS,
-    IN
+    IN,
+    RANGE
 }
