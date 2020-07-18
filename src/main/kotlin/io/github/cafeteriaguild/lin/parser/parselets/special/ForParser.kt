@@ -6,14 +6,14 @@ import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.misc.ForExpr
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
+import io.github.cafeteriaguild.lin.ast.expr.misc.ForNode
+import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
 
-object ForParser : PrefixParser<TokenType, Expr> {
-    override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
+object ForParser : PrefixParser<TokenType, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)
@@ -22,7 +22,7 @@ object ForParser : PrefixParser<TokenType, Expr> {
         ctx.eat(TokenType.IN)
         ctx.matchAll(TokenType.NL)
         val iterable = ctx.parseExpression().let {
-            it as? Node ?: return InvalidExpr {
+            it as? Expr ?: return InvalidNode {
                 section(token.section)
                 child(it)
                 error(SyntaxException("Expected a node", it.section))
@@ -33,6 +33,6 @@ object ForParser : PrefixParser<TokenType, Expr> {
         ctx.matchAll(TokenType.NL)
         val expr = ctx.parseBlock() ?: ctx.parseExpression()
 
-        return ForExpr(identifier.value, iterable, expr, token.section)
+        return ForNode(identifier.value, iterable, expr, token.section)
     }
 }

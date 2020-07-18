@@ -6,15 +6,15 @@ import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableExpr
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DestructuringVariableExpr
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableNode
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DestructuringVariableNode
+import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
-class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Expr> {
-    override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
+class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.skipOnlyUntil(TokenType.L_PAREN)
         if (ctx.match(TokenType.L_PAREN)) {
             return parseDestructuring(ctx, token)
@@ -25,18 +25,18 @@ class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Expr
             ctx.matchAll(TokenType.NL)
             val last = ctx.last
             val expr = ctx.parseExpression().let {
-                it as? Node ?: return InvalidExpr {
+                it as? Expr ?: return InvalidNode {
                     section(token.section)
                     child(it)
                     error(SyntaxException("Expected a node", it.section))
                 }
             }
-            return DeclareVariableExpr(ident.value, mutable, expr, token.section)
+            return DeclareVariableNode(ident.value, mutable, expr, token.section)
         }
-        return DeclareVariableExpr(ident.value, mutable, null, token.section)
+        return DeclareVariableNode(ident.value, mutable, null, token.section)
     }
 
-    fun parseDestructuring(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
+    fun parseDestructuring(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         val names = mutableListOf<String>()
         do {
@@ -51,12 +51,12 @@ class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Expr
         ctx.eat(TokenType.ASSIGN)
         ctx.matchAll(TokenType.NL)
         val expr = ctx.parseExpression().let {
-            it as? Node ?: return InvalidExpr {
+            it as? Expr ?: return InvalidNode {
                 section(token.section)
                 child(it)
                 error(SyntaxException("Expected a node", it.section))
             }
         }
-        return DestructuringVariableExpr(names, mutable, expr, token.section)
+        return DestructuringVariableNode(names, mutable, expr, token.section)
     }
 }

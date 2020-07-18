@@ -6,22 +6,22 @@ import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.access.DeclareFunctionExpr
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
-import io.github.cafeteriaguild.lin.ast.expr.nodes.FunctionNode
+import io.github.cafeteriaguild.lin.ast.expr.access.DeclareFunctionNode
+import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
+import io.github.cafeteriaguild.lin.ast.expr.nodes.FunctionExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
 
-object FunctionParser : PrefixParser<TokenType, Expr> {
-    override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
+object FunctionParser : PrefixParser<TokenType, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         val ident = if (ctx.nextIs(TokenType.IDENTIFIER)) ctx.eat(TokenType.IDENTIFIER) else null
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)
 
-        val parameters = mutableListOf<FunctionNode.Parameter>()
+        val parameters = mutableListOf<FunctionExpr.Parameter>()
 
         if (!ctx.match(TokenType.R_PAREN)) {
             do {
@@ -31,7 +31,7 @@ object FunctionParser : PrefixParser<TokenType, Expr> {
                 val paramValue = if (ctx.match(TokenType.ASSIGN)) {
                     ctx.matchAll(TokenType.NL)
                     ctx.parseExpression().let {
-                        it as? Node ?: return InvalidExpr {
+                        it as? Expr ?: return InvalidNode {
                             section(token.section)
                             child(it)
                             error(SyntaxException("Expected a node", it.section))
@@ -40,29 +40,30 @@ object FunctionParser : PrefixParser<TokenType, Expr> {
                 } else null
                 ctx.matchAll(TokenType.NL)
 
-                parameters += FunctionNode.Parameter(paramIdent.value, paramValue)
+                parameters += FunctionExpr.Parameter(paramIdent.value, paramValue)
             } while (ctx.match(TokenType.COMMA))
+            ctx.matchAll(TokenType.NL)
             ctx.eat(TokenType.R_PAREN)
         }
         ctx.matchAll(TokenType.NL)
         val expr = if (ctx.match(TokenType.ASSIGN)) {
             ctx.matchAll(TokenType.NL)
             ctx.parseExpression().let {
-                it as? Node ?: return InvalidExpr {
+                it as? Expr ?: return InvalidNode {
                     section(token.section)
                     child(it)
                     error(SyntaxException("Expected a node", it.section))
                 }
             }
         } else {
-            ctx.parseBlock(false) ?: return InvalidExpr {
+            ctx.parseBlock(false) ?: return InvalidNode {
                 section(token.section)
                 error(SyntaxException("Couldn't parse function's block, found ${ctx.peek()}", token.section))
             }
         }
 
-        val function = FunctionNode(parameters, expr, token.section)
+        val function = FunctionExpr(parameters, expr, token.section)
 
-        return if (ident != null) DeclareFunctionExpr(ident.value, function, ident.section) else function
+        return if (ident != null) DeclareFunctionNode(ident.value, function, ident.section) else function
     }
 }

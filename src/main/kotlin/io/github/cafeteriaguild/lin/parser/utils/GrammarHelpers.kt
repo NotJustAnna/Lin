@@ -10,11 +10,11 @@ import io.github.cafeteriaguild.lin.lexer.TokenType
 /**
  * Hacky method to ignore newlines in case of method chains
  */
-fun ParserContext<TokenType, Expr>.maybeIgnoreNL() {
+fun ParserContext<TokenType, Node>.maybeIgnoreNL() {
     skipOnlyUntil(TokenType.DOT, TokenType.QUESTION_DOT)
 }
 
-fun ParserContext<TokenType, Expr>.skipOnlyUntil(vararg type: TokenType) {
+fun ParserContext<TokenType, Node>.skipOnlyUntil(vararg type: TokenType) {
     check(TokenType.NL !in type) { "[INTERNAL] NL was supplied as a token" }
     if (peekAheadUntil(*type).all { it.type == TokenType.NL }) {
         skipUntil(*type)
@@ -22,20 +22,20 @@ fun ParserContext<TokenType, Expr>.skipOnlyUntil(vararg type: TokenType) {
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun ParserContext<TokenType, Expr>.parseBlock(smartToNode: Boolean = true): Expr? {
-    if (match(TokenType.L_BRACE)) {
+fun ParserContext<TokenType, Node>.parseBlock(smartToNode: Boolean = true, braceConsumed: Boolean = false): Node? {
+    if (braceConsumed || match(TokenType.L_BRACE)) {
         val start = last
-        val list = mutableListOf<Expr>()
+        val list = mutableListOf<Node>()
         while (true) {
             matchAll(TokenType.NL, TokenType.SEMICOLON)
             if (match(TokenType.R_BRACE)) break
             list += parseExpression()
         }
-        if (smartToNode && list.isNotEmpty() && list.last() is Node) {
-            val last = list.removeLast() as Node
-            return MultiNode(list, last, start.section)
+        if (smartToNode && list.isNotEmpty() && list.last() is Expr) {
+            val last = list.removeLast() as Expr
+            return MultiExpr(list, last, start.section)
         }
-        return MultiExpr(list, start.section)
+        return MultiNode(list, start.section)
     }
     return null
 }

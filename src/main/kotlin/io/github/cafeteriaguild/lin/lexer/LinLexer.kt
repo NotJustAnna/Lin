@@ -52,7 +52,9 @@ val linStdLexer = createLexer<Token<TokenType>> {
     "==" { process(makeToken(EQ, 2)) }
     '=' { process(makeToken(ASSIGN)) }
     "||" { process(makeToken(OR, 2)) }
+    "|" { process(makeToken(PIPE)) }
     "&&" { process(makeToken(AND, 2)) }
+    "&" { process(makeToken(AMP)) }
     "<=" { process(makeToken(LTE, 2)) }
     '<' { process(makeToken(LT)) }
     ">=" { process(makeToken(GTE, 2)) }

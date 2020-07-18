@@ -1,7 +1,7 @@
 package io.github.cafeteriaguild.lin.parser
 
 import net.notjustanna.tartar.createGrammar
-import io.github.cafeteriaguild.lin.ast.expr.Expr
+import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperationType
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryAssignOperationType
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperationType
@@ -16,7 +16,7 @@ import io.github.cafeteriaguild.lin.parser.parselets.declarations.FunctionParser
 import io.github.cafeteriaguild.lin.parser.parselets.nodes.*
 import io.github.cafeteriaguild.lin.parser.parselets.special.*
 
-val linStdGrammar = createGrammar<TokenType, Expr> {
+val linStdGrammar = createGrammar<TokenType, Node> {
     // Nodes
     prefix(INT, IntParser)
     prefix(LONG, LongParser)

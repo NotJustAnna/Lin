@@ -8,19 +8,19 @@ import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.ast.expr.misc.IfExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.IfNode
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
+import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
 import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
-object IfParser : PrefixParser<TokenType, Expr> {
-    override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
+object IfParser : PrefixParser<TokenType, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)
         val condition = ctx.parseExpression().let {
-            it as? Node ?: return InvalidExpr {
+            it as? Expr ?: return InvalidNode {
                 section(token.section)
                 child(it)
                 error(SyntaxException("Expected a node", it.section))
@@ -43,7 +43,7 @@ object IfParser : PrefixParser<TokenType, Expr> {
             null
         }
 
-        if (thenBranch is Node && elseBranch is Node) {
+        if (thenBranch is Expr && elseBranch is Expr) {
             return IfNode(condition, thenBranch, elseBranch, token.section)
         }
         return IfExpr(condition, thenBranch, elseBranch, token.section)

@@ -1,13 +1,13 @@
 package io.github.cafeteriaguild.lin.ast
 
-import io.github.cafeteriaguild.lin.ast.expr.Expr
-import io.github.cafeteriaguild.lin.ast.expr.ExprVisitor
+import io.github.cafeteriaguild.lin.ast.expr.Node
+import io.github.cafeteriaguild.lin.ast.expr.NodeVisitor
 import io.github.cafeteriaguild.lin.ast.expr.access.*
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableExpr
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DestructuringVariableExpr
-import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalNode
-import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberNode
-import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeNode
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableNode
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DestructuringVariableNode
+import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeExpr
+import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalExpr
+import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.*
 import io.github.cafeteriaguild.lin.ast.expr.nodes.*
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
@@ -15,11 +15,11 @@ import io.github.cafeteriaguild.lin.ast.expr.ops.PostAssignUnaryOperation
 import io.github.cafeteriaguild.lin.ast.expr.ops.PreAssignUnaryOperation
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperation
 
-class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boolean) : ExprVisitor<Unit> {
-    fun Expr.ast(indent: String = this@ASTViewer.indent + if (isTail) "    " else "│   ", tail: Boolean) =
+class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boolean) : NodeVisitor<Unit> {
+    fun Node.ast(indent: String = this@ASTViewer.indent + if (isTail) "    " else "│   ", tail: Boolean) =
         accept(ASTViewer(buf, indent, tail))
 
-    fun Expr.astLabel(
+    fun Node.astLabel(
         label: String,
         indent: String = this@ASTViewer.indent + if (isTail) "    " else "│   ",
         tail: Boolean
@@ -27,7 +27,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         listOf(this).astGroup(label, indent, tail)
     }
 
-    fun List<Expr>.astGroup(
+    fun List<Node>.astGroup(
         label: String,
         indent: String = this@ASTViewer.indent + if (isTail) "    " else "│   ",
         tail: Boolean
@@ -84,7 +84,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        if (expr.fileModules.isNotEmpty()) expr.fileModules.astGroup("files", tail = true)
 //    }
 
-    override fun visit(expr: InvalidExpr) {
+    override fun visit(expr: InvalidNode) {
         base("[Invalid expression.]")
         expr.children.astGroup("children", tail = false)
         expr.errors.run {
@@ -94,31 +94,31 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         }
     }
 
-    override fun visit(expr: IdentifierNode) = base("reference ${expr.name}")
+    override fun visit(expr: IdentifierExpr) = base("reference ${expr.name}")
 
-    override fun visit(expr: NullNode) = base("null ref")
+    override fun visit(expr: NullExpr) = base("null ref")
 
-    override fun visit(expr: IntNode) = base("Int: ${expr.value}")
+    override fun visit(expr: IntExpr) = base("Int: ${expr.value}")
 
-    override fun visit(expr: LongNode) = base("Long: ${expr.value}")
+    override fun visit(expr: LongExpr) = base("Long: ${expr.value}")
 
-    override fun visit(expr: FloatNode) = base("Float: ${expr.value}")
+    override fun visit(expr: FloatExpr) = base("Float: ${expr.value}")
 
-    override fun visit(expr: DoubleNode) = base("Double: ${expr.value}")
+    override fun visit(expr: DoubleExpr) = base("Double: ${expr.value}")
 
-    override fun visit(expr: CharNode) = base("Char: \'${expr.value}\'")
+    override fun visit(expr: CharExpr) = base("Char: \'${expr.value}\'")
 
-    override fun visit(expr: StringNode) = base("String: \"${expr.value}\"")
+    override fun visit(expr: StringExpr) = base("String: \"${expr.value}\"")
 
-    override fun visit(expr: BooleanNode) = base(expr.value.toString())
+    override fun visit(expr: BooleanExpr) = base(expr.value.toString())
 
-    override fun visit(expr: MultiExpr) {
+    override fun visit(expr: MultiNode) {
         for (i in expr.list.indices) {
             expr.list[i].ast(indent, i == expr.list.lastIndex)
         }
     }
 
-    override fun visit(expr: MultiNode) {
+    override fun visit(expr: MultiExpr) {
         for (i in expr.list.indices) {
             expr.list[i].ast(indent, false)
         }
@@ -137,25 +137,25 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        }
 //    }
 
-    override fun visit(expr: DeclareFunctionExpr) {
+    override fun visit(expr: DeclareFunctionNode) {
         base("declare function")
         label("name: ${expr.name}", false)
         expr.function.astLabel("function", tail = true)
     }
 
-    override fun visit(expr: DeclareVariableExpr) {
+    override fun visit(expr: DeclareVariableNode) {
         base(if (expr.mutable) "var" else "val")
         label("name: ${expr.name}", tail = expr.value == null)
         expr.value?.astLabel("value", tail = true)
     }
 
-    override fun visit(expr: DestructuringVariableExpr) {
+    override fun visit(expr: DestructuringVariableNode) {
         base(if (expr.mutable) "var" else "val")
         label("destructuring: ${expr.names.joinToString(", ", "(", ")")}", tail = false)
         expr.value?.astLabel("value", tail = true)
     }
 
-    override fun visit(expr: FunctionNode) {
+    override fun visit(expr: FunctionExpr) {
         base("function")
         val (names, values) = expr.parameters.map { it.name to it.value }.unzip()
         label("parameters: ${names.joinToString(", ")}", tail = false)
@@ -206,7 +206,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        label("return: ${expr.returnType}", true)
 //    }
 
-    override fun visit(expr: AssignExpr) {
+    override fun visit(expr: AssignNode) {
         base("assign ${expr.name}")
 
         expr.value.ast(tail = true)
@@ -219,7 +219,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        expr.body.astLabel("body", tail = true)
 //    }
 
-    override fun visit(expr: UnitNode) {
+    override fun visit(expr: UnitExpr) {
         base("unit")
     }
 
@@ -254,21 +254,21 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        label(expr.typeArguments.joinToString(prefix = "type arguments: <", postfix = ">"), true)
 //    }
 
-    override fun visit(expr: InvokeNode) {
+    override fun visit(expr: InvokeExpr) {
         base("invoke")
 
         expr.target.astLabel("target", tail = expr.arguments.isEmpty())
         expr.arguments.astGroup("arguments", tail = true)
     }
 
-    override fun visit(expr: InvokeLocalNode) {
+    override fun visit(expr: InvokeLocalExpr) {
         base("invoke local")
 
         label("name: ${expr.name}", tail = expr.arguments.isEmpty())
         expr.arguments.astGroup("arguments", tail = true)
     }
 
-    override fun visit(expr: InvokeMemberNode) {
+    override fun visit(expr: InvokeMemberExpr) {
         base("invoke member function")
 
         expr.target.astLabel("target", tail = false)
@@ -302,19 +302,19 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.right.ast(tail = true)
     }
 
-    override fun visit(expr: ReturnNode) {
+    override fun visit(expr: ReturnExpr) {
         base("return")
 
         expr.value.ast(tail = true)
     }
 
-    override fun visit(expr: ThrowNode) {
+    override fun visit(expr: ThrowExpr) {
         base("throw")
 
         expr.value.ast(tail = true)
     }
 
-    override fun visit(expr: NotNullNode) {
+    override fun visit(expr: NotNullExpr) {
         base("not null")
 
         expr.value.ast(tail = true)
@@ -339,21 +339,21 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.elseBranch.astLabel("else", tail = true)
     }
 
-    override fun visit(expr: DoWhileExpr) {
+    override fun visit(expr: DoWhileNode) {
         base("do-while")
 
         expr.body.astLabel("body", tail = false)
         expr.condition.astLabel("condition", tail = true)
     }
 
-    override fun visit(expr: WhileExpr) {
+    override fun visit(expr: WhileNode) {
         base("while")
 
         expr.condition.astLabel("condition", tail = false)
         expr.body.astLabel("body", tail = true)
     }
 
-    override fun visit(expr: ForExpr) {
+    override fun visit(expr: ForNode) {
         base("for")
 
         label("variable name: ${expr.variableName}", tail = false)
@@ -361,14 +361,14 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.body.astLabel("body", tail = true)
     }
 
-    override fun visit(expr: SubscriptAccessNode) {
+    override fun visit(expr: SubscriptAccessExpr) {
         base("subscript access")
 
         expr.target.astLabel("target", tail = false)
         expr.arguments.astGroup("arguments", tail = true)
     }
 
-    override fun visit(expr: SubscriptAssignExpr) {
+    override fun visit(expr: SubscriptAssignNode) {
         base("subscript assign")
 
         expr.target.astLabel("target", tail = false)
@@ -383,7 +383,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        label("index: ${expr.index}", true)
 //    }
 
-    override fun visit(expr: PropertyAccessNode) {
+    override fun visit(expr: PropertyAccessExpr) {
         base("property access")
 
         expr.target.astLabel("target", tail = false)
@@ -391,7 +391,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         label("name: ${expr.name}", true)
     }
 
-    override fun visit(expr: PropertyAssignExpr) {
+    override fun visit(expr: PropertyAssignNode) {
         base("property access")
 
         expr.target.astLabel("target", tail = false)

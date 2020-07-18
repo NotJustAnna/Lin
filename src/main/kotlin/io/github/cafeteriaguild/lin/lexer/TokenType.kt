@@ -22,6 +22,8 @@ enum class TokenType {
 
     AND, // &&
     OR, // ||
+    AMP, // &
+    PIPE, // |
 
     PLUS, // +
     MINUS, // -

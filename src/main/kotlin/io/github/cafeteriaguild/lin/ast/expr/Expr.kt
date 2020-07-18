@@ -1,8 +1,8 @@
 package io.github.cafeteriaguild.lin.ast.expr
 
-import net.notjustanna.tartar.api.lexer.Sectional
-
-interface Expr : Sectional {
-    fun <R> accept(visitor: ExprVisitor<R>): R
-    fun <T, R> accept(visitor: ExprParamVisitor<T, R>, param: T): R
-}
+/**
+ * Interface for expressions that generates result when interpreted.
+ *
+ * (Note: Expressions that doesn't implement this interface are expected to generates an "Unit" or void result.)
+ */
+interface Expr : Node

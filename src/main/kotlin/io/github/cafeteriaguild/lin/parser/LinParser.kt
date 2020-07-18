@@ -4,7 +4,7 @@ import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.createParser
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
+import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
 import io.github.cafeteriaguild.lin.ast.expr.misc.MultiExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.MultiNode
 import io.github.cafeteriaguild.lin.lexer.TokenType
@@ -13,28 +13,28 @@ import io.github.cafeteriaguild.lin.parser.utils.matchAll
 @OptIn(ExperimentalStdlibApi::class)
 val linStdParser = createParser(linStdGrammar) {
     val start = peek()
-    val list = mutableListOf<Expr>()
+    val list = mutableListOf<Node>()
     matchAll(TokenType.NL, TokenType.SEMICOLON)
     val expr = try {
         do {
             list += parseExpression()
         } while (matchAll(TokenType.NL, TokenType.SEMICOLON) && !eof)
 
-        if (list.isNotEmpty() && list.last() is Node) {
-            val last = list.removeLast() as Node
-            MultiNode(list, last, start.section)
+        if (list.isNotEmpty() && list.last() is Expr) {
+            val last = list.removeLast() as Expr
+            MultiExpr(list, last, start.section)
         } else
-            MultiExpr(list, start.section)
+            MultiNode(list, start.section)
 
     } catch (e: Exception) {
-        InvalidExpr {
+        InvalidNode {
             section(start.section)
             child(*list.toTypedArray())
             error(e)
         }
     }
 
-    if (!eof) InvalidExpr {
+    if (!eof) InvalidNode {
         child(expr)
         error(SyntaxException("Should've reached end of content", eat().section))
     }
