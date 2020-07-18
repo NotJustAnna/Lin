@@ -2,6 +2,7 @@ package io.github.cafeteriaguild.lin.ast.expr
 
 import io.github.cafeteriaguild.lin.ast.expr.access.*
 import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableExpr
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DestructuringVariableExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalNode
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberNode
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeNode
@@ -22,6 +23,7 @@ interface ExprVisitor<R> {
     fun visit(expr: AssignExpr): R
     fun visit(expr: IdentifierNode): R
     fun visit(expr: DeclareVariableExpr): R
+    fun visit(expr: DestructuringVariableExpr): R
     fun visit(expr: ReturnNode): R
     fun visit(expr: ThrowNode): R
     fun visit(expr: CharNode): R

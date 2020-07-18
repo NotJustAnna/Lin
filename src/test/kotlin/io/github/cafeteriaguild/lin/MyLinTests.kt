@@ -10,11 +10,15 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-        
-        for (a in 0 until 30) {
-            return a
+    while (continuations.isNotEmpty()) {
+        val (i, c) = continuations.poll()
+        val next = c.next()
+        if (next.hasNext()) {
+            continuations.offer(i to next)
+        } else {
+            println("Done")
         }
-        
+    }
     """.trimIndent()
     )
 

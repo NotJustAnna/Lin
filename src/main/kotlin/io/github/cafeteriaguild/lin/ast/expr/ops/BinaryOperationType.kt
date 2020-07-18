@@ -5,6 +5,7 @@ enum class BinaryOperationType {
     SUBTRACT,
     MULTIPLY,
     DIVIDE,
+    REMAINING,
     EQUALS,
     NOT_EQUALS,
     AND,

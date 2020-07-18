@@ -40,6 +40,7 @@ val linStdGrammar = createGrammar<TokenType, Expr> {
     infix(MINUS, BinaryOperatorParser(Precedence.ADDITIVE, BinaryOperationType.SUBTRACT))
     infix(ASTERISK, BinaryOperatorParser(Precedence.MULTIPLICATIVE, BinaryOperationType.MULTIPLY))
     infix(SLASH, BinaryOperatorParser(Precedence.MULTIPLICATIVE, BinaryOperationType.DIVIDE))
+    infix(REM, BinaryOperatorParser(Precedence.MULTIPLICATIVE, BinaryOperationType.REMAINING))
     infix(AND, BinaryOperatorParser(Precedence.CONJUNCTION, BinaryOperationType.AND))
     infix(OR, BinaryOperatorParser(Precedence.DISJUNCTION, BinaryOperationType.OR))
     infix(LT, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.LT))

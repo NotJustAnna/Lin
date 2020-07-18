@@ -12,7 +12,7 @@ import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
-import io.github.cafeteriaguild.lin.parser.utils.skipNewLinesUntil
+import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
 object IfParser : PrefixParser<TokenType, Expr> {
     override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
@@ -31,7 +31,7 @@ object IfParser : PrefixParser<TokenType, Expr> {
         ctx.matchAll(TokenType.NL)
         val thenBranch = ctx.parseBlock() ?: ctx.parseExpression()
 
-        ctx.skipNewLinesUntil(TokenType.ELSE)
+        ctx.skipOnlyUntil(TokenType.ELSE)
         val elseBranch = if (ctx.match(TokenType.ELSE)) {
             ctx.matchAll(TokenType.NL)
             if (ctx.nextIs(TokenType.IF)) {

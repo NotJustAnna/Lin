@@ -4,6 +4,7 @@ import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.ExprVisitor
 import io.github.cafeteriaguild.lin.ast.expr.access.*
 import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableExpr
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DestructuringVariableExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalNode
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberNode
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeNode
@@ -145,6 +146,12 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
     override fun visit(expr: DeclareVariableExpr) {
         base(if (expr.mutable) "var" else "val")
         label("name: ${expr.name}", tail = expr.value == null)
+        expr.value?.astLabel("value", tail = true)
+    }
+
+    override fun visit(expr: DestructuringVariableExpr) {
+        base(if (expr.mutable) "var" else "val")
+        label("destructuring: ${expr.names.joinToString(", ", "(", ")")}", tail = false)
         expr.value?.astLabel("value", tail = true)
     }
 
