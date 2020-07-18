@@ -8,10 +8,12 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 
 - Booleans, Null
 - Ints, Longs, Floats, Doubles, Chars
-    - CAVEAT: Parsing needs to be improved but works
+    - **CAVEATS**:
+        - Parsing needs to be improved but works
+        - Characters are somewhat sketchy
 - Strings
-    - CAVEATS:
-        - Parsing needs to be improved
+    - **CAVEATS**:
+        - Parsing needs to be improved but works
         - Raw strings and template strings not yet implemented
 - Variables
     - Vals, Vars, Destructuring variables
@@ -37,12 +39,11 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 ## Missing
 
 - The type system, and by extent:
-    - The "is", "!is", "as", "as?", "typeof" operators
+    - The `is`, `!is`, `as`, `as?`, `typeof` operators
     - Types on variables, parameters, return types
     - SAM constructors, if get implemented at all
     - Type aliases
     - Generics
-    - 
 - Declaration of extension functions (Requires a minimal type system)
 - Declaration of infix functions
 - Declaration of operator functions
