@@ -20,7 +20,7 @@ object DoubleBangParser : InfixParser<TokenType, Expr> {
             return InvalidExpr {
                 section(token.section)
                 child(left)
-                error(SyntaxException("Expected a node but got a statement instead.", left.section))
+                error(SyntaxException("Expected a node but got a statement instead", left.section))
             }
         }
         ctx.maybeIgnoreNL()

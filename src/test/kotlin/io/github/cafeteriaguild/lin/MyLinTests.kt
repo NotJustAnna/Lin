@@ -10,7 +10,18 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-            return a ?: throw b
+        
+        for (
+        a
+        in
+        listOf(
+        
+        )
+        )
+        {
+        
+        }
+        
     """.trimIndent()
     )
 

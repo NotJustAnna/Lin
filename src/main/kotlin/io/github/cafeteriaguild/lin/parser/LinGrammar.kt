@@ -46,6 +46,8 @@ val linStdGrammar = createGrammar<TokenType, Expr> {
     infix(LTE, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.LTE))
     infix(GT, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.GT))
     infix(GTE, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.GTE))
+    infix(ELVIS, BinaryOperatorParser(Precedence.ELVIS, BinaryOperationType.ELVIS))
+    infix(IN, BinaryOperatorParser(Precedence.NAMED_CHECKS, BinaryOperationType.IN))
 
     // Increment/decrement
     prefix(DECREMENT, PreAssignUnaryOperatorParser(UnaryAssignOperationType.DECREMENT))
@@ -61,12 +63,13 @@ val linStdGrammar = createGrammar<TokenType, Expr> {
     infix(DOT, DotParser(false))
     infix(QUESTION_DOT, DotParser(true))
     infix(DOUBLE_BANG, DoubleBangParser)
-    infix(ELVIS, ElvisParser)
+    infix(BANG, InfixBangParser)
 
     prefix(RETURN, ReturnParser)
     prefix(THROW, ThrowParser)
     prefix(IF, IfParser)
     prefix(DO, DoWhileParser)
     prefix(WHILE, WhileParser)
+    prefix(FOR, ForParser)
     prefix(FUN, FunctionParser)
 }

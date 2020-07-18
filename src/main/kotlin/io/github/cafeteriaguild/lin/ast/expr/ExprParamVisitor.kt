@@ -24,7 +24,6 @@ interface ExprParamVisitor<T, R> {
     fun visit(expr: DeclareVariableExpr, param: T): R
     fun visit(expr: ReturnNode, param: T): R
     fun visit(expr: ThrowNode, param: T): R
-    fun visit(expr: ElvisNode, param: T): R
     fun visit(expr: CharNode, param: T): R
     fun visit(expr: StringNode, param: T): R
     fun visit(expr: UnitNode, param: T): R
@@ -43,6 +42,7 @@ interface ExprParamVisitor<T, R> {
     fun visit(expr: NotNullNode, param: T): R
     fun visit(expr: DoWhileExpr, param: T): R
     fun visit(expr: WhileExpr, param: T): R
+    fun visit(expr: ForExpr, param: T): R
     fun visit(expr: BinaryOperation, param: T): R
     fun visit(expr: UnaryOperation, param: T): R
     fun visit(expr: PreAssignUnaryOperation, param: T): R

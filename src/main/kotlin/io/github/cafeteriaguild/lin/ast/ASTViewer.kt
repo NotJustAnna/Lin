@@ -307,13 +307,6 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.value.ast(tail = true)
     }
 
-    override fun visit(expr: ElvisNode) {
-        base("elvis")
-
-        expr.left.ast(tail = false)
-        expr.right.ast(tail = true)
-    }
-
     override fun visit(expr: NotNullNode) {
         base("not null")
 
@@ -350,6 +343,14 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         base("while")
 
         expr.condition.astLabel("condition", tail = false)
+        expr.body.astLabel("body", tail = true)
+    }
+
+    override fun visit(expr: ForExpr) {
+        base("for")
+
+        label("variable name: ${expr.variableName}", tail = false)
+        expr.iterable.astLabel("iterable", tail = false)
         expr.body.astLabel("body", tail = true)
     }
 

@@ -12,5 +12,7 @@ enum class BinaryOperationType {
     LT,
     LTE,
     GT,
-    GTE
+    GTE,
+    ELVIS,
+    IN
 }
