@@ -28,14 +28,17 @@ object IfParser : PrefixParser<TokenType, Expr> {
         }
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.R_PAREN)
-        val thenBranch = ctx.parseBlock()
+        ctx.matchAll(TokenType.NL)
+        val thenBranch = ctx.parseBlock() ?: ctx.parseExpression()
 
         ctx.skipNewLinesUntil(TokenType.ELSE)
         val elseBranch = if (ctx.match(TokenType.ELSE)) {
+            ctx.matchAll(TokenType.NL)
             if (ctx.nextIs(TokenType.IF)) {
-                ctx.matchAll(TokenType.NL)
                 ctx.parseExpression()
-            } else ctx.parseBlock()
+            } else {
+                ctx.parseBlock() ?: ctx.parseExpression()
+            }
         } else {
             null
         }

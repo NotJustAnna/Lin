@@ -134,24 +134,24 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        }
 //    }
 
-//    override fun visit(expr: DeclareFunctionExpr) {
-//        base("function")
-//
-//        label("name: ${expr.name}", false)
-//
-//        if (expr.generics.isNotEmpty()) {
-//            label(expr.generics.joinToString(prefix = "generics: <", postfix = ">"), false)
-//        }
-//
-//        label(expr.arguments.joinToString(prefix = "arguments: (", postfix = ")"), false)
-//        label("return: ${expr.returnType}", false)
-//        expr.body.astLabel("body", tail = true)
-//    }
+    override fun visit(expr: DeclareFunctionExpr) {
+        base("declare function")
+        label("name: ${expr.name}", false)
+        expr.function.astLabel("function", tail = true)
+    }
 
     override fun visit(expr: DeclareVariableExpr) {
         base(if (expr.mutable) "var" else "val")
         label("name: ${expr.name}", tail = expr.value == null)
         expr.value?.astLabel("value", tail = true)
+    }
+
+    override fun visit(expr: FunctionNode) {
+        base("function")
+        val (names, values) = expr.parameters.map { it.name to it.value }.unzip()
+        label("parameters: ${names.joinToString(", ")}", tail = false)
+        values.filterNotNull().astGroup("default values", tail = false)
+        expr.body.astLabel("body", tail = true)
     }
 
 //    override fun visit(expr: TypeAliasExpr) {
@@ -255,7 +255,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
     override fun visit(expr: InvokeLocalNode) {
         base("invoke local")
 
-        label("name: ${expr.name}", tail = false)
+        label("name: ${expr.name}", tail = expr.arguments.isEmpty())
         expr.arguments.astGroup("arguments", tail = true)
     }
 

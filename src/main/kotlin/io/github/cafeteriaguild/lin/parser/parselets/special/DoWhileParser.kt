@@ -14,7 +14,8 @@ import io.github.cafeteriaguild.lin.parser.utils.parseBlock
 
 object DoWhileParser : PrefixParser<TokenType, Expr> {
     override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
-        val expr = ctx.parseBlock()
+        ctx.matchAll(TokenType.NL)
+        val expr = ctx.parseBlock() ?: ctx.parseExpression()
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.WHILE)
         ctx.matchAll(TokenType.NL)

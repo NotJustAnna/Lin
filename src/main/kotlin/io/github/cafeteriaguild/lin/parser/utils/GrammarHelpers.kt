@@ -14,16 +14,15 @@ fun ParserContext<TokenType, Expr>.maybeIgnoreNL() {
     skipNewLinesUntil(TokenType.DOT)
 }
 
-fun ParserContext<TokenType, Expr>.skipNewLinesUntil(type: TokenType) {
-    check(type != TokenType.NL)
-    if (peekAheadUntil(type).all { it.type == TokenType.NL }) {
-        skipUntil(type)
+fun ParserContext<TokenType, Expr>.skipNewLinesUntil(vararg type: TokenType) {
+    check(TokenType.NL !in type) { "[INTERNAL] NL was supplied as a token" }
+    if (peekAheadUntil(*type).all { it.type == TokenType.NL }) {
+        skipUntil(*type)
     }
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun ParserContext<TokenType, Expr>.parseBlock(): Expr {
-    skipNewLinesUntil(TokenType.L_BRACE)
+fun ParserContext<TokenType, Expr>.parseBlock(smartToNode: Boolean = true): Expr? {
     if (match(TokenType.L_BRACE)) {
         val start = last
         val list = mutableListOf<Expr>()
@@ -32,11 +31,11 @@ fun ParserContext<TokenType, Expr>.parseBlock(): Expr {
             if (match(TokenType.R_BRACE)) break
             list += parseExpression()
         }
-        if (list.isNotEmpty() && list.last() is Node) {
+        if (smartToNode && list.isNotEmpty() && list.last() is Node) {
             val last = list.removeLast() as Node
             return MultiNode(list, last, start.section)
         }
         return MultiExpr(list, start.section)
     }
-    return parseExpression()
+    return null
 }

@@ -40,4 +40,6 @@ interface ExprParamVisitor<T, R> {
     fun visit(expr: WhileExpr, param: T): R
     fun visit(expr: BinaryOperation, param: T): R
     fun visit(expr: UnaryOperation, param: T): R
+    fun visit(expr: FunctionNode, param: T): R
+    fun visit(expr: DeclareFunctionExpr, param: T): R
 }

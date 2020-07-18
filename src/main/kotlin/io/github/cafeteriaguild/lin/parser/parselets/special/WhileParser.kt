@@ -26,7 +26,8 @@ object WhileParser : PrefixParser<TokenType, Expr> {
         }
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.R_PAREN)
-        val expr = ctx.parseBlock()
+        ctx.matchAll(TokenType.NL)
+        val expr = ctx.parseBlock() ?: ctx.parseExpression()
         return WhileExpr(condition, expr, token.section)
     }
 }

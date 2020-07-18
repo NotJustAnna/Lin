@@ -33,6 +33,6 @@ class InvalidExpr(section: Section, val children: List<Expr>, val errors: List<E
 
     companion object {
         operator fun invoke(block: Builder.() -> Unit) = Builder().apply(block).build()
-        private fun Builder.build() = InvalidExpr(section!!, children, errors)
+        private fun Builder.build() = InvalidExpr(section ?: error("Section wasn't set!"), children, errors)
     }
 }
