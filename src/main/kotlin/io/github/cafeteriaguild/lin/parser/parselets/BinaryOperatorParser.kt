@@ -10,6 +10,7 @@ import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperationType
 import io.github.cafeteriaguild.lin.lexer.TokenType
+import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
 class BinaryOperatorParser(
@@ -25,6 +26,7 @@ class BinaryOperatorParser(
                 error(SyntaxException("Expected a node but got a statement instead.", left.section))
             }
         }
+        ctx.matchAll(TokenType.NL)
         val right = ctx.parseExpression(precedence - if (leftAssoc) 0 else 1).let {
             it as? Node ?: return InvalidExpr {
                 section(token.section)
@@ -33,6 +35,6 @@ class BinaryOperatorParser(
             }
         }
         ctx.maybeIgnoreNL()
-        return BinaryOperation(left, right, operator, left.span(right))
+        return BinaryOperation(left, right, operator, token.section)
     }
 }

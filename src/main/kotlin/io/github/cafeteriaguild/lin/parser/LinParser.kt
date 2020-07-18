@@ -18,7 +18,7 @@ val linStdParser = createParser(linStdGrammar) {
     val expr = try {
         do {
             list += parseExpression()
-        } while (matchAll(TokenType.NL, TokenType.SEMICOLON))
+        } while (matchAll(TokenType.NL, TokenType.SEMICOLON) && !eof)
 
         if (list.isNotEmpty() && list.last() is Node) {
             val last = list.removeLast() as Node

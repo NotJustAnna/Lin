@@ -14,6 +14,7 @@ import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.ast.expr.nodes.IdentifierNode
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.Precedence
+import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
 object InvocationParser : InfixParser<TokenType, Expr> {
@@ -29,8 +30,10 @@ object InvocationParser : InfixParser<TokenType, Expr> {
         }
         val arguments = mutableListOf<Node>()
 
+        ctx.matchAll(TokenType.NL)
         if (!ctx.match(TokenType.R_PAREN)) {
             do {
+                ctx.matchAll(TokenType.NL)
                 arguments += ctx.parseExpression().let {
                     it as? Node ?: return InvalidExpr {
                         section(token.section)
@@ -38,22 +41,21 @@ object InvocationParser : InfixParser<TokenType, Expr> {
                         error(SyntaxException("Expected a node but got a statement instead.", it.section))
                     }
                 }
+                ctx.matchAll(TokenType.NL)
             } while (ctx.match(TokenType.COMMA))
             ctx.eat(TokenType.R_PAREN)
         }
 
         val rParen = ctx.last
 
-        val position = token.span(rParen)
-
         ctx.maybeIgnoreNL()
 
         if (left is PropertyAccessNode) {
-            return InvokeMemberNode(left.target, left.name, arguments, position)
+            return InvokeMemberNode(left.target, left.name, arguments, token.section)
         } else if (left is IdentifierNode) {
-            return InvokeLocalNode(left.name, arguments, position)
+            return InvokeLocalNode(left.name, arguments, token.section)
         }
 
-        return InvokeNode(left, arguments, position)
+        return InvokeNode(left, arguments, token.section)
     }
 }

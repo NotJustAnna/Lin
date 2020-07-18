@@ -11,6 +11,7 @@ import io.github.cafeteriaguild.lin.ast.expr.access.PropertyAssignExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.Precedence
+import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 
 object DotParser : InfixParser<TokenType, Expr> {
@@ -24,9 +25,7 @@ object DotParser : InfixParser<TokenType, Expr> {
                 error(SyntaxException("Expected a node but got a statement instead.", left.section))
             }
         }
-        while (ctx.match(TokenType.NL)) {
-            ctx.eat()
-        }
+        ctx.matchAll(TokenType.NL)
         val identifier = ctx.eat()
         if (identifier.type == TokenType.IDENTIFIER) {
             val name = identifier.value
@@ -41,10 +40,10 @@ object DotParser : InfixParser<TokenType, Expr> {
                     }
                 }
                 ctx.maybeIgnoreNL()
-                PropertyAssignExpr(left, name, value, token.span(value))
+                PropertyAssignExpr(left, name, value, token.section)
             } else {
                 ctx.maybeIgnoreNL()
-                PropertyAccessNode(left, name, token.span(identifier))
+                PropertyAccessNode(left, name, token.section)
             }
         }
         return InvalidExpr {

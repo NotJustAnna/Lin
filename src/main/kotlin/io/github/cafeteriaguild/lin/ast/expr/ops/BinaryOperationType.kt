@@ -8,5 +8,9 @@ enum class BinaryOperationType {
     EQUALS,
     NOT_EQUALS,
     AND,
-    OR
+    OR,
+    LT,
+    LTE,
+    GT,
+    GTE
 }

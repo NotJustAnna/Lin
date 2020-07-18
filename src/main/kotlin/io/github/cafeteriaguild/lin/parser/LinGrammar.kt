@@ -38,6 +38,10 @@ val linStdGrammar = createGrammar<TokenType, Expr> {
     infix(SLASH, BinaryOperatorParser(Precedence.MULTIPLICATIVE, BinaryOperationType.DIVIDE))
     infix(AND, BinaryOperatorParser(Precedence.CONJUNCTION, BinaryOperationType.AND))
     infix(OR, BinaryOperatorParser(Precedence.DISJUNCTION, BinaryOperationType.OR))
+    infix(LT, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.LT))
+    infix(LTE, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.LTE))
+    infix(GT, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.GT))
+    infix(GTE, BinaryOperatorParser(Precedence.COMPARISON, BinaryOperationType.GTE))
 
     prefix(VAL, DeclareVariableParser(false))
     prefix(VAR, DeclareVariableParser(true))
