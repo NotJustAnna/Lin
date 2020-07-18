@@ -5,8 +5,10 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Expr
-import io.github.cafeteriaguild.lin.ast.expr.access.PropertyAccessExpr
+import io.github.cafeteriaguild.lin.ast.expr.Node
+import io.github.cafeteriaguild.lin.ast.expr.access.PropertyAccessNode
 import io.github.cafeteriaguild.lin.ast.expr.access.PropertyAssignExpr
+import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.Precedence
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
@@ -15,6 +17,13 @@ object DotParser : InfixParser<TokenType, Expr> {
     override val precedence: Int = Precedence.POSTFIX
 
     override fun parse(ctx: ParserContext<TokenType, Expr>, left: Expr, token: Token<TokenType>): Expr {
+        if (left !is Node) {
+            return InvalidExpr {
+                section(token.section)
+                child(left)
+                error(SyntaxException("Expected a node but got a statement instead.", left.section))
+            }
+        }
         while (ctx.match(TokenType.NL)) {
             ctx.eat()
         }
@@ -24,14 +33,24 @@ object DotParser : InfixParser<TokenType, Expr> {
 
             // TODO implement all the op-assign (plusAssign, etc)
             return if (ctx.match(TokenType.ASSIGN)) {
-                val value = ctx.parseExpression()
+                val value = ctx.parseExpression().let {
+                    it as? Node ?: return InvalidExpr {
+                        section(token.section)
+                        child(it)
+                        error(SyntaxException("Expected a node but got a statement instead.", it.section))
+                    }
+                }
                 ctx.maybeIgnoreNL()
                 PropertyAssignExpr(left, name, value, token.span(value))
             } else {
                 ctx.maybeIgnoreNL()
-                PropertyAccessExpr(left, name, token.span(identifier))
+                PropertyAccessNode(left, name, token.span(identifier))
             }
         }
-        throw SyntaxException("Invalid identifier", identifier.section)
+        return InvalidExpr {
+            section(token.section)
+            child(left)
+            error(SyntaxException("Expected an indentifier, but found ${token.type}", identifier.section))
+        }
     }
 }

@@ -1,13 +1,10 @@
 package io.github.cafeteriaguild.lin.ast.expr.misc
 
 import net.notjustanna.tartar.api.lexer.Section
-import io.github.cafeteriaguild.lin.ast.expr.AbstractExpr
-import io.github.cafeteriaguild.lin.ast.expr.Expr
-import io.github.cafeteriaguild.lin.ast.expr.ExprParamVisitor
-import io.github.cafeteriaguild.lin.ast.expr.ExprVisitor
+import io.github.cafeteriaguild.lin.ast.expr.*
 
 class IfExpr(
-    val condition: Expr,
+    val condition: Node,
     val thenBranch: Expr,
     val elseBranch: Expr?,
     section: Section

@@ -48,5 +48,6 @@ val linStdGrammar = createGrammar<TokenType, Expr> {
 
     prefix(RETURN, ReturnParser)
     prefix(IF, IfParser)
+    prefix(DO, DoWhileParser)
     prefix(WHILE, WhileParser)
 }

@@ -6,14 +6,16 @@ import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.misc.IfExpr
-import io.github.cafeteriaguild.lin.ast.expr.misc.IfNode
+import io.github.cafeteriaguild.lin.ast.expr.misc.DoWhileExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
 
-object IfParser : PrefixParser<TokenType, Expr> {
+object DoWhileParser : PrefixParser<TokenType, Expr> {
     override fun parse(ctx: ParserContext<TokenType, Expr>, token: Token<TokenType>): Expr {
+        val expr = ctx.parseBlock()
+        ctx.skipUntil(TokenType.WHILE)
+        ctx.eat(TokenType.WHILE)
         ctx.eat(TokenType.L_PAREN)
         val condition = ctx.parseExpression().let {
             it as? Node ?: return InvalidExpr {
@@ -23,18 +25,6 @@ object IfParser : PrefixParser<TokenType, Expr> {
             }
         }
         ctx.eat(TokenType.R_PAREN)
-        val thenBranch = ctx.parseBlock()
-
-        val elseBranch = if (ctx.match(TokenType.ELSE)) {
-            if (ctx.nextIs(TokenType.IF)) ctx.parseExpression()
-            else ctx.parseBlock()
-        } else {
-            null
-        }
-
-        if (thenBranch is Node && elseBranch is Node) {
-            return IfNode(condition, thenBranch, elseBranch, token.section)
-        }
-        return IfExpr(condition, thenBranch, elseBranch, token.section)
+        return DoWhileExpr(expr, condition, token.section)
     }
 }

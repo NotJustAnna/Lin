@@ -2,22 +2,25 @@ package io.github.cafeteriaguild.lin
 
 import net.notjustanna.tartar.api.lexer.Source
 import io.github.cafeteriaguild.lin.ast.ASTViewer
+import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.lexer.linStdLexer
 import io.github.cafeteriaguild.lin.parser.linStdParser
 
 fun main() {
     val source = Source(
         """
-        while (true) {
+        do {
             val result = mySequence
                 .filter()
                 .map()
                 .toList()
-        }
+        } while (i)
     """.trimIndent()
     )
 
     println(buildString {
-        linStdParser.parse(source, linStdLexer).accept(ASTViewer(this, "", true))
+        val expr = linStdParser.parse(source, linStdLexer)
+        println(expr is Node)
+        expr.accept(ASTViewer(this, "", true))
     })
 }
