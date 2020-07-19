@@ -19,6 +19,7 @@ interface NodeParamVisitor<T, R> {
     fun visit(expr: AssignNode, param: T): R
     fun visit(expr: IdentifierExpr, param: T): R
     fun visit(expr: DeclareClassNode, param: T): R
+    fun visit(expr: DeclareEnumClassNode, param: T): R
     fun visit(expr: DeclareInterfaceNode, param: T): R
     fun visit(expr: DeclareObjectNode, param: T): R
     fun visit(expr: DeclareFunctionNode, param: T): R

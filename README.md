@@ -30,16 +30,25 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
     - `a ?: b`, `a in b`, `a !in b`, `a..b`
 - Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
 - Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
-- Objects
+- Objects, Classes and Interfaces
+    - Support for Enum classes
+    - **CAVEATS**:
+        - No support for:
+            - Class Constructors
+            - Interface delegation
+            - Functional interfaces
+            - Data classes
+            - Sealed classes
 
 ## Missing
 
 - The type system, and by extent:
-    - The `is`, `!is`, `as`, `as?`, `typeof` operators
+    - Inheritance in objects, classes and interfaces
+    - `is`, `!is`, `as`, `as?`, `typeof` operators
     - Types on variables, parameters, return types
-    - SAM constructors, if get implemented at all
-    - Type aliases
-    - Generics
+    - SAM constructors, if they get implemented at all
+    - Generics, if they get implemented at all
+    - Type aliases, if they get implemented at all
 - Declaration of extension functions (Requires a minimal type system)
 - Declaration of infix functions
 - Declaration of operator functions
@@ -50,11 +59,6 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 - Lambdas
 - Property delegation
 - Visibility Modifiers (public, private, internal)
-- Classes and Interfaces, and by extent:
-    - Interface delegation
-    - Functional interfaces
-    - Enum classes
-    - Data classes
 - The interpreter
 
 ## Stuff that is different

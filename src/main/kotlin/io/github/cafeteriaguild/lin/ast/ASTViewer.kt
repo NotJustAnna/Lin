@@ -139,6 +139,16 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.body.astGroup("body", tail = true)
     }
 
+    override fun visit(expr: DeclareEnumClassNode) {
+        base("declare enum class")
+        label("name: ${expr.name}", expr.body.isEmpty())
+        val values = expr.values
+        if (values.isNotEmpty()) {
+            label("values: ${values.joinToString(", ")}", tail = expr.body.isEmpty())
+        }
+        expr.body.astGroup("body", tail = true)
+    }
+
     override fun visit(expr: DeclareInterfaceNode) {
         base("declare interface")
         label("name: ${expr.name}", expr.body.isEmpty())

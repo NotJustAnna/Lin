@@ -28,6 +28,9 @@ fun main() {
                 val test = "hi"
             }
         }
+        enum class ScreenMode {
+            TEXT, PIXEL, OPENGL
+        }
 //        companion object {
 //            val hw = getHardware()
 //        }
