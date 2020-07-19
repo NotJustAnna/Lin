@@ -17,7 +17,7 @@ application.mainClassName = "io.github.cafeteriaguild.lin.LinUtilsKt"
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("net.notjustanna:tartar:1.5.1")
+    implementation("net.notjustanna:tartar:1.5.3")
     //implementation("it.unimi.dsi:fastutil:8.3.1")
 }
 

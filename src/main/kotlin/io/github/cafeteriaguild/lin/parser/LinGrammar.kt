@@ -2,15 +2,13 @@ package io.github.cafeteriaguild.lin.parser
 
 import net.notjustanna.tartar.createGrammar
 import io.github.cafeteriaguild.lin.ast.expr.Node
+import io.github.cafeteriaguild.lin.ast.expr.ops.AssignOperationType
 import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperationType
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryAssignOperationType
 import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperationType
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.lexer.TokenType.*
-import io.github.cafeteriaguild.lin.parser.parselets.BinaryOperatorParser
-import io.github.cafeteriaguild.lin.parser.parselets.PostAssignUnaryOperatorParser
-import io.github.cafeteriaguild.lin.parser.parselets.PreAssignUnaryOperatorParser
-import io.github.cafeteriaguild.lin.parser.parselets.UnaryOperatorParser
+import io.github.cafeteriaguild.lin.parser.parselets.*
 import io.github.cafeteriaguild.lin.parser.parselets.declarations.DeclareVariableParser
 import io.github.cafeteriaguild.lin.parser.parselets.declarations.FunctionParser
 import io.github.cafeteriaguild.lin.parser.parselets.nodes.*
@@ -56,6 +54,13 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     prefix(INCREMENT, PreAssignUnaryOperatorParser(UnaryAssignOperationType.INCREMENT))
     infix(DECREMENT, PostAssignUnaryOperatorParser(UnaryAssignOperationType.DECREMENT))
     infix(INCREMENT, PostAssignUnaryOperatorParser(UnaryAssignOperationType.INCREMENT))
+
+    // Assign operations
+    infix(PLUS_ASSIGN, AssignOperatorParser(AssignOperationType.ADD_ASSIGN))
+    infix(MINUS_ASSIGN, AssignOperatorParser(AssignOperationType.SUBTRACT_ASSIGN))
+    infix(ASTERISK_ASSIGN, AssignOperatorParser(AssignOperationType.MULTIPLY_ASSIGN))
+    infix(SLASH_ASSIGN, AssignOperatorParser(AssignOperationType.DIVIDE_ASSIGN))
+    infix(REM_ASSIGN, AssignOperatorParser(AssignOperationType.REMAINING_ASSIGN))
 
     prefix(VAL, DeclareVariableParser(false))
     prefix(VAR, DeclareVariableParser(true))

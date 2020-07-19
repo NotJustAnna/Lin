@@ -8,10 +8,7 @@ import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.*
 import io.github.cafeteriaguild.lin.ast.expr.nodes.*
-import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
-import io.github.cafeteriaguild.lin.ast.expr.ops.PostAssignUnaryOperation
-import io.github.cafeteriaguild.lin.ast.expr.ops.PreAssignUnaryOperation
-import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperation
+import io.github.cafeteriaguild.lin.ast.expr.ops.*
 
 interface NodeParamVisitor<T, R> {
     fun visit(expr: NullExpr, param: T): R
@@ -49,6 +46,7 @@ interface NodeParamVisitor<T, R> {
     fun visit(expr: UnaryOperation, param: T): R
     fun visit(expr: PreAssignUnaryOperation, param: T): R
     fun visit(expr: PostAssignUnaryOperation, param: T): R
+    fun visit(expr: AssignOperation, param: T): R
     fun visit(expr: FunctionExpr, param: T): R
     fun visit(expr: LambdaExpr, param: T): R
     fun visit(expr: DeclareFunctionNode, param: T): R

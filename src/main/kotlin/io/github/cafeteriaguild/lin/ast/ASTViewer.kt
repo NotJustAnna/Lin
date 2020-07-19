@@ -10,10 +10,7 @@ import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.*
 import io.github.cafeteriaguild.lin.ast.expr.nodes.*
-import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
-import io.github.cafeteriaguild.lin.ast.expr.ops.PostAssignUnaryOperation
-import io.github.cafeteriaguild.lin.ast.expr.ops.PreAssignUnaryOperation
-import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperation
+import io.github.cafeteriaguild.lin.ast.expr.ops.*
 
 class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boolean) : NodeVisitor<Unit> {
     fun Node.ast(indent: String = this@ASTViewer.indent + if (isTail) "    " else "│   ", tail: Boolean) =
@@ -308,6 +305,13 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 
     override fun visit(expr: BinaryOperation) {
         base("binary ${expr.operator}")
+
+        expr.left.ast(tail = false)
+        expr.right.ast(tail = true)
+    }
+
+    override fun visit(expr: AssignOperation) {
+        base("assign operation ${expr.operator}")
 
         expr.left.ast(tail = false)
         expr.right.ast(tail = true)

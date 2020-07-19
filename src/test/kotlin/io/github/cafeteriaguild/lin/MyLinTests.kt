@@ -10,12 +10,16 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-        hw.interrupt { | i, (event, data) | ->
-            println("${'$'}event ${'$'}data ${'$'}i")
-        }
+a += b
+b -= c
+c *= d
+d /= e
+e %= f
+//        hw.interrupt { | i, (event, data) | ->
+//            println("${'$'}event ${'$'}data ${'$'}i")
+//        }
         """.trimIndent()
     )
-
     println(buildString {
         val expr = linStdParser.parse(source, linStdLexer)
         println(expr is Expr)

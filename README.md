@@ -8,13 +8,7 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 
 - Booleans, Null
 - Ints, Longs, Floats, Doubles, Chars
-    - **CAVEATS**:
-        - Parsing needs to be improved but works
-        - Characters are somewhat sketchy
-- Strings
-    - **CAVEATS**:
-        - Parsing needs to be improved but works
-        - Raw strings and template strings not yet implemented
+- Strings (with support for raw and template strings)
 - Variables
     - Vals, Vars, Destructuring variables
 - access/assignments of variables
@@ -35,6 +29,7 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
     - `a==b`, `a!=b`, `a&&b`, `a||b`, `a<b`, `a<=b`, `a>b`, `a>=b`
     - `a ?: b`, `a in b`, `a !in b`, `a..b`
 - Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
+- Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
 
 ## Missing
 
@@ -59,7 +54,6 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
     - Functional interfaces
     - Enum classes
     - Data classes
-- Binary-assignment (`a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`)
 - The interpreter
 
 ## Stuff that is different
