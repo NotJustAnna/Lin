@@ -31,14 +31,17 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 - Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
 - Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
 - Objects, Classes and Interfaces
-    - Support for Enum classes
+    - Support for Companion Objects, Enum classes, Functional Interfaces (Kotlin 1.4+)
     - **CAVEATS**:
+        - Data, Sealed and Annotation classes are supported only as Modifiers
         - No support for:
             - Class Constructors
             - Interface delegation
-            - Functional interfaces
-            - Data classes
-            - Sealed classes
+- Modifiers 
+    - Abstract, Sealed, Data, Annotation
+    - Open, Final, Override, Const
+    - Public, Internal, Protected, Private
+    - Infix, Operator, Lateinit
 
 ## Missing
 
@@ -58,7 +61,7 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 - When
 - Lambdas
 - Property delegation
-- Visibility Modifiers (public, private, internal)
+- Modifiers are not validated
 - The interpreter
 
 ## Stuff that is different
