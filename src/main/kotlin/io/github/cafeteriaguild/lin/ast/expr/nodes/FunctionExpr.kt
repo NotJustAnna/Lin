@@ -5,11 +5,12 @@ import io.github.cafeteriaguild.lin.ast.expr.*
 
 class FunctionExpr(
     val parameters: List<Parameter>,
-    val body: Node,
+    val body: Node?,
     section: Section
 ) : AbstractNode(section), Expr {
     data class Parameter(
         val name: String,
+        val varargs: Boolean,
         val value: Expr?
     )
 

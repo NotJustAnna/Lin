@@ -10,9 +10,27 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-companion object {
-    val hw = getHardware()
-}
+        interface Marker
+        class Any
+        interface B {
+            fun test(vararg values)
+            
+            companion object C {
+                val value = "hi"
+                
+                fun test(vararg values) {
+                    values.toList()
+                }
+            }
+        }
+        class A {
+            companion object {
+                val test = "hi"
+            }
+        }
+//        companion object {
+//            val hw = getHardware()
+//        }
 //        hw.interrupt { | i, (event, data) | ->
 //            println("${'$'}event ${'$'}data ${'$'}i")
 //        }

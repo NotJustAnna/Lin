@@ -18,6 +18,8 @@ interface NodeVisitor<R> {
     fun visit(expr: BooleanExpr): R
     fun visit(expr: AssignNode): R
     fun visit(expr: IdentifierExpr): R
+    fun visit(expr: DeclareClassNode): R
+    fun visit(expr: DeclareInterfaceNode): R
     fun visit(expr: DeclareObjectNode): R
     fun visit(expr: DeclareFunctionNode): R
     fun visit(expr: DeclareVariableNode): R

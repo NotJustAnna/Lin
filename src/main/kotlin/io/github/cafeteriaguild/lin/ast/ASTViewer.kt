@@ -133,10 +133,22 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //        }
 //    }
 
+    override fun visit(expr: DeclareClassNode) {
+        base("declare class")
+        label("name: ${expr.name}", expr.body.isEmpty())
+        expr.body.astGroup("body", tail = true)
+    }
+
+    override fun visit(expr: DeclareInterfaceNode) {
+        base("declare interface")
+        label("name: ${expr.name}", expr.body.isEmpty())
+        expr.body.astGroup("body", tail = true)
+    }
+
     override fun visit(expr: DeclareObjectNode) {
         base("declare ${if (expr.isCompanion) "companion object" else "object"}")
-        label("name: ${expr.name}", false)
-        expr.obj.astLabel("object", tail = true)
+        label("name: ${expr.name}", expr.obj.body.isEmpty())
+        expr.obj.body.astGroup("body", tail = true)
     }
 
     override fun visit(expr: DeclareFunctionNode) {
@@ -166,10 +178,10 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         base("function")
         val (names, values) = expr.parameters.map { it.name to it.value }.unzip()
         if (names.isNotEmpty()) {
-            label("parameters: ${names.joinToString(", ")}", tail = false)
+            label("parameters: ${names.joinToString(", ")}", tail = values.isNotEmpty() && expr.body == null)
         }
-        values.filterNotNull().astGroup("default values", tail = false)
-        expr.body.astLabel("body", tail = true)
+        values.filterNotNull().astGroup("default values", tail = expr.body == null)
+        expr.body?.astLabel("body", tail = true)
     }
 
     override fun visit(expr: LambdaExpr) {

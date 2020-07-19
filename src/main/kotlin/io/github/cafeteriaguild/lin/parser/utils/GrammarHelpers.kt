@@ -22,16 +22,18 @@ fun ParserContext<TokenType, Node>.skipOnlyUntil(vararg type: TokenType) {
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun ParserContext<TokenType, Node>.parseBlock(smartToNode: Boolean = true, braceConsumed: Boolean = false): Node? {
+fun ParserContext<TokenType, Node>.parseBlock(smartToExpr: Boolean = true, braceConsumed: Boolean = false): Node? {
     if (braceConsumed || match(TokenType.L_BRACE)) {
         val start = last
         val list = mutableListOf<Node>()
         while (true) {
-            matchAll(TokenType.NL, TokenType.SEMICOLON)
+            matchAll(TokenType.SEMICOLON)
+            skipOnlyUntil(TokenType.R_BRACE)
             if (match(TokenType.R_BRACE)) break
+            matchAll(TokenType.NL)
             list += parseExpression()
         }
-        if (smartToNode && list.isNotEmpty() && list.last() is Expr) {
+        if (smartToExpr && list.isNotEmpty() && list.last() is Expr) {
             val last = list.removeLast() as Expr
             return MultiExpr(list, last, start.section)
         }
