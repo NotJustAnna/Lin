@@ -25,7 +25,7 @@ object DoWhileParser : PrefixParser<TokenType, Node> {
             it as? Expr ?: return InvalidNode {
                 section(token.section)
                 child(it)
-                error(SyntaxException("Expected a node", it.section))
+                error(SyntaxException("Expected an expression", it.section))
             }
         }
         ctx.matchAll(TokenType.NL)

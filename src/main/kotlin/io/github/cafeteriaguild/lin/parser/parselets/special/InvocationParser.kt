@@ -26,7 +26,7 @@ object InvocationParser : InfixParser<TokenType, Node> {
             return InvalidNode {
                 section(token.section)
                 child(left)
-                error(SyntaxException("Expected a node", left.section))
+                error(SyntaxException("Expected an expression", left.section))
             }
         }
         val arguments = mutableListOf<Expr>()
@@ -39,7 +39,7 @@ object InvocationParser : InfixParser<TokenType, Node> {
                     it as? Expr ?: return InvalidNode {
                         section(token.section)
                         child(it)
-                        error(SyntaxException("Expected a node", it.section))
+                        error(SyntaxException("Expected an expression", it.section))
                     }
                 }
                 ctx.matchAll(TokenType.NL)

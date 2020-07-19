@@ -197,11 +197,21 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         expr.value?.astLabel("value", tail = true)
     }
 
+    override fun visit(expr: DelegatingVariableNode) {
+        base(if (expr.mutable) "var" else "val")
+        val modifiers = expr.modifiers
+        if (modifiers.isNotEmpty()) {
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", tail = false)
+        }
+        label("name: ${expr.name}", tail = false)
+        expr.delegate.astLabel("delegate", tail = true)
+    }
+
     override fun visit(expr: DestructuringVariableNode) {
         base(if (expr.mutable) "var" else "val")
         val modifiers = expr.modifiers
         if (modifiers.isNotEmpty()) {
-            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", tail = false)
         }
         label("destructuring: ${expr.names.joinToString(", ", "(", ")")}", tail = false)
         expr.value.astLabel("value", tail = true)

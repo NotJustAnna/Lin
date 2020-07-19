@@ -24,6 +24,7 @@ interface NodeParamVisitor<T, R> {
     fun visit(expr: DeclareObjectNode, param: T): R
     fun visit(expr: DeclareFunctionNode, param: T): R
     fun visit(expr: DeclareVariableNode, param: T): R
+    fun visit(expr: DelegatingVariableNode, param: T): R
     fun visit(expr: DestructuringVariableNode, param: T): R
     fun visit(expr: ReturnExpr, param: T): R
     fun visit(expr: ThrowExpr, param: T): R

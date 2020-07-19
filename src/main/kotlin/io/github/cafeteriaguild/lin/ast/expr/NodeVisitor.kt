@@ -24,6 +24,7 @@ interface NodeVisitor<R> {
     fun visit(expr: DeclareObjectNode): R
     fun visit(expr: DeclareFunctionNode): R
     fun visit(expr: DeclareVariableNode): R
+    fun visit(expr: DelegatingVariableNode): R
     fun visit(expr: DestructuringVariableNode): R
     fun visit(expr: ReturnExpr): R
     fun visit(expr: ThrowExpr): R

@@ -7,19 +7,19 @@ import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
-import io.github.cafeteriaguild.lin.ast.expr.nodes.ThrowExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 
-object ThrowParser : PrefixParser<TokenType, Node> {
+object ParenthesisParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
-        val node = ctx.parseExpression().let {
-            it as? Expr ?: return InvalidNode {
+        val node = ctx.parseExpression()
+        if (node !is Expr) {
+            return InvalidNode {
                 section(token.section)
-                child(it)
-                error(SyntaxException("Expected an expression", it.section))
+                child(node)
+                error(SyntaxException("Expected an expression", node.section))
             }
         }
-
-        return ThrowExpr(node, token.section)
+        ctx.eat(TokenType.R_PAREN)
+        return node
     }
 }

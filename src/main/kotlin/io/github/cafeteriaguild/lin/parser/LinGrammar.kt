@@ -83,6 +83,7 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     prefix(OBJECT, ObjectParser)
     prefix(FUN, FunctionParser)
 
+    prefix(L_PAREN, ParenthesisParser)
     prefix(L_BRACE, LambdaParser)
     infix(L_BRACE, LambdaInvocationParser)
 }

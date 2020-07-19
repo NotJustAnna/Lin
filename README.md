@@ -42,6 +42,7 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
     - Open, Final, Override, Const
     - Public, Internal, Protected, Private
     - Infix, Operator, Lateinit
+- Property delegation
 
 ## Missing
 
@@ -53,14 +54,11 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
     - Generics, if they get implemented at all
     - Type aliases, if they get implemented at all
 - Declaration of extension functions (Requires a minimal type system)
-- Declaration of infix functions
-- Declaration of operator functions
 - Declaration of function-based properties
 - Break/Continue on Loops
 - Labels on Loops
 - When
 - Lambdas
-- Property delegation
 - Modifiers are not validated
 - The interpreter
 

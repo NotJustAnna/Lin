@@ -10,36 +10,7 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-        internal interface Marker
-        private class Any
-        private fun interface B {
-            fun test(vararg values)
-
-            companion object C {
-                val value = "hi"
-
-                fun test(vararg values) {
-                    values.toList()
-                }
-            }
-        }
-        class A {
-            companion object {
-                val test = "hi"
-            }
-        }
-        enum class Language {
-            JAVA, KOTLIN, LIN;
-            companion object {
-                val map = values().toMap()
-            }
-        }
-        companion object {
-            val hw = getHardware()
-        }
-        hw.interrupt { | i, (event, data) | ->
-            println("${'$'}event ${'$'}data ${'$'}i")
-        }
+        val something by lazy { expensiveOperation() }
         """.trimIndent()
     )
     println(buildString {
