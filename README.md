@@ -30,6 +30,7 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
     - `a ?: b`, `a in b`, `a !in b`, `a..b`
 - Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
 - Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
+- Objects
 
 ## Missing
 
@@ -49,7 +50,7 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 - Lambdas
 - Property delegation
 - Visibility Modifiers (public, private, internal)
-- Classes, Objects and Interfaces, and by extent:
+- Classes and Interfaces, and by extent:
     - Interface delegation
     - Functional interfaces
     - Enum classes

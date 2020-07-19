@@ -11,6 +11,7 @@ import io.github.cafeteriaguild.lin.lexer.TokenType.*
 import io.github.cafeteriaguild.lin.parser.parselets.*
 import io.github.cafeteriaguild.lin.parser.parselets.declarations.DeclareVariableParser
 import io.github.cafeteriaguild.lin.parser.parselets.declarations.FunctionParser
+import io.github.cafeteriaguild.lin.parser.parselets.declarations.ObjectParser
 import io.github.cafeteriaguild.lin.parser.parselets.nodes.*
 import io.github.cafeteriaguild.lin.parser.parselets.special.*
 
@@ -80,6 +81,7 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     prefix(WHILE, WhileParser)
     prefix(FOR, ForParser)
     prefix(FUN, FunctionParser)
+    prefix(OBJECT, ObjectParser)
 
     prefix(L_BRACE, LambdaParser)
     infix(L_BRACE, LambdaInvocationParser)

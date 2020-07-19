@@ -1,6 +1,8 @@
 package io.github.cafeteriaguild.lin.ast.expr
 
 import io.github.cafeteriaguild.lin.ast.expr.access.*
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareFunctionNode
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareObjectNode
 import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableNode
 import io.github.cafeteriaguild.lin.ast.expr.declarations.DestructuringVariableNode
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeExpr
@@ -19,6 +21,8 @@ interface NodeParamVisitor<T, R> {
     fun visit(expr: BooleanExpr, param: T): R
     fun visit(expr: AssignNode, param: T): R
     fun visit(expr: IdentifierExpr, param: T): R
+    fun visit(expr: DeclareObjectNode, param: T): R
+    fun visit(expr: DeclareFunctionNode, param: T): R
     fun visit(expr: DeclareVariableNode, param: T): R
     fun visit(expr: DestructuringVariableNode, param: T): R
     fun visit(expr: ReturnExpr, param: T): R
@@ -47,7 +51,7 @@ interface NodeParamVisitor<T, R> {
     fun visit(expr: PreAssignUnaryOperation, param: T): R
     fun visit(expr: PostAssignUnaryOperation, param: T): R
     fun visit(expr: AssignOperation, param: T): R
+    fun visit(expr: ObjectExpr, param: T): R
     fun visit(expr: FunctionExpr, param: T): R
     fun visit(expr: LambdaExpr, param: T): R
-    fun visit(expr: DeclareFunctionNode, param: T): R
 }

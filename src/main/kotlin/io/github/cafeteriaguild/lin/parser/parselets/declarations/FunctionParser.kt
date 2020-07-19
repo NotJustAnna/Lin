@@ -6,7 +6,7 @@ import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.access.DeclareFunctionNode
+import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareFunctionNode
 import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
 import io.github.cafeteriaguild.lin.ast.expr.nodes.FunctionExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType

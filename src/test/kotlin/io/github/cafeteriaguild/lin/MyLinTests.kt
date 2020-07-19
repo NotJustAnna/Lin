@@ -10,11 +10,13 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-a += b
-b -= c
-c *= d
-d /= e
-e %= f
+object Test {
+    val interrupts = mapOf()
+    
+    fun resetInterrupts() {
+        interrupts.clear()
+    }
+}
 //        hw.interrupt { | i, (event, data) | ->
 //            println("${'$'}event ${'$'}data ${'$'}i")
 //        }
