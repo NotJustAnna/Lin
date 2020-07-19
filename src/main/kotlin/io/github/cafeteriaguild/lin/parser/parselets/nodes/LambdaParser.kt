@@ -9,7 +9,9 @@ import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
 import io.github.cafeteriaguild.lin.ast.expr.nodes.LambdaExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
+import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
 object LambdaParser : PrefixParser<TokenType, Node> {
 
@@ -17,6 +19,7 @@ object LambdaParser : PrefixParser<TokenType, Node> {
 
         val parameters = mutableListOf<LambdaExpr.Parameter>()
 
+        ctx.skipOnlyUntil(TokenType.PIPE)
         if (ctx.match(TokenType.PIPE)) {
             do {
                 ctx.matchAll(TokenType.NL)
@@ -48,6 +51,7 @@ object LambdaParser : PrefixParser<TokenType, Node> {
             section(token.section)
             error(SyntaxException("Couldn't parse function's block, found ${ctx.peek()}", token.section))
         }
+        ctx.maybeIgnoreNL()
         return LambdaExpr(parameters, expr, token.section)
     }
 }

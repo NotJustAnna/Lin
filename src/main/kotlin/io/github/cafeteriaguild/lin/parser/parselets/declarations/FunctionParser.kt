@@ -11,6 +11,7 @@ import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
 import io.github.cafeteriaguild.lin.ast.expr.nodes.FunctionExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
 
 object FunctionParser : PrefixParser<TokenType, Node> {
@@ -62,6 +63,7 @@ object FunctionParser : PrefixParser<TokenType, Node> {
             }
         }
 
+        ctx.maybeIgnoreNL()
         val function = FunctionExpr(parameters, expr, token.section)
 
         return if (ident != null) DeclareFunctionNode(ident.value, function, ident.section) else function

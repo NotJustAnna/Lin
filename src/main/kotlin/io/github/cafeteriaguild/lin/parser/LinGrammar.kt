@@ -75,4 +75,7 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     prefix(WHILE, WhileParser)
     prefix(FOR, ForParser)
     prefix(FUN, FunctionParser)
+
+    prefix(L_BRACE, LambdaParser)
+    infix(L_BRACE, LambdaInvocationParser)
 }

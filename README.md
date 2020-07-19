@@ -62,6 +62,16 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 - Binary-assignment (`a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`)
 - The interpreter
 
+## Stuff that is different
+- Lambdas
+    - They can be declared pretty much anywhere, no need for a magic type.
+    - Any parameters must be enclosed in pipes (`|`)
+        - `a { doSomething() }` stays the same
+        - `a { it.values }` stays the same
+        - `a { b -> c(b) }` turns into `a { | b | -> c(b) }`
+        - `a { b, c -> c(b) }` turns into `a { | b, c | -> c(b) }`
+        - `a { (b, c) -> c(b) }` turns into `a { | (b, c) | -> c(b) }`
+
 ## Stuff that will most likely be different
 
 - Mostly everything regarding to imports/packages will be different.

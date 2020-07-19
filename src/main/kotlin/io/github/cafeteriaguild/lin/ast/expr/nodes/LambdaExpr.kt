@@ -9,8 +9,13 @@ class LambdaExpr(
     section: Section
 ) : AbstractNode(section), Expr {
     sealed class Parameter {
-        class Destructured(val names: List<String>): Parameter()
-        class Named(val name: String) : Parameter()
+        class Destructured(val names: List<String>) : Parameter() {
+            override fun toString() = names.joinToString(", ", "(", ")")
+        }
+
+        class Named(val name: String) : Parameter() {
+            override fun toString() = name
+        }
     }
 
     override fun <R> accept(visitor: NodeVisitor<R>) = visitor.visit(this)

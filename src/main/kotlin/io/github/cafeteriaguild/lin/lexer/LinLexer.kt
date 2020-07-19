@@ -60,7 +60,8 @@ val linStdLexer = createLexer<Token<TokenType>> {
     ">=" { process(makeToken(GTE, 2)) }
     '>' { process(makeToken(GT)) }
     '\'' { process(makeToken(CHAR, readLinString(it))) }
-    '"' { process(makeToken(STRING, readLinString(it))) }
+    "\"\"\"" { readLinTemplateString(it.toString(), true) }
+    '"' { readLinTemplateString(it.toString(), false) }
     "`" { process(makeToken(IDENTIFIER, readString(it))) }
     matching { it.isDigit() }.configure {
         process(

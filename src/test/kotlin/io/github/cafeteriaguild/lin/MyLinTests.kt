@@ -10,16 +10,10 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-    while (continuations.isNotEmpty()) {
-        val (i, c) = continuations.poll()
-        val next = c.next()
-        if (next.hasNext()) {
-            continuations.offer(i to next)
-        } else {
-            println("Done")
+        hw.interrupt { | i, (event, data) | ->
+            println("${'$'}event ${'$'}data ${'$'}i")
         }
-    }
-    """.trimIndent()
+        """.trimIndent()
     )
 
     println(buildString {

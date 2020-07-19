@@ -158,8 +158,19 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
     override fun visit(expr: FunctionExpr) {
         base("function")
         val (names, values) = expr.parameters.map { it.name to it.value }.unzip()
-        label("parameters: ${names.joinToString(", ")}", tail = false)
+        if (names.isNotEmpty()) {
+            label("parameters: ${names.joinToString(", ")}", tail = false)
+        }
         values.filterNotNull().astGroup("default values", tail = false)
+        expr.body.astLabel("body", tail = true)
+    }
+
+    override fun visit(expr: LambdaExpr) {
+        base("lambda")
+        val parameters = expr.parameters
+        if (parameters.isNotEmpty()) {
+            label("parameters: ${parameters.joinToString(", ")}", tail = false)
+        }
         expr.body.astLabel("body", tail = true)
     }
 
