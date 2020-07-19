@@ -135,14 +135,22 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 
     override fun visit(expr: DeclareClassNode) {
         base("declare class")
+        val modifiers = expr.modifiers
+        if (modifiers.isNotEmpty()) {
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
+        }
         label("name: ${expr.name}", expr.body.isEmpty())
         expr.body.astGroup("body", tail = true)
     }
 
     override fun visit(expr: DeclareEnumClassNode) {
         base("declare enum class")
-        label("name: ${expr.name}", expr.body.isEmpty())
+        val modifiers = expr.modifiers
+        if (modifiers.isNotEmpty()) {
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
+        }
         val values = expr.values
+        label("name: ${expr.name}", values.isEmpty() && expr.body.isEmpty())
         if (values.isNotEmpty()) {
             label("values: ${values.joinToString(", ")}", tail = expr.body.isEmpty())
         }
@@ -151,30 +159,50 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 
     override fun visit(expr: DeclareInterfaceNode) {
         base("declare interface")
+        val modifiers = expr.modifiers
+        if (modifiers.isNotEmpty()) {
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
+        }
         label("name: ${expr.name}", expr.body.isEmpty())
         expr.body.astGroup("body", tail = true)
     }
 
     override fun visit(expr: DeclareObjectNode) {
-        base("declare ${if (expr.isCompanion) "companion object" else "object"}")
+        base("declare object")
+        val modifiers = expr.modifiers
+        if (modifiers.isNotEmpty()) {
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
+        }
         label("name: ${expr.name}", expr.obj.body.isEmpty())
         expr.obj.body.astGroup("body", tail = true)
     }
 
     override fun visit(expr: DeclareFunctionNode) {
         base("declare function")
+        val modifiers = expr.modifiers
+        if (modifiers.isNotEmpty()) {
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
+        }
         label("name: ${expr.name}", false)
         expr.function.astLabel("function", tail = true)
     }
 
     override fun visit(expr: DeclareVariableNode) {
         base(if (expr.mutable) "var" else "val")
-        label("name: ${expr.name}", tail = expr.value == null)
+        val modifiers = expr.modifiers
+        if (modifiers.isNotEmpty()) {
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
+        }
+        label("name: ${expr.name}", expr.value == null)
         expr.value?.astLabel("value", tail = true)
     }
 
     override fun visit(expr: DestructuringVariableNode) {
         base(if (expr.mutable) "var" else "val")
+        val modifiers = expr.modifiers
+        if (modifiers.isNotEmpty()) {
+            label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
+        }
         label("destructuring: ${expr.names.joinToString(", ", "(", ")")}", tail = false)
         expr.value.astLabel("value", tail = true)
     }

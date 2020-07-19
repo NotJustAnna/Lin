@@ -5,7 +5,7 @@ import net.notjustanna.tartar.api.parser.Token
 enum class LinModifier {
     ABSTRACT, ANNOTATION, COMPANION, CONST, DATA, ENUM,
     FINAL, INFIX, INTERNAL, LATEINIT, OPEN, OPERATOR, OVERRIDE,
-    PRIVATE, PROTECTED, PUBLIC, SEALED;
+    PRIVATE, PROTECTED, PUBLIC, SEALED, FUN;
 
     companion object {
         private val map by lazy { values().associateBy { it.name.toLowerCase() } }

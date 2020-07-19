@@ -10,14 +10,14 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-        interface Marker
-        class Any
-        interface B {
+        internal interface Marker
+        private class Any
+        private fun interface B {
             fun test(vararg values)
-            
+
             companion object C {
                 val value = "hi"
-                
+
                 fun test(vararg values) {
                     values.toList()
                 }
@@ -28,15 +28,18 @@ fun main() {
                 val test = "hi"
             }
         }
-        enum class ScreenMode {
-            TEXT, PIXEL, OPENGL
+        enum class Language {
+            JAVA, KOTLIN, LIN;
+            companion object {
+                val map = values().toMap()
+            }
         }
-//        companion object {
-//            val hw = getHardware()
-//        }
-//        hw.interrupt { | i, (event, data) | ->
-//            println("${'$'}event ${'$'}data ${'$'}i")
-//        }
+        companion object {
+            val hw = getHardware()
+        }
+        hw.interrupt { | i, (event, data) | ->
+            println("${'$'}event ${'$'}data ${'$'}i")
+        }
         """.trimIndent()
     )
     println(buildString {

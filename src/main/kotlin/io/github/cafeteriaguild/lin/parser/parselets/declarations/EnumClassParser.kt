@@ -9,10 +9,6 @@ import io.github.cafeteriaguild.lin.ast.expr.misc.MultiNode
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
-enum class constructor constructor() {
-    A() {}
-}
-
 object EnumClassParser : TypeParser() {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.skipOnlyUntil(TokenType.IDENTIFIER)

@@ -61,6 +61,7 @@ val linStdLexer = createLexer<Token<TokenType>> {
     '>' { process(makeToken(GT)) }
     '\'' { process(makeToken(CHAR, readLinString(it))) }
     "\"\"\"" { readLinTemplateString(it.toString(), true) }
+    "\"\"" { process(makeToken(STRING, 2)) }
     '"' { readLinTemplateString(it.toString(), false) }
     "`" { process(makeToken(IDENTIFIER, readString(it))) }
     matching { it.isDigit() }.configure {

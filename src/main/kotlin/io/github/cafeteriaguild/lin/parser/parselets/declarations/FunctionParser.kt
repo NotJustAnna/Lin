@@ -4,20 +4,26 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.PrefixParser
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
+import io.github.cafeteriaguild.lin.ast.LinModifier
 import io.github.cafeteriaguild.lin.ast.expr.Expr
 import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareFunctionNode
 import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
 import io.github.cafeteriaguild.lin.ast.expr.nodes.FunctionExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
+import io.github.cafeteriaguild.lin.parser.parselets.nodes.IdentifierParser
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
 import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
+
 object FunctionParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
+        if (ctx.nextIs(TokenType.INTERFACE)) {
+            return IdentifierParser.applyModifiers(ctx.parseExpression(), mapOf(LinModifier.FUN to token))
+        }
         val ident = if (ctx.nextIs(TokenType.IDENTIFIER)) ctx.eat(TokenType.IDENTIFIER) else null
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)

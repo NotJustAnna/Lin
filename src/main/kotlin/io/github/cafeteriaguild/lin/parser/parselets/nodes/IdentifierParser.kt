@@ -7,7 +7,7 @@ import net.notjustanna.tartar.createGrammar
 import io.github.cafeteriaguild.lin.ast.LinModifier
 import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.ast.expr.access.AssignNode
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareObjectNode
+import io.github.cafeteriaguild.lin.ast.expr.declarations.*
 import io.github.cafeteriaguild.lin.ast.expr.nodes.IdentifierExpr
 import io.github.cafeteriaguild.lin.ast.expr.nodes.ObjectExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
@@ -49,19 +49,49 @@ object IdentifierParser : PrefixParser<TokenType, Node> {
         return applyModifiers(ctx.parseExpression(), map)
     }
 
-    private fun applyModifiers(node: Node, map: Map<LinModifier, Token<TokenType>>): Node {
+    fun applyModifiers(node: Node, map: Map<LinModifier, Token<TokenType>>): Node {
+        val set = map.keys.toSet()
         when (node) {
             is DeclareObjectNode -> {
-                val companionToken = map[LinModifier.COMPANION]
-                if (companionToken != null) {
-                    return DeclareObjectNode(node.name, node.obj, companionToken.section, true)
-                }
+                return DeclareObjectNode(
+                    node.name, node.obj, node.section, set + node.modifiers
+                )
             }
             is ObjectExpr -> {
                 val companionToken = map[LinModifier.COMPANION]
                 if (companionToken != null) {
-                    return DeclareObjectNode("Companion", node, companionToken.section, true)
+                    return DeclareObjectNode("Companion", node, companionToken.section, set)
                 }
+            }
+            is DeclareClassNode -> {
+                return DeclareClassNode(
+                    node.name, node.body, node.section, set + node.modifiers
+                )
+            }
+            is DeclareEnumClassNode -> {
+                return DeclareEnumClassNode(
+                    node.name, node.values, node.body, node.section, set + node.modifiers
+                )
+            }
+            is DeclareFunctionNode -> {
+                return DeclareFunctionNode(
+                    node.name, node.function, node.section, set + node.modifiers
+                )
+            }
+            is DeclareInterfaceNode -> {
+                return DeclareInterfaceNode(
+                    node.name, node.body, node.section, set + node.modifiers
+                )
+            }
+            is DeclareVariableNode -> {
+                return DeclareVariableNode(
+                    node.name, node.mutable, node.value, node.section, set + node.modifiers
+                )
+            }
+            is DestructuringVariableNode -> {
+                return DestructuringVariableNode(
+                    node.names, node.mutable, node.value, node.section, set + node.modifiers
+                )
             }
         }
         return node
