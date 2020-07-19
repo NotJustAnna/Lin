@@ -3,10 +3,7 @@ package io.github.cafeteriaguild.lin.ast
 import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.ast.expr.NodeVisitor
 import io.github.cafeteriaguild.lin.ast.expr.access.*
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareFunctionNode
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareObjectNode
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareVariableNode
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DestructuringVariableNode
+import io.github.cafeteriaguild.lin.ast.expr.declarations.*
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalExpr
 import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberExpr
@@ -137,7 +134,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 //    }
 
     override fun visit(expr: DeclareObjectNode) {
-        base("declare object")
+        base("declare ${if (expr.isCompanion) "companion object" else "object"}")
         label("name: ${expr.name}", false)
         expr.obj.astLabel("object", tail = true)
     }
@@ -181,6 +178,11 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         if (parameters.isNotEmpty()) {
             label("parameters: ${parameters.joinToString(", ")}", tail = false)
         }
+        expr.body.astLabel("body", tail = true)
+    }
+
+    override fun visit(expr: InitializerNode) {
+        base("init")
         expr.body.astLabel("body", tail = true)
     }
 

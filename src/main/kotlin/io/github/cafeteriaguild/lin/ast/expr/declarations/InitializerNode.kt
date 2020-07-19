@@ -5,11 +5,10 @@ import io.github.cafeteriaguild.lin.ast.expr.AbstractNode
 import io.github.cafeteriaguild.lin.ast.expr.Declaration
 import io.github.cafeteriaguild.lin.ast.expr.NodeParamVisitor
 import io.github.cafeteriaguild.lin.ast.expr.NodeVisitor
-import io.github.cafeteriaguild.lin.ast.expr.nodes.ObjectExpr
+import io.github.cafeteriaguild.lin.ast.expr.misc.MultiNode
 
-class DeclareObjectNode(
-    val name: String, val obj: ObjectExpr, section: Section,
-    val isCompanion: Boolean = false
+class InitializerNode(
+    val body: MultiNode, section: Section
 ) : AbstractNode(section), Declaration {
     override fun <R> accept(visitor: NodeVisitor<R>) = visitor.visit(this)
     override fun <T, R> accept(visitor: NodeParamVisitor<T, R>, param: T) = visitor.visit(this, param)

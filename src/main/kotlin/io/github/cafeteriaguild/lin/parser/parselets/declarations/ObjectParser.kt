@@ -7,8 +7,12 @@ import net.notjustanna.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.ast.expr.Declaration
 import io.github.cafeteriaguild.lin.ast.expr.Node
 import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareObjectNode
+import io.github.cafeteriaguild.lin.ast.expr.declarations.InitializerNode
+import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
+import io.github.cafeteriaguild.lin.ast.expr.misc.MultiExpr
 import io.github.cafeteriaguild.lin.ast.expr.misc.MultiNode
+import io.github.cafeteriaguild.lin.ast.expr.nodes.LambdaExpr
 import io.github.cafeteriaguild.lin.ast.expr.nodes.ObjectExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
@@ -28,7 +32,25 @@ object ObjectParser : PrefixParser<TokenType, Node> {
                 child(it)
                 error(SyntaxException("Invalid node found", token.section))
             }
-        }.list
+        }.list.map {
+            if (it is InvokeLocalExpr) {
+                val arguments = it.arguments
+
+                if (arguments.singleOrNull() is LambdaExpr) {
+                    val lambda = arguments.single() as LambdaExpr
+
+                    if (lambda.parameters.isEmpty()) {
+                        val body = lambda.body
+                        InitializerNode(
+                            body as? MultiNode ?: (body as MultiExpr).let { expr ->
+                                MultiNode(expr.list + expr.last, expr.section)
+                            },
+                            body.section
+                        )
+                    } else it
+                } else it
+            } else it
+        }
 
         if (list.any { it !is Declaration }) return InvalidNode {
             section(list.first().section)

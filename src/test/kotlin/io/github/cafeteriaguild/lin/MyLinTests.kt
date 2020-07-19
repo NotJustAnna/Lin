@@ -10,12 +10,8 @@ import io.github.cafeteriaguild.lin.parser.linStdParser
 fun main() {
     val source = Source(
         """
-object Test {
-    val interrupts = mapOf()
-    
-    fun resetInterrupts() {
-        interrupts.clear()
-    }
+companion object {
+    val hw = getHardware()
 }
 //        hw.interrupt { | i, (event, data) | ->
 //            println("${'$'}event ${'$'}data ${'$'}i")
