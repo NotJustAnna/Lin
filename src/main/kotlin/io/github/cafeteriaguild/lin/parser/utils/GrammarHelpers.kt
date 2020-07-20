@@ -22,7 +22,7 @@ fun ParserContext<TokenType, Node>.skipOnlyUntil(vararg type: TokenType) {
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun ParserContext<TokenType, Node>.parseBlock(smartTonode: Boolean = true, braceConsumed: Boolean = false): Node? {
+fun ParserContext<TokenType, Node>.parseBlock(smartToExpr: Boolean = true, braceConsumed: Boolean = false): Node? {
     if (braceConsumed || match(TokenType.L_BRACE)) {
         val start = last
         val list = mutableListOf<Node>()

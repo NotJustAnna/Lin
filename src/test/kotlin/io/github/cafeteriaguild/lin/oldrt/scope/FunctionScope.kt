@@ -6,7 +6,6 @@ import io.github.cafeteriaguild.lin.oldrt.types.functions.LFunction
 import io.github.cafeteriaguild.lin.oldrt.types.properties.LObjectProperty
 import io.github.cafeteriaguild.lin.oldrt.types.properties.LProperty
 import io.github.cafeteriaguild.lin.oldrt.types.properties.LocalProperty
-import io.github.cafeteriaguild.lin.rt.scope.Scope
 import java.util.concurrent.ConcurrentHashMap
 
 class FunctionScope(override val parent: Scope? = null) : AbstractScope() {

@@ -4,7 +4,6 @@ import io.github.cafeteriaguild.lin.oldrt.types.LType
 import io.github.cafeteriaguild.lin.oldrt.types.functions.LFunction
 import io.github.cafeteriaguild.lin.oldrt.types.properties.LObjectProperty
 import io.github.cafeteriaguild.lin.oldrt.types.properties.LProperty
-import io.github.cafeteriaguild.lin.rt.scope.Scope
 
 abstract class AbstractScope : Scope {
     protected abstract val parent: Scope?

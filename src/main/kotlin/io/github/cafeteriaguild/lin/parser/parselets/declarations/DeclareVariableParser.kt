@@ -24,10 +24,9 @@ class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Node
         ctx.skipOnlyUntil(TokenType.ASSIGN, TokenType.IDENTIFIER)
         if (ctx.match(TokenType.ASSIGN)) {
             ctx.matchAll(TokenType.NL)
-            val last = ctx.last
             val expr = ctx.parseExpression().let {
                 it as? Expr ?: return InvalidNode {
-                    section(token.section)
+                    section(it.section)
                     child(it)
                     error(SyntaxException("Expected an expression", it.section))
                 }

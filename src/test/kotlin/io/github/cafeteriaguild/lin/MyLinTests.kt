@@ -6,6 +6,9 @@ import io.github.cafeteriaguild.lin.ast.node.Expr
 import io.github.cafeteriaguild.lin.ast.node.misc.InvalidNode
 import io.github.cafeteriaguild.lin.lexer.linStdLexer
 import io.github.cafeteriaguild.lin.parser.linStdParser
+import io.github.cafeteriaguild.lin.rt.LinInterpreter
+import io.github.cafeteriaguild.lin.rt.LinRuntime
+import io.github.cafeteriaguild.lin.rt.scope.GlobalScope
 
 fun main() {
     val source = Source(
@@ -15,9 +18,9 @@ fun main() {
         was - now
         """.trimIndent()
     )
+    val expr = linStdParser.parse(source, linStdLexer)
+    println(expr is Expr)
     println(buildString {
-        val expr = linStdParser.parse(source, linStdLexer)
-        println(expr is Expr)
         expr.accept(ASTViewer(this, "", true))
         if (expr is InvalidNode) {
             for (child in expr.children.filterIsInstance<InvalidNode>()) {
@@ -30,4 +33,12 @@ fun main() {
             }
         }
     })
+    val scope = GlobalScope()
+    scope["millis"] = LinRuntime.millis
+    try {
+        println("RESULT:\n    ${LinInterpreter().execute(expr)}")
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }

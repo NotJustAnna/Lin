@@ -10,7 +10,7 @@ import io.github.cafeteriaguild.lin.ast.node.misc.*
 import io.github.cafeteriaguild.lin.ast.node.nodes.*
 import io.github.cafeteriaguild.lin.ast.node.ops.*
 
-class NodeValidator : NodeVisitor<Boolean> {
+object NodeValidator : NodeVisitor<Boolean> {
     override fun visit(node: NullExpr) = true
 
     override fun visit(node: IntExpr) = true

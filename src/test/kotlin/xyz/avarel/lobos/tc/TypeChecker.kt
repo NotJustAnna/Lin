@@ -40,7 +40,7 @@ open class TypeChecker(
     val deferBody: Boolean,
     val errorHandler: (message: String, section: Section) -> Unit
 ) : ExprVisitor<Type?> {
-    override fun visit(node: UseExpr): Type? {
+    override fun visit(expr: UseExpr): Type? {
         var target: Type? = null
         for (name in expr.list) {
             target = if (target == null) {
@@ -67,7 +67,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: FolderModuleExpr): Type? {
+    override fun visit(expr: FolderModuleExpr): Type? {
         if (expr.name in scope.variables) {
             if (!scope.getDeclaration(expr.name)!!.mutable) {
                 // if a module is mutable in this scope, it's body's typecheck is being deferred
@@ -98,19 +98,19 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: FileModuleExpr): Type? {
+    override fun visit(expr: FileModuleExpr): Type? {
         return visit(expr as DeclareModuleExpr)
     }
 
-    override fun visit(node: NullExpr) = NullType
-    override fun visit(node: I32Expr) = I32Type
-    override fun visit(node: I64Expr) = I64Type
-    override fun visit(node: F64Expr) = F64Type
-    override fun visit(node: InvalidExpr) = InvalidType
-    override fun visit(node: StringExpr) = StrType
-    override fun visit(node: BooleanExpr) = BoolType
+    override fun visit(expr: NullExpr) = NullType
+    override fun visit(expr: I32Expr) = I32Type
+    override fun visit(expr: I64Expr) = I64Type
+    override fun visit(expr: F64Expr) = F64Type
+    override fun visit(expr: InvalidExpr) = InvalidType
+    override fun visit(expr: StringExpr) = StrType
+    override fun visit(expr: BooleanExpr) = BoolType
 
-    override fun visit(node: DeclareModuleExpr): Type? {
+    override fun visit(expr: DeclareModuleExpr): Type? {
         if (expr.name in scope.variables) {
             if (!scope.getDeclaration(expr.name)!!.mutable) {
                 // if a module is mutable in this scope, it's body's typecheck is being deferred
@@ -152,7 +152,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: DeclareFunctionExpr): Type? {
+    override fun visit(expr: DeclareFunctionExpr): Type? {
         if (expr.name in scope.variables) {
             if (!scope.getDeclaration(expr.name)!!.mutable) {
                 // if a function is mutable in this scope, it's body's typecheck is being deferred
@@ -205,7 +205,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: TypeAliasExpr): Type? {
+    override fun visit(expr: TypeAliasExpr): Type? {
         val typeAliased = if (expr.generics.isNotEmpty()) {
             val genericParameters = expr.generics.map {
                 GenericParameter(it.name, it.parentType?.resolve(scope))
@@ -242,13 +242,13 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: DeclareLetExpr): Type? {
+    override fun visit(expr: DeclareLetExpr): Type? {
         val exprType = expr.value.visitValue(scope)
         expr.pattern.accept(PatternTypeBinder(this, exprType, scope, true))
         return null
     }
 
-    override fun visit(node: AssignExpr): Type? {
+    override fun visit(expr: AssignExpr): Type? {
         val (type, mutable) = scope.getDeclaration(expr.name) ?: let {
             errorHandler("Reference ${expr.name} does not exist in this scope", expr.section)
             return null
@@ -267,7 +267,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: IdentExpr): Type {
+    override fun visit(expr: IdentExpr): Type {
         val key = expr.name
         return stmt.getAssumption(key) ?: scope.getAssumption(key) ?: let {
             errorHandler("Reference $key does not exist in this scope", expr.section)
@@ -275,7 +275,7 @@ open class TypeChecker(
         }
     }
 
-    override fun visit(node: ClosureExpr): Type? {
+    override fun visit(expr: ClosureExpr): Type? {
         val bodyScope = scope.subContext(false, AnyType)
 
         val arguments = expr.arguments.map {
@@ -289,14 +289,14 @@ open class TypeChecker(
         return FunctionType(arguments, resultType)
     }
 
-    override fun visit(node: TupleExpr): Type {
+    override fun visit(expr: TupleExpr): Type {
         return when {
             expr.list.isEmpty() -> UnitType
             else -> TupleType(expr.list.map { it.visitValue(scope) })
         }
     }
 
-    override fun visit(node: ListLiteralExpr): Type? {
+    override fun visit(expr: ListLiteralExpr): Type? {
         return if (expr.list.isEmpty()) {
             ArrayType(NeverType)
         } else {
@@ -305,7 +305,7 @@ open class TypeChecker(
         }
     }
 
-    override fun visit(node: MapLiteralExpr): Type? {
+    override fun visit(expr: MapLiteralExpr): Type? {
         return if (expr.map.isEmpty()) {
             MapType(NeverType, NeverType)
         } else {
@@ -315,7 +315,7 @@ open class TypeChecker(
         }
     }
 
-    override fun visit(node: TemplateExpr): Type {
+    override fun visit(expr: TemplateExpr): Type {
         val target = expr.target.visitValue(scope, checkNotGeneric = false)
 
         if (target !is TypeTemplate) {
@@ -349,19 +349,19 @@ open class TypeChecker(
         return target.template(typeArguments)
     }
 
-    override fun visit(node: InvokeExpr): Type {
+    override fun visit(expr: InvokeExpr): Type {
         return checkInvocation(expr.target, expr.arguments, expr.section)
     }
 
-    override fun visit(node: InvokeLocalExpr): Type {
+    override fun visit(expr: InvokeLocalExpr): Type {
         return checkInvocation(IdentExpr(expr.name, expr.section), expr.arguments, expr.section)
     }
 
-    override fun visit(node: InvokeMemberExpr): Type {
+    override fun visit(expr: InvokeMemberExpr): Type {
         return checkInvocation(PropertyAccessExpr(expr.target, expr.name, expr.section), expr.arguments, expr.section)
     }
 
-    override fun visit(node: UnaryOperation): Type {
+    override fun visit(expr: UnaryOperation): Type {
         val stmt = stmt
         val target = expr.target.visitValue(scope, stmt)
 
@@ -386,7 +386,7 @@ open class TypeChecker(
         return InvalidType
     }
 
-    override fun visit(node: BinaryOperation): Type {
+    override fun visit(expr: BinaryOperation): Type {
         val stmt = stmt
         val left = expr.left.visitValue(scope, stmt)
 
@@ -489,7 +489,7 @@ open class TypeChecker(
         }
     }
 
-    override fun visit(node: ReturnExpr): Type {
+    override fun visit(expr: ReturnExpr): Type {
         val expectedReturnType = scope.expectedReturnType
         if (expectedReturnType == null) {
             errorHandler("return is not valid in this context", expr.section)
@@ -500,7 +500,7 @@ open class TypeChecker(
         return NeverType
     }
 
-    override fun visit(node: WhileExpr): Type? {
+    override fun visit(expr: WhileExpr): Type? {
         val conditionStmt = stmt // special test
         val condition = expr.condition.visitValue(scope, conditionStmt)
 
@@ -514,7 +514,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: IfExpr): Type? {
+    override fun visit(expr: IfExpr): Type? {
         val conditionStmt = stmt // special test
         val condition = expr.condition.visitValue(scope, conditionStmt)
 
@@ -611,7 +611,7 @@ open class TypeChecker(
         }
     }
 
-    override fun visit(node: SubscriptAccessExpr): Type {
+    override fun visit(expr: SubscriptAccessExpr): Type {
         val target = expr.target.visitValue(scope)
 
         val keyType = expr.index.visitValue(scope)
@@ -629,7 +629,7 @@ open class TypeChecker(
         }
     }
 
-    override fun visit(node: SubscriptAssignExpr): Type? {
+    override fun visit(expr: SubscriptAssignExpr): Type? {
         val target = expr.target.visitValue(scope)
 
         val keyType = expr.index.visitValue(scope)
@@ -650,7 +650,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: PropertyAccessExpr): Type {
+    override fun visit(expr: PropertyAccessExpr): Type {
         val target = expr.target.visitValue(scope)
         val type = target.getMember(expr.name)?.type
 
@@ -661,7 +661,7 @@ open class TypeChecker(
         return type ?: InvalidType
     }
 
-    override fun visit(node: PropertyAssignExpr): Type? {
+    override fun visit(expr: PropertyAssignExpr): Type? {
         val target = expr.target.visitValue(scope)
         val member = target.getMember(expr.name)
 
@@ -681,7 +681,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: TupleIndexAccessExpr): Type {
+    override fun visit(expr: TupleIndexAccessExpr): Type {
         val type = expr.target.visitValue(scope)
 
         if (type !is TupleType) {
@@ -700,7 +700,7 @@ open class TypeChecker(
         return type.valueTypes[expr.index]
     }
 
-    override fun visit(node: ExternalModuleExpr): Type? {
+    override fun visit(expr: ExternalModuleExpr): Type? {
         if (expr.name in scope.variables) {
             if (!scope.getDeclaration(expr.name)!!.mutable) {
                 // if a module is mutable in this scope, it's body's typecheck is being deferred
@@ -727,7 +727,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: ExternalLetExpr): Type? {
+    override fun visit(expr: ExternalLetExpr): Type? {
         if (expr.name in scope.variables) {
             errorHandler("Reference ${expr.name} has already been declared", expr.section)
         }
@@ -739,7 +739,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: ExternalFunctionExpr): Type? {
+    override fun visit(expr: ExternalFunctionExpr): Type? {
         if (expr.name in scope.variables) {
             if (!scope.getDeclaration(expr.name)!!.mutable) {
                 // if a function is mutable in this scope, it's body's typecheck is being deferred
@@ -766,7 +766,7 @@ open class TypeChecker(
         return null
     }
 
-    override fun visit(node: MultiExpr): Type? {
+    override fun visit(expr: MultiExpr): Type? {
         for (i in 0 until expr.list.lastIndex) {
             expr.list[i].visitStmt(scope, deferBody = deferBody)
         }
@@ -778,7 +778,7 @@ open class TypeChecker(
         stmt: StmtContext = StmtContext(),
         deferBody: Boolean = false,
         expectNotGeneric: Boolean = true,
-        expectnode: Boolean = false
+        expectExpr: Boolean = false
     ): Type? {
         val type = accept(createSubvisitor(scope, stmt, deferBody))
 

@@ -1,6 +1,6 @@
 package io.github.cafeteriaguild.lin.oldrt.types.properties
 
-import io.github.cafeteriaguild.lin.rt.lib.LObj
+import io.github.cafeteriaguild.lin.oldrt.lib.LObj
 
 class BoundProperty(val property: LObjectProperty, val target: LObj) : LProperty, LBaseProperty by property {
 

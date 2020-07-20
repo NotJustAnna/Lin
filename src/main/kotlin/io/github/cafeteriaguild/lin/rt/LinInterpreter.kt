@@ -17,8 +17,19 @@ import io.github.cafeteriaguild.lin.rt.scope.LocalProperty
 import io.github.cafeteriaguild.lin.rt.scope.Scope
 
 class LinInterpreter : NodeParamVisitor<Scope, LObj> {
-    fun execute(node: Node) {
-
+    fun execute(node: Node, scope: Scope = BasicScope()): LObj {
+        if (node.accept(NodeValidator)) {
+            return try {
+                node.accept(this, scope)
+            } catch (r: ReturnException) {
+                r.value
+            } catch (b: BreakException) {
+                throw LinException("Unbound break signal", b)
+            } catch (c: ContinueException) {
+                throw LinException("Unbound continue signal", c)
+            }
+        }
+        throw LinException("Node is invalid or contains invalid children nodes")
     }
 
     override fun visit(node: NullExpr, param: Scope) = LNull
@@ -106,9 +117,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     override fun visit(node: UnitExpr, param: Scope) = LUnit
 
     override fun visit(node: MultiNode, param: Scope): LObj = block {
-        for (node in node.list) {
+        for (child in node.list) {
             try {
-                node.accept(this, param)
+                child.accept(this, param)
             } catch (r: ReturnException) {
                 return r.value
             }

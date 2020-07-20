@@ -1,7 +1,7 @@
 package io.github.cafeteriaguild.lin.oldrt.types.properties
 
+import io.github.cafeteriaguild.lin.oldrt.lib.LObj
 import io.github.cafeteriaguild.lin.oldrt.types.LType
-import io.github.cafeteriaguild.lin.rt.lib.LObj
 
 open class InObjectProperty(
     override val name: String, override val type: LType, override val mutable: Boolean

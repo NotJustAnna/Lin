@@ -1,6 +1,6 @@
 package io.github.cafeteriaguild.lin.oldrt.types.properties
 
-import io.github.cafeteriaguild.lin.rt.lib.LObj
+import io.github.cafeteriaguild.lin.oldrt.lib.LObj
 
 /**
  * Represents a Lin property
