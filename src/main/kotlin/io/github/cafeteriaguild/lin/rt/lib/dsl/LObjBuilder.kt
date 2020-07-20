@@ -1,12 +1,13 @@
 package io.github.cafeteriaguild.lin.rt.lib.dsl
 
+import io.github.cafeteriaguild.lin.rt.exc.LinException
 import io.github.cafeteriaguild.lin.rt.lib.LCallable
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 import io.github.cafeteriaguild.lin.rt.scope.LocalProperty
 import io.github.cafeteriaguild.lin.rt.scope.Property
 
 class LObjBuilder {
-    private val properties = LinkedHashMap<String, Property>()
+    val properties = LinkedHashMap<String, Property>()
     private var component: (Int) -> LObj? = { null }
     private var toString: (LObj) -> String = { it.toString() }
     private var call: ((List<LObj>) -> LObj)? = null
@@ -53,4 +54,21 @@ fun createLObj(block: LObjBuilder.() -> Unit): LObj {
 fun createLFun(block: (List<LObj>) -> LObj): LObj = createLObj {
     toString { "<native function>" }
     call(block)
+}
+
+fun createGetter(block: () -> LObj): Property {
+    return object : Property {
+        override val getAllowed: Boolean
+            get() = true
+        override val setAllowed: Boolean
+            get() = false
+
+        override fun get(): LObj {
+            return block()
+        }
+
+        override fun set(value: LObj) {
+            throw LinException("Set not allowed")
+        }
+    }
 }

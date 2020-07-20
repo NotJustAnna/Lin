@@ -9,12 +9,12 @@ plugins {
     `maven-publish`
     //application
     //id("com.github.johnrengelman.shadow") version "6.0.0"
-    id("com.jfrog.bintray") version "1.8.4"
+    id("com.jfrog.bintray") version "1.8.5"
     id("org.jetbrains.dokka") version "0.10.1"
 }
 
 group = "io.github.cafeteriaguild"
-version = "0.1-SNAPSHOT"
+version = "0.1.1"
 
 repositories {
     jcenter()
