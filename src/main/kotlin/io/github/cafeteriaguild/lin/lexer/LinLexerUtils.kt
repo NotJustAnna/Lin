@@ -82,6 +82,7 @@ fun LexerContext<Token<TokenType>>.readLinTemplateString(delim: String, raw: Boo
                     val cc = peek()
                     if (cc == '}') {
                         if (braces == 0) {
+                            next()
                             break
                         } else {
                             braces--

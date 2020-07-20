@@ -8,14 +8,20 @@ import io.github.cafeteriaguild.lin.lexer.linStdLexer
 import io.github.cafeteriaguild.lin.parser.linStdParser
 import io.github.cafeteriaguild.lin.rt.LinInterpreter
 import io.github.cafeteriaguild.lin.rt.LinRuntime
-import io.github.cafeteriaguild.lin.rt.scope.GlobalScope
+import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 fun main() {
     val source = Source(
         """
-        val was = nanos()
-        val now = nanos()
-        now - was + " nanos"
+        thread {
+            println("1 is run on ${'$'}threadName ${'$'}{millis()}")
+        }
+        thread {
+            println("2 is run on ${'$'}threadName ${'$'}{millis()}")
+        }
+        thread {
+            println("3 is run on ${'$'}threadName ${'$'}{millis()}")
+        }
         """.trimIndent()
     )
     val expr = linStdParser.parse(source, linStdLexer)
@@ -33,9 +39,12 @@ fun main() {
             }
         }
     })
-    val scope = GlobalScope()
+    val scope = UserScope()
     scope["millis"] = LinRuntime.millis
     scope["nanos"] = LinRuntime.nanos
+    scope.declareProperty("threadName", LinRuntime.getThreadName)
+    scope["thread"] = LinRuntime.runOnThread
+    scope["println"] = LinRuntime.printlnConsole
     try {
         println("RESULT:\n    ${LinInterpreter().execute(expr, scope)}")
 

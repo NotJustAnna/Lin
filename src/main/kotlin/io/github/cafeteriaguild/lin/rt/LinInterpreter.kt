@@ -444,7 +444,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     }
 
     override fun visit(node: LambdaExpr, param: Scope): LObj {
-        TODO("Not yet implemented")
+        return LLambda(param, node.parameters, node.body)
     }
 
     override fun visit(node: InitializerNode, param: Scope): LObj {

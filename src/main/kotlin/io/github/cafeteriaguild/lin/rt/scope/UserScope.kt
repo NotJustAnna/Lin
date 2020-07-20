@@ -4,9 +4,7 @@ import io.github.cafeteriaguild.lin.rt.exc.LinException
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 import java.util.concurrent.ConcurrentHashMap
 
-class GlobalScope : Scope() {
-    override val parent: Scope?
-        get() = null
+class UserScope(override val parent: Scope? = null) : Scope() {
 
     operator fun set(name: String, value: LObj) {
         declareProperty(name, LocalProperty(false).also { it.set(value) })
@@ -15,7 +13,7 @@ class GlobalScope : Scope() {
     val properties = ConcurrentHashMap<String, Property>()
 
     override fun findProperty(name: String): Property? {
-        return properties[name]
+        return properties[name] ?: super.findProperty(name)
     }
 
     override fun declareProperty(name: String, property: Property) {
