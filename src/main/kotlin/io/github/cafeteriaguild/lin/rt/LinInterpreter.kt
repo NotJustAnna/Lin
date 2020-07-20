@@ -15,6 +15,7 @@ import io.github.cafeteriaguild.lin.rt.lib.*
 import io.github.cafeteriaguild.lin.rt.scope.BasicScope
 import io.github.cafeteriaguild.lin.rt.scope.LocalProperty
 import io.github.cafeteriaguild.lin.rt.scope.Scope
+import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     fun execute(node: Node, scope: Scope = BasicScope()): LObj {
@@ -74,7 +75,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     }
 
     override fun visit(node: DeclareFunctionNode, param: Scope) = block {
-        TODO("Not yet implemented")
+        val p = LocalProperty(false)
+        param.declareProperty(node.name, p)
+        p.set(node.function.accept(this, param))
     }
 
     override fun visit(node: DeclareVariableNode, param: Scope) = block {
@@ -89,6 +92,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     }
 
     override fun visit(node: DelegatingVariableNode, param: Scope) = block {
+        TODO("Not yet implemented")
     }
 
     override fun visit(node: DestructuringVariableNode, param: Scope) = block {
@@ -265,8 +269,22 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
         }
     }
 
-    override fun visit(node: ForNode, param: Scope): LObj {
-        TODO("Not yet implemented")
+    override fun visit(node: ForNode, param: Scope) = block {
+        val iterable = node.iterable.accept(this, param)
+        if (iterable !is LIterable) {
+            throw LinTypeException("$iterable is not an Iterable")
+        }
+        for (each in iterable) {
+            try {
+                val child = UserScope(param)
+                child[node.variableName] = each
+                node.body.accept(this, child)
+            } catch (_: BreakException) {
+                break
+            } catch (_: ContinueException) {
+                continue
+            }
+        }
     }
 
     override fun visit(node: BreakExpr, param: Scope) = throw BreakException()
@@ -394,6 +412,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
             }
             BinaryOperationType.RANGE -> {
                 val right = node.right.accept(this, param)
+                if (left is LRangeTo) {
+                    return left.rangeTo(right)
+                }
                 throw LinTypeException("Unsupported operation $left..$right")
             }
         }

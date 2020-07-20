@@ -14,6 +14,11 @@ import io.github.cafeteriaguild.lin.rt.scope.UserScope
 fun main() {
     val source = Source(
         """
+        fun listOf(vararg values) = values
+        for (it in listOf("hi", "how", "are", "you")) {
+            println(it)
+        }
+
         fun() { return "Hello World!" }
         """.trimIndent()
     )
