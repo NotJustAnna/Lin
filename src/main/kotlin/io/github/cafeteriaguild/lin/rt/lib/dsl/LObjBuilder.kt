@@ -42,7 +42,7 @@ class LObjBuilder {
     }
 
     private inner class Callable : Obj(), LCallable {
-        override fun invoke(parameters: List<LObj>) = call!!.invoke(parameters)
+        override fun invoke(args: List<LObj>) = call!!.invoke(args)
     }
 }
 

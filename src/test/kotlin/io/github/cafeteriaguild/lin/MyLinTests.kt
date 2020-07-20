@@ -8,20 +8,13 @@ import io.github.cafeteriaguild.lin.lexer.linStdLexer
 import io.github.cafeteriaguild.lin.parser.linStdParser
 import io.github.cafeteriaguild.lin.rt.LinInterpreter
 import io.github.cafeteriaguild.lin.rt.LinRuntime
+import io.github.cafeteriaguild.lin.rt.lib.LCallable
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 fun main() {
     val source = Source(
         """
-        thread {
-            println("1 is run on ${'$'}threadName ${'$'}{millis()}")
-        }
-        thread {
-            println("2 is run on ${'$'}threadName ${'$'}{millis()}")
-        }
-        thread {
-            println("3 is run on ${'$'}threadName ${'$'}{millis()}")
-        }
+        fun() { return "Hello World!" }
         """.trimIndent()
     )
     val expr = linStdParser.parse(source, linStdLexer)
@@ -46,8 +39,11 @@ fun main() {
     scope["thread"] = LinRuntime.runOnThread
     scope["println"] = LinRuntime.printlnConsole
     try {
-        println("RESULT:\n    ${LinInterpreter().execute(expr, scope)}")
-
+        val execute = LinInterpreter().execute(expr, scope)
+        println("RESULT:\n    $execute")
+        if (execute is LCallable) {
+            println(execute.invoke(emptyList()))
+        }
     } catch (e: Exception) {
         e.printStackTrace()
     }

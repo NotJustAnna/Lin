@@ -10,20 +10,20 @@ import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 class LLambda(
     private val parentScope: Scope,
-    private val lambdaParams: List<LambdaExpr.Parameter>,
+    private val parameters: List<LambdaExpr.Parameter>,
     private val body: Node
 ) : LCallable {
-    override fun invoke(parameters: List<LObj>): LObj {
+    override fun invoke(args: List<LObj>): LObj {
         val params = UserScope(parentScope)
 
-        if (lambdaParams.isEmpty()) {
-            if (parameters.size == 1) {
-                params["it"] = parameters.single()
-            } else if (parameters.size > 1) {
+        if (parameters.isEmpty()) {
+            if (args.size == 1) {
+                params["it"] = args.single()
+            } else if (args.size > 1) {
                 throw LinException("Lambda only accepts a single parameter or no parameter.")
             }
-        } else if (lambdaParams.size == parameters.size) {
-            for ((param, arg) in lambdaParams.zip(parameters)) {
+        } else if (parameters.size == args.size) {
+            for ((param, arg) in parameters.zip(args)) {
                 when (param) {
                     is LambdaExpr.Parameter.Destructured -> {
                         for ((i, name) in param.names.withIndex()) {
@@ -37,10 +37,14 @@ class LLambda(
             }
         } else {
             throw LinException(
-                "Lambda accepts ${lambdaParams.size} parameter${if (lambdaParams.size == 1) "" else "s"}."
+                "Lambda accepts ${parameters.size} parameter${if (parameters.size == 1) "" else "s"}."
             )
         }
 
         return LinInterpreter().execute(body, BasicScope(params))
+    }
+
+    override fun toString(): String {
+        return "lambda { | ${parameters.joinToString(", ")} | -> ... }"
     }
 }

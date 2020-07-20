@@ -116,7 +116,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
 
     override fun visit(node: UnitExpr, param: Scope) = LUnit
 
-    override fun visit(node: MultiNode, param: Scope): LObj = block {
+    override fun visit(node: MultiNode, param: Scope) = block {
         for (child in node.list) {
             try {
                 child.accept(this, param)
@@ -440,18 +440,18 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     }
 
     override fun visit(node: FunctionExpr, param: Scope): LObj {
-        TODO("Not yet implemented")
+        return LFunction(param, node.parameters, node.body)
     }
 
     override fun visit(node: LambdaExpr, param: Scope): LObj {
         return LLambda(param, node.parameters, node.body)
     }
 
-    override fun visit(node: InitializerNode, param: Scope): LObj {
-        TODO("Not yet implemented")
+    override fun visit(node: InitializerNode, param: Scope) = block {
+        node.body.accept(this, param)
     }
 
-    private inline fun block(block: () -> Unit): LUnit {
+    private inline fun block(block: () -> Unit): LObj {
         block()
         return LUnit
     }
