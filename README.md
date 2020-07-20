@@ -16,6 +16,7 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 - Infix function invocation
 - Property access/assignment
 - While/Do-While loops
+- For Loops
 - If/else (both as statement and expression)
 - Return/Throw
 - Null-safe operator (`?.`)
@@ -25,14 +26,15 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
     - `a+b`, `a-b`, `a*b`, `a/b`, `a%b`
     - `a==b`, `a!=b`, `a&&b`, `a||b`, `a<b`, `a<=b`, `a>b`, `a>=b`
     - `a ?: b`, `a in b`, `a !in b`, `a..b`
-
-## Parsing
-
-- For Loops
 - Function declaration (named, anonymous)
 - Subscript access/assignment (`a[...]`, `a[...] = b`)
 - Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
 - Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
+- Objects, Classes
+    - Support for Companion Objects
+
+## Parsing
+
 - Objects, Classes and Interfaces
     - Support for Companion Objects, Enum classes, Functional Interfaces (Kotlin 1.4+)
     - **CAVEATS**:
