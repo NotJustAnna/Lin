@@ -28,6 +28,6 @@ object ObjectParser : TypeParser() {
             ctx.maybeIgnoreNL()
         }
         val obj = ObjectExpr(decl, token.section)
-        return if (ident != null) DeclareObjectNode(ident.value, obj, ident.section) else obj
+        return if (ident != null) DeclareObjectNode(ident.value, decl, ident.section) else obj
     }
 }

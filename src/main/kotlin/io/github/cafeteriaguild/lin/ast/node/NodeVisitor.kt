@@ -33,6 +33,7 @@ interface NodeVisitor<R> {
     fun visit(node: UnitExpr): R
     fun visit(node: MultiNode): R
     fun visit(node: MultiExpr): R
+    fun visit(node: ThisExpr): R
     fun visit(node: InvalidNode): R
     fun visit(node: PropertyAccessExpr): R
     fun visit(node: PropertyAssignNode): R
@@ -51,8 +52,8 @@ interface NodeVisitor<R> {
     fun visit(node: ContinueExpr): R
     fun visit(node: BinaryOperation): R
     fun visit(node: UnaryOperation): R
-    fun visit(node: PreAssignUnaryOperation): R
-    fun visit(node: PostAssignUnaryOperation): R
+    fun visit(node: PrefixAssignUnaryOperation): R
+    fun visit(node: PostfixAssignUnaryOperation): R
     fun visit(node: AssignOperation): R
     fun visit(node: ObjectExpr): R
     fun visit(node: FunctionExpr): R

@@ -15,11 +15,30 @@ fun main() {
     val source = Source(
         """
         fun listOf(vararg values) = values
-        for (it in listOf("hi", "how", "are", "you")) {
-            println(it)
+        
+        println(nanos())
+        var i = 0
+        val a = listOf(1)
+        a[i++] += ++i
+        println(nanos())
+        println(a + " " + i)
+        
+        object native {
+            class Screen {
+                var x = 0
+                var y = 0
+                object Size {
+                    val w = 854
+                    val h = 480
+                }
+            }
+            val prefix = "haha "
+            fun toJson() = prefix + "yesn't"
+            fun fromJson() = prefix + "no"
         }
-
-        fun() { return "Hello World!" }
+        val screen = native.Screen()
+        screen.x = 5
+        return screen.x + " of " + native.Screen.Size.w
         """.trimIndent()
     )
     val expr = linStdParser.parse(source, linStdLexer)

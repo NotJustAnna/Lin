@@ -1,17 +1,17 @@
 package io.github.cafeteriaguild.lin.rt.lib
 
-import io.github.cafeteriaguild.lin.rt.exc.LinException
 import io.github.cafeteriaguild.lin.rt.lib.dsl.createGetter
 import io.github.cafeteriaguild.lin.rt.scope.Property
 
-open class LList(open val list: List<LObj>) : LSubscript, LIterable {
+class LList(list: List<LObj>) : LSubscript, LIterable {
+    val list: MutableList<LObj> = list.toMutableList()
     private val size = createGetter { LInt(list.size) }
     override fun get(args: List<LObj>): LObj {
         return list.getOrNull((args.single() as LNumber).value.toInt()) ?: LNull
     }
 
     override fun set(args: List<LObj>, value: LObj) {
-        throw LinException("Collection is read-only")
+        list[(args.single() as LNumber).value.toInt()] = value
     }
 
     override fun property(name: String): Property? {
@@ -29,4 +29,3 @@ open class LList(open val list: List<LObj>) : LSubscript, LIterable {
         return list.toString()
     }
 }
-

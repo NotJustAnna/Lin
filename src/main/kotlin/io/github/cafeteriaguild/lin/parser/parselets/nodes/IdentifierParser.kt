@@ -54,13 +54,13 @@ object IdentifierParser : PrefixParser<TokenType, Node> {
         when (node) {
             is DeclareObjectNode -> {
                 return DeclareObjectNode(
-                    node.name, node.obj, node.section, set + node.modifiers
+                    node.name, node.body, node.section, set + node.modifiers
                 )
             }
             is ObjectExpr -> {
                 val companionToken = map[LinModifier.COMPANION]
                 if (companionToken != null) {
-                    return DeclareObjectNode("Companion", node, companionToken.section, set)
+                    return DeclareObjectNode("Companion", node.body, companionToken.section, set)
                 }
             }
             is DeclareClassNode -> {

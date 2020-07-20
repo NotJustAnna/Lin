@@ -94,6 +94,8 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 
     override fun visit(node: NullExpr) = base("null ref")
 
+    override fun visit(node: ThisExpr) = base("this ref")
+
     override fun visit(node: IntExpr) = base("Int: ${node.value}")
 
     override fun visit(node: LongExpr) = base("Long: ${node.value}")
@@ -173,8 +175,8 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${node.name}", node.obj.body.isEmpty())
-        node.obj.body.astGroup("body", tail = true)
+        label("name: ${node.name}", node.body.isEmpty())
+        node.body.astGroup("body", tail = true)
     }
 
     override fun visit(node: DeclareFunctionNode) {
@@ -366,13 +368,13 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         node.target.ast(tail = true)
     }
 
-    override fun visit(node: PreAssignUnaryOperation) {
+    override fun visit(node: PrefixAssignUnaryOperation) {
         base("pre-assign unary ${node.operator}")
 
         node.target.ast(tail = true)
     }
 
-    override fun visit(node: PostAssignUnaryOperation) {
+    override fun visit(node: PostfixAssignUnaryOperation) {
         base("post-assign unary ${node.operator}")
 
         node.target.ast(tail = true)

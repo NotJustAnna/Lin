@@ -4,6 +4,7 @@ import net.notjustanna.tartar.createGrammar
 import io.github.cafeteriaguild.lin.ast.node.Node
 import io.github.cafeteriaguild.lin.ast.node.misc.BreakExpr
 import io.github.cafeteriaguild.lin.ast.node.misc.ContinueExpr
+import io.github.cafeteriaguild.lin.ast.node.nodes.ThisExpr
 import io.github.cafeteriaguild.lin.ast.node.ops.AssignOperationType
 import io.github.cafeteriaguild.lin.ast.node.ops.BinaryOperationType
 import io.github.cafeteriaguild.lin.ast.node.ops.UnaryAssignOperationType
@@ -51,10 +52,10 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     infix(RANGE, BinaryOperatorParser(Precedence.RANGE, BinaryOperationType.RANGE))
 
     // Increment/decrement
-    prefix(DECREMENT, PreAssignUnaryOperatorParser(UnaryAssignOperationType.DECREMENT))
-    prefix(INCREMENT, PreAssignUnaryOperatorParser(UnaryAssignOperationType.INCREMENT))
-    infix(DECREMENT, PostAssignUnaryOperatorParser(UnaryAssignOperationType.DECREMENT))
-    infix(INCREMENT, PostAssignUnaryOperatorParser(UnaryAssignOperationType.INCREMENT))
+    prefix(DECREMENT, PrefixAssignUnaryOperatorParser(UnaryAssignOperationType.DECREMENT))
+    prefix(INCREMENT, PrefixAssignUnaryOperatorParser(UnaryAssignOperationType.INCREMENT))
+    infix(DECREMENT, PostfixAssignUnaryOperatorParser(UnaryAssignOperationType.DECREMENT))
+    infix(INCREMENT, PostfixAssignUnaryOperatorParser(UnaryAssignOperationType.INCREMENT))
 
     // Assign operations
     infix(PLUS_ASSIGN, AssignOperatorParser(AssignOperationType.ADD_ASSIGN))
@@ -91,4 +92,5 @@ val linStdGrammar = createGrammar<TokenType, Node> {
 
     prefix(BREAK) { BreakExpr(it.section) }
     prefix(CONTINUE) { ContinueExpr(it.section) }
+    prefix(THIS) { ThisExpr(it.section) }
 }

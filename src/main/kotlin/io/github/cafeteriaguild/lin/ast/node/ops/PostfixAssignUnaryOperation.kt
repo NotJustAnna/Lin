@@ -3,7 +3,7 @@ package io.github.cafeteriaguild.lin.ast.node.ops
 import net.notjustanna.tartar.api.lexer.Section
 import io.github.cafeteriaguild.lin.ast.node.*
 
-class PreAssignUnaryOperation(
+class PostfixAssignUnaryOperation(
     val target: AccessExpr,
     val operator: UnaryAssignOperationType,
     section: Section

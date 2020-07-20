@@ -11,6 +11,8 @@ import io.github.cafeteriaguild.lin.ast.node.nodes.*
 import io.github.cafeteriaguild.lin.ast.node.ops.*
 
 object NodeValidator : NodeVisitor<Boolean> {
+    override fun visit(node: ThisExpr) = true
+
     override fun visit(node: NullExpr) = true
 
     override fun visit(node: IntExpr) = true
@@ -42,7 +44,7 @@ object NodeValidator : NodeVisitor<Boolean> {
     }
 
     override fun visit(node: DeclareObjectNode): Boolean {
-        return node.obj.accept(this)
+        return node.body.all { it.accept(this) }
     }
 
     override fun visit(node: DeclareFunctionNode): Boolean {
@@ -155,11 +157,11 @@ object NodeValidator : NodeVisitor<Boolean> {
         return node.target.accept(this)
     }
 
-    override fun visit(node: PreAssignUnaryOperation): Boolean {
+    override fun visit(node: PrefixAssignUnaryOperation): Boolean {
         return node.target.accept(this)
     }
 
-    override fun visit(node: PostAssignUnaryOperation): Boolean {
+    override fun visit(node: PostfixAssignUnaryOperation): Boolean {
         return node.target.accept(this)
     }
 

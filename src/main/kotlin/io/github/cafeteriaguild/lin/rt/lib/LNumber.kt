@@ -19,6 +19,10 @@ interface LNumber : LObj {
 
     operator fun compareTo(other: LNumber) = compareTo(value, other.value)
 
+    operator fun inc() = box(inc(value))
+
+    operator fun dec() = box(dec(value))
+
     companion object {
         fun box(target: Number): LNumber {
             return when (target) {
@@ -101,5 +105,22 @@ interface LNumber : LObj {
             }
         }
 
+        fun inc(target: Number): Number {
+            return when (target) {
+                is Double -> target.toDouble().inc()
+                is Float -> target.toFloat().inc()
+                is Long -> target.toLong().inc()
+                else -> target.toInt().inc()
+            }
+        }
+
+        fun dec(target: Number): Number {
+            return when (target) {
+                is Double -> target.toDouble().dec()
+                is Float -> target.toFloat().dec()
+                is Long -> target.toLong().dec()
+                else -> target.toInt().dec()
+            }
+        }
     }
 }

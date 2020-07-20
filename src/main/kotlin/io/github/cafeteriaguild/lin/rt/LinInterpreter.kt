@@ -12,12 +12,9 @@ import io.github.cafeteriaguild.lin.ast.node.nodes.*
 import io.github.cafeteriaguild.lin.ast.node.ops.*
 import io.github.cafeteriaguild.lin.rt.exc.*
 import io.github.cafeteriaguild.lin.rt.lib.*
-import io.github.cafeteriaguild.lin.rt.scope.BasicScope
-import io.github.cafeteriaguild.lin.rt.scope.LocalProperty
-import io.github.cafeteriaguild.lin.rt.scope.Scope
-import io.github.cafeteriaguild.lin.rt.scope.UserScope
+import io.github.cafeteriaguild.lin.rt.scope.*
 
-class LinInterpreter : NodeParamVisitor<Scope, LObj> {
+class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Property?> {
     fun execute(node: Node, scope: Scope = BasicScope()): LObj {
         if (node.accept(NodeValidator)) {
             return try {
@@ -33,6 +30,10 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
         throw LinException("Node is invalid or contains invalid children nodes")
     }
 
+    override fun visit(node: ThisExpr, param: Scope): LObj {
+        return IdentifierExpr("this", node.section).accept(this, param)
+    }
+
     override fun visit(node: NullExpr, param: Scope) = LNull
 
     override fun visit(node: IntExpr, param: Scope) = LInt(node.value)
@@ -46,20 +47,22 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     override fun visit(node: BooleanExpr, param: Scope) = LBoolean.valueOf(node.value)
 
     override fun visit(node: AssignNode, param: Scope) = block {
-        val property = param.findProperty(node.name) ?: throw LinException("${node.name} does not exist.")
+        val property = resolve(IdentifierExpr(node.name, node.section), param)
         if (!property.setAllowed) throw LinException("Property ${node.name} does not allow assignments.")
         val value = node.value.accept(this, param)
         property.set(value)
     }
 
     override fun visit(node: IdentifierExpr, param: Scope): LObj {
-        val property = param.findProperty(node.name) ?: throw LinException("${node.name} does not exist.")
+        val property = resolve(node, param)
         if (!property.getAllowed) throw LinException("Property ${node.name} does not allow access.")
         return property.get()
     }
 
     override fun visit(node: DeclareClassNode, param: Scope) = block {
-        TODO("Not yet implemented")
+        val p = LocalProperty(false)
+        param.declareProperty(node.name, p)
+        p.set(LClass(node.name, this, param, node.body))
     }
 
     override fun visit(node: DeclareEnumClassNode, param: Scope) = block {
@@ -71,7 +74,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     }
 
     override fun visit(node: DeclareObjectNode, param: Scope) = block {
-        TODO("Not yet implemented")
+        val p = LocalProperty(false)
+        param.declareProperty(node.name, p)
+        p.set(LObject(node.name, this, param, node.body))
     }
 
     override fun visit(node: DeclareFunctionNode, param: Scope) = block {
@@ -167,11 +172,19 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     }
 
     override fun visit(node: SubscriptAccessExpr, param: Scope): LObj {
-        TODO("Not yet implemented")
+        val target = node.target.accept(this, param)
+        if (target !is LSubscript) {
+            throw LinException("$target is not subscript")
+        }
+        return target[node.arguments.map { it.accept(this, param) }]
     }
 
-    override fun visit(node: SubscriptAssignNode, param: Scope): LObj {
-        TODO("Not yet implemented")
+    override fun visit(node: SubscriptAssignNode, param: Scope) = block {
+        val target = node.target.accept(this, param)
+        if (target !is LSubscript) {
+            throw LinException("$target is not subscript")
+        }
+        target[node.arguments.map { it.accept(this, param) }] = node.value.accept(this, param)
     }
 
     override fun visit(node: InvokeExpr, param: Scope): LObj {
@@ -444,20 +457,94 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
         }
     }
 
-    override fun visit(node: PreAssignUnaryOperation, param: Scope): LObj {
-        TODO("Not yet implemented")
+    private fun applyUnaryAssignOperation(target: LObj, operator: UnaryAssignOperationType): LObj {
+        return when (operator) {
+            UnaryAssignOperationType.INCREMENT -> {
+                if (target is LNumber) {
+                    target.inc()
+                } else {
+                    throw LinTypeException("Increment is unsupported on $target")
+                }
+            }
+            UnaryAssignOperationType.DECREMENT -> {
+                if (target is LNumber) {
+                    target.dec()
+                } else {
+                    throw LinTypeException("Decrement is unsupported on $target")
+                }
+            }
+        }
     }
 
-    override fun visit(node: PostAssignUnaryOperation, param: Scope): LObj {
-        TODO("Not yet implemented")
+    override fun visit(node: PrefixAssignUnaryOperation, param: Scope): LObj {
+        val property = node.target.resolve(this, param) ?: return LNull
+        if (!property.getAllowed) throw LinException("Access is not allowed by the property.")
+        if (!property.setAllowed) throw LinException("Assignment is not allowed by the property.")
+        val target = property.get()
+        val result = applyUnaryAssignOperation(target, node.operator)
+        property.set(result)
+        return result
     }
 
-    override fun visit(node: AssignOperation, param: Scope): LObj {
-        TODO("Not yet implemented")
+    override fun visit(node: PostfixAssignUnaryOperation, param: Scope): LObj {
+        val property = node.target.resolve(this, param) ?: return LNull
+        if (!property.getAllowed) throw LinException("Access is not allowed by the property.")
+        if (!property.setAllowed) throw LinException("Assignment is not allowed by the property.")
+        val target = property.get()
+        val result = applyUnaryAssignOperation(target, node.operator)
+        property.set(result)
+        return target
+    }
+
+    override fun visit(node: AssignOperation, param: Scope) = block {
+        val property = node.left.resolve(this, param) ?: return LNull
+        if (!property.getAllowed) throw LinException("Access is not allowed by the property.")
+        if (!property.setAllowed) throw LinException("Assignment is not allowed by the property.")
+        val left = property.get()
+        val right = node.right.accept(this, param)
+
+        property.set(
+            when (node.operator) {
+                AssignOperationType.ADD_ASSIGN -> {
+                    when {
+                        left is LNumber && right is LNumber -> left + right
+                        left is LString -> left + right
+                        right is LString -> LString(left.toString() + right.value)
+                        left is LChar -> left + right
+                        right is LChar -> LString(left.toString() + right.value)
+                        else -> throw LinTypeException("Unsupported operation $left + $right")
+                    }
+                }
+                AssignOperationType.SUBTRACT_ASSIGN -> {
+                    when {
+                        left is LNumber && right is LNumber -> left - right
+                        else -> throw LinTypeException("Unsupported operation $left - $right")
+                    }
+                }
+                AssignOperationType.MULTIPLY_ASSIGN -> {
+                    when {
+                        left is LNumber && right is LNumber -> left * right
+                        else -> throw LinTypeException("Unsupported operation $left * $right")
+                    }
+                }
+                AssignOperationType.DIVIDE_ASSIGN -> {
+                    when {
+                        left is LNumber && right is LNumber -> left / right
+                        else -> throw LinTypeException("Unsupported operation $left / $right")
+                    }
+                }
+                AssignOperationType.REMAINING_ASSIGN -> {
+                    when {
+                        left is LNumber && right is LNumber -> left % right
+                        else -> throw LinTypeException("Unsupported operation $left % $right")
+                    }
+                }
+            }
+        )
     }
 
     override fun visit(node: ObjectExpr, param: Scope): LObj {
-        TODO("Not yet implemented")
+        return LObject(null, this, param, node.body)
     }
 
     override fun visit(node: FunctionExpr, param: Scope): LObj {
@@ -475,5 +562,48 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
     private inline fun block(block: () -> Unit): LObj {
         block()
         return LUnit
+    }
+
+    override fun resolve(node: ThisExpr, param: Scope): Property {
+        return param.findProperty("this")
+            ?: throw LinException("There isn't an object associated in this context.")
+    }
+
+    override fun resolve(node: IdentifierExpr, param: Scope): Property {
+        return param.findProperty(node.name) ?: throw LinException("${node.name} does not exist.")
+    }
+
+    override fun resolve(node: PropertyAccessExpr, param: Scope): Property? {
+        val target = node.target.accept(this, param)
+        if (node.nullSafe && target == LNull) {
+            return null
+        }
+        val property = target.property(node.name)
+        if (property == null) {
+            if (node.nullSafe) return null
+            throw LinException("${node.name} does not exist.")
+        }
+        return property
+    }
+
+    override fun resolve(node: SubscriptAccessExpr, param: Scope): Property {
+        val target = node.target.accept(this, param)
+        if (target !is LSubscript) {
+            throw LinException("$node does not accept subscript operations")
+        }
+        val args = node.arguments.map { it.accept(this, param) }
+        return object : Property {
+            override val getAllowed: Boolean
+                get() = true
+            override val setAllowed: Boolean
+                get() = true
+
+            override fun get(): LObj = target[args]
+
+            override fun set(value: LObj) {
+                target[args] = value
+            }
+
+        }
     }
 }

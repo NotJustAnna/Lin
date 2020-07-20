@@ -33,6 +33,7 @@ interface NodeParamVisitor<T, R> {
     fun visit(node: UnitExpr, param: T): R
     fun visit(node: MultiNode, param: T): R
     fun visit(node: MultiExpr, param: T): R
+    fun visit(node: ThisExpr, param: T): R
     fun visit(node: InvalidNode, param: T): R
     fun visit(node: PropertyAccessExpr, param: T): R
     fun visit(node: PropertyAssignNode, param: T): R
@@ -51,8 +52,8 @@ interface NodeParamVisitor<T, R> {
     fun visit(node: ContinueExpr, param: T): R
     fun visit(node: BinaryOperation, param: T): R
     fun visit(node: UnaryOperation, param: T): R
-    fun visit(node: PreAssignUnaryOperation, param: T): R
-    fun visit(node: PostAssignUnaryOperation, param: T): R
+    fun visit(node: PrefixAssignUnaryOperation, param: T): R
+    fun visit(node: PostfixAssignUnaryOperation, param: T): R
     fun visit(node: AssignOperation, param: T): R
     fun visit(node: ObjectExpr, param: T): R
     fun visit(node: FunctionExpr, param: T): R
