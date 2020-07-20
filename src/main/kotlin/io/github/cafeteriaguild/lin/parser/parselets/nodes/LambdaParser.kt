@@ -4,9 +4,9 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.PrefixParser
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
-import io.github.cafeteriaguild.lin.ast.expr.nodes.LambdaExpr
+import io.github.cafeteriaguild.lin.ast.node.Node
+import io.github.cafeteriaguild.lin.ast.node.misc.InvalidNode
+import io.github.cafeteriaguild.lin.ast.node.nodes.LambdaExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL

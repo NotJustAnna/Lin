@@ -4,11 +4,11 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.PrefixParser
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.ast.expr.Expr
-import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
-import io.github.cafeteriaguild.lin.ast.expr.misc.UnitExpr
-import io.github.cafeteriaguild.lin.ast.expr.nodes.ReturnExpr
+import io.github.cafeteriaguild.lin.ast.node.Expr
+import io.github.cafeteriaguild.lin.ast.node.Node
+import io.github.cafeteriaguild.lin.ast.node.misc.InvalidNode
+import io.github.cafeteriaguild.lin.ast.node.misc.UnitExpr
+import io.github.cafeteriaguild.lin.ast.node.nodes.ReturnExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 
 object ReturnParser : PrefixParser<TokenType, Node> {

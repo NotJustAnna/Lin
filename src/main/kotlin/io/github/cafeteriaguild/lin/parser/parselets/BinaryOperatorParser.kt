@@ -4,11 +4,11 @@ import net.notjustanna.tartar.api.parser.InfixParser
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.ast.expr.Expr
-import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
-import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperation
-import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperationType
+import io.github.cafeteriaguild.lin.ast.node.Expr
+import io.github.cafeteriaguild.lin.ast.node.Node
+import io.github.cafeteriaguild.lin.ast.node.misc.InvalidNode
+import io.github.cafeteriaguild.lin.ast.node.ops.BinaryOperation
+import io.github.cafeteriaguild.lin.ast.node.ops.BinaryOperationType
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL

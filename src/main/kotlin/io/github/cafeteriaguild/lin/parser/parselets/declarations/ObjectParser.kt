@@ -2,11 +2,11 @@ package io.github.cafeteriaguild.lin.parser.parselets.declarations
 
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.ast.expr.Declaration
-import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.declarations.DeclareObjectNode
-import io.github.cafeteriaguild.lin.ast.expr.misc.MultiNode
-import io.github.cafeteriaguild.lin.ast.expr.nodes.ObjectExpr
+import io.github.cafeteriaguild.lin.ast.node.Declaration
+import io.github.cafeteriaguild.lin.ast.node.Node
+import io.github.cafeteriaguild.lin.ast.node.declarations.DeclareObjectNode
+import io.github.cafeteriaguild.lin.ast.node.misc.MultiNode
+import io.github.cafeteriaguild.lin.ast.node.nodes.ObjectExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil

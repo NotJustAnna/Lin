@@ -2,15 +2,17 @@ package io.github.cafeteriaguild.lin
 
 import net.notjustanna.tartar.api.lexer.Source
 import io.github.cafeteriaguild.lin.ast.ASTViewer
-import io.github.cafeteriaguild.lin.ast.expr.Expr
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
+import io.github.cafeteriaguild.lin.ast.node.Expr
+import io.github.cafeteriaguild.lin.ast.node.misc.InvalidNode
 import io.github.cafeteriaguild.lin.lexer.linStdLexer
 import io.github.cafeteriaguild.lin.parser.linStdParser
 
 fun main() {
     val source = Source(
         """
-        val something by lazy { expensiveOperation() }
+        val was = millis()
+        val now = millis()
+        was - now
         """.trimIndent()
     )
     println(buildString {

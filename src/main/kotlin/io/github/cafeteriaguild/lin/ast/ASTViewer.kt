@@ -1,15 +1,15 @@
 package io.github.cafeteriaguild.lin.ast
 
-import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.NodeVisitor
-import io.github.cafeteriaguild.lin.ast.expr.access.*
-import io.github.cafeteriaguild.lin.ast.expr.declarations.*
-import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeExpr
-import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeLocalExpr
-import io.github.cafeteriaguild.lin.ast.expr.invoke.InvokeMemberExpr
-import io.github.cafeteriaguild.lin.ast.expr.misc.*
-import io.github.cafeteriaguild.lin.ast.expr.nodes.*
-import io.github.cafeteriaguild.lin.ast.expr.ops.*
+import io.github.cafeteriaguild.lin.ast.node.Node
+import io.github.cafeteriaguild.lin.ast.node.NodeVisitor
+import io.github.cafeteriaguild.lin.ast.node.access.*
+import io.github.cafeteriaguild.lin.ast.node.declarations.*
+import io.github.cafeteriaguild.lin.ast.node.invoke.InvokeExpr
+import io.github.cafeteriaguild.lin.ast.node.invoke.InvokeLocalExpr
+import io.github.cafeteriaguild.lin.ast.node.invoke.InvokeMemberExpr
+import io.github.cafeteriaguild.lin.ast.node.misc.*
+import io.github.cafeteriaguild.lin.ast.node.nodes.*
+import io.github.cafeteriaguild.lin.ast.node.ops.*
 
 class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boolean) : NodeVisitor<Unit> {
     fun Node.ast(indent: String = this@ASTViewer.indent + if (isTail) "    " else "│   ", tail: Boolean) =
@@ -56,437 +56,441 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         }
     }
 
-//    override fun visit(expr: UseExpr) {
+//    override fun visit(node: UseExpr) {
 //        base("use")
-//        label(expr.list.joinToString("::"), tail = true)
+//        label(node.list.joinToString("::"), tail = true)
 //    }
 
-//    override fun visit(expr: FileModuleExpr) {
+//    override fun visit(node: FileModuleExpr) {
 //        base("file module")
-//        label("name: ${expr.name}", expr.declarationsAST.isEmpty())
+//        label("name: ${node.name}", node.declarationsAST.isEmpty())
 //
-//        expr.declarationsAST.let { d ->
+//        node.declarationsAST.let { d ->
 //            d.modules.astGroup("submodules", tail = d.functions.isEmpty() && d.variables.isEmpty())
 //            d.functions.astGroup("functions", tail = d.variables.isEmpty())
 //            d.variables.astGroup("variables", tail = true)
 //        }
 //    }
 
-//    override fun visit(expr: FolderModuleExpr) {
+//    override fun visit(node: FolderModuleExpr) {
 //        base("folder module")
-//        label("name: ${expr.name}", expr.folderModules.isNotEmpty() && expr.fileModules.isNotEmpty())
+//        label("name: ${node.name}", node.folderModules.isNotEmpty() && node.fileModules.isNotEmpty())
 //
-//        if (expr.folderModules.isNotEmpty())  expr.folderModules.astGroup("folders", tail = expr.fileModules.isEmpty())
-//        if (expr.fileModules.isNotEmpty()) expr.fileModules.astGroup("files", tail = true)
+//        if (node.folderModules.isNotEmpty())  node.folderModules.astGroup("folders", tail = node.fileModules.isEmpty())
+//        if (node.fileModules.isNotEmpty()) node.fileModules.astGroup("files", tail = true)
 //    }
 
-    override fun visit(expr: InvalidNode) {
+    override fun visit(node: InvalidNode) {
         base("[Invalid expression.]")
-        expr.children.astGroup("children", tail = false)
-        expr.errors.run {
+        node.children.astGroup("children", tail = false)
+        node.errors.run {
             for (i in indices) {
                 label(this[i].toString(), i == lastIndex)
             }
         }
     }
 
-    override fun visit(expr: IdentifierExpr) = base("reference ${expr.name}")
+    override fun visit(node: IdentifierExpr) = base("reference ${node.name}")
 
-    override fun visit(expr: NullExpr) = base("null ref")
+    override fun visit(node: NullExpr) = base("null ref")
 
-    override fun visit(expr: IntExpr) = base("Int: ${expr.value}")
+    override fun visit(node: IntExpr) = base("Int: ${node.value}")
 
-    override fun visit(expr: LongExpr) = base("Long: ${expr.value}")
+    override fun visit(node: LongExpr) = base("Long: ${node.value}")
 
-    override fun visit(expr: FloatExpr) = base("Float: ${expr.value}")
+    override fun visit(node: FloatExpr) = base("Float: ${node.value}")
 
-    override fun visit(expr: DoubleExpr) = base("Double: ${expr.value}")
+    override fun visit(node: DoubleExpr) = base("Double: ${node.value}")
 
-    override fun visit(expr: CharExpr) = base("Char: \'${expr.value}\'")
+    override fun visit(node: CharExpr) = base("Char: \'${node.value}\'")
 
-    override fun visit(expr: StringExpr) = base("String: \"${expr.value}\"")
+    override fun visit(node: StringExpr) = base("String: \"${node.value}\"")
 
-    override fun visit(expr: BooleanExpr) = base(expr.value.toString())
+    override fun visit(node: BooleanExpr) = base(node.value.toString())
 
-    override fun visit(expr: MultiNode) {
-        for (i in expr.list.indices) {
-            expr.list[i].ast(indent, i == expr.list.lastIndex)
+    override fun visit(node: MultiNode) {
+        for (i in node.list.indices) {
+            node.list[i].ast(indent, i == node.list.lastIndex)
         }
     }
 
-    override fun visit(expr: MultiExpr) {
-        for (i in expr.list.indices) {
-            expr.list[i].ast(indent, false)
+    override fun visit(node: MultiExpr) {
+        for (i in node.list.indices) {
+            node.list[i].ast(indent, false)
         }
-        expr.last.ast(indent, true)
+        node.last.ast(indent, true)
     }
 
-//    override fun visit(expr: DeclareModuleExpr) {
+//    override fun visit(node: DeclareModuleExpr) {
 //        base("local module")
 //
-//        label("name: ${expr.name}", false)
+//        label("name: ${node.name}", false)
 //
-//        expr.declarationsAST.let { d ->
+//        node.declarationsAST.let { d ->
 //            d.modules.astGroup("submodules", tail = d.functions.isEmpty() && d.variables.isEmpty())
 //            d.functions.astGroup("functions", tail = d.variables.isEmpty())
 //            d.variables.astGroup("variables", tail = true)
 //        }
 //    }
 
-    override fun visit(expr: DeclareClassNode) {
+    override fun visit(node: DeclareClassNode) {
         base("declare class")
-        val modifiers = expr.modifiers
+        val modifiers = node.modifiers
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${expr.name}", expr.body.isEmpty())
-        expr.body.astGroup("body", tail = true)
+        label("name: ${node.name}", node.body.isEmpty())
+        node.body.astGroup("body", tail = true)
     }
 
-    override fun visit(expr: DeclareEnumClassNode) {
+    override fun visit(node: DeclareEnumClassNode) {
         base("declare enum class")
-        val modifiers = expr.modifiers
+        val modifiers = node.modifiers
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        val values = expr.values
-        label("name: ${expr.name}", values.isEmpty() && expr.body.isEmpty())
+        val values = node.values
+        label("name: ${node.name}", values.isEmpty() && node.body.isEmpty())
         if (values.isNotEmpty()) {
-            label("values: ${values.joinToString(", ")}", tail = expr.body.isEmpty())
+            label("values: ${values.joinToString(", ")}", tail = node.body.isEmpty())
         }
-        expr.body.astGroup("body", tail = true)
+        node.body.astGroup("body", tail = true)
     }
 
-    override fun visit(expr: DeclareInterfaceNode) {
+    override fun visit(node: DeclareInterfaceNode) {
         base("declare interface")
-        val modifiers = expr.modifiers
+        val modifiers = node.modifiers
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${expr.name}", expr.body.isEmpty())
-        expr.body.astGroup("body", tail = true)
+        label("name: ${node.name}", node.body.isEmpty())
+        node.body.astGroup("body", tail = true)
     }
 
-    override fun visit(expr: DeclareObjectNode) {
+    override fun visit(node: DeclareObjectNode) {
         base("declare object")
-        val modifiers = expr.modifiers
+        val modifiers = node.modifiers
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${expr.name}", expr.obj.body.isEmpty())
-        expr.obj.body.astGroup("body", tail = true)
+        label("name: ${node.name}", node.obj.body.isEmpty())
+        node.obj.body.astGroup("body", tail = true)
     }
 
-    override fun visit(expr: DeclareFunctionNode) {
+    override fun visit(node: DeclareFunctionNode) {
         base("declare function")
-        val modifiers = expr.modifiers
+        val modifiers = node.modifiers
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${expr.name}", false)
-        expr.function.astLabel("function", tail = true)
+        label("name: ${node.name}", false)
+        node.function.astLabel("function", tail = true)
     }
 
-    override fun visit(expr: DeclareVariableNode) {
-        base(if (expr.mutable) "var" else "val")
-        val modifiers = expr.modifiers
+    override fun visit(node: DeclareVariableNode) {
+        base(if (node.mutable) "var" else "val")
+        val modifiers = node.modifiers
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${expr.name}", expr.value == null)
-        expr.value?.astLabel("value", tail = true)
+        label("name: ${node.name}", node.value == null)
+        node.value?.astLabel("value", tail = true)
     }
 
-    override fun visit(expr: DelegatingVariableNode) {
-        base(if (expr.mutable) "var" else "val")
-        val modifiers = expr.modifiers
+    override fun visit(node: DelegatingVariableNode) {
+        base(if (node.mutable) "var" else "val")
+        val modifiers = node.modifiers
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", tail = false)
         }
-        label("name: ${expr.name}", tail = false)
-        expr.delegate.astLabel("delegate", tail = true)
+        label("name: ${node.name}", tail = false)
+        node.delegate.astLabel("delegate", tail = true)
     }
 
-    override fun visit(expr: DestructuringVariableNode) {
-        base(if (expr.mutable) "var" else "val")
-        val modifiers = expr.modifiers
+    override fun visit(node: DestructuringVariableNode) {
+        base(if (node.mutable) "var" else "val")
+        val modifiers = node.modifiers
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", tail = false)
         }
-        label("destructuring: ${expr.names.joinToString(", ", "(", ")")}", tail = false)
-        expr.value.astLabel("value", tail = true)
+        label("destructuring: ${node.names.joinToString(", ", "(", ")")}", tail = false)
+        node.value.astLabel("value", tail = true)
     }
 
-    override fun visit(expr: ObjectExpr) {
+    override fun visit(node: ObjectExpr) {
         base("object")
-        expr.body.astGroup("body", tail = true)
+        node.body.astGroup("body", tail = true)
     }
 
-    override fun visit(expr: FunctionExpr) {
+    override fun visit(node: FunctionExpr) {
         base("function")
-        val (names, values) = expr.parameters.map { it.name to it.value }.unzip()
+        val (names, values) = node.parameters.map { it.name to it.value }.unzip()
         if (names.isNotEmpty()) {
-            label("parameters: ${names.joinToString(", ")}", tail = values.isNotEmpty() && expr.body == null)
+            label("parameters: ${names.joinToString(", ")}", tail = values.isNotEmpty() && node.body == null)
         }
-        values.filterNotNull().astGroup("default values", tail = expr.body == null)
-        expr.body?.astLabel("body", tail = true)
+        values.filterNotNull().astGroup("default values", tail = node.body == null)
+        node.body?.astLabel("body", tail = true)
     }
 
-    override fun visit(expr: LambdaExpr) {
+    override fun visit(node: LambdaExpr) {
         base("lambda")
-        val parameters = expr.parameters
+        val parameters = node.parameters
         if (parameters.isNotEmpty()) {
             label("parameters: ${parameters.joinToString(", ")}", tail = false)
         }
-        expr.body.astLabel("body", tail = true)
+        node.body.astLabel("body", tail = true)
     }
 
-    override fun visit(expr: InitializerNode) {
+    override fun visit(node: InitializerNode) {
         base("init")
-        expr.body.astLabel("body", tail = true)
+        node.body.astLabel("body", tail = true)
     }
 
-//    override fun visit(expr: TypeAliasExpr) {
+//    override fun visit(node: TypeAliasExpr) {
 //        base("typealias")
 //
-//        label("name: ${expr.name}", false)
+//        label("name: ${node.name}", false)
 //
-//        if (expr.generics.isNotEmpty()) {
-//            label(expr.generics.joinToString(prefix = "generics: <", postfix = ">"), false)
+//        if (node.generics.isNotEmpty()) {
+//            label(node.generics.joinToString(prefix = "generics: <", postfix = ">"), false)
 //        }
 //
-//        label("type: ${expr.type}", true)
+//        label("type: ${node.type}", true)
 //    }
 
-//    override fun visit(expr: ExternalModuleExpr) {
+//    override fun visit(node: ExternalModuleExpr) {
 //        base("external module")
 //
-//        label("name: ${expr.name}", false)
+//        label("name: ${node.name}", false)
 //
-//        expr.declarationsAST.let { d ->
+//        node.declarationsAST.let { d ->
 //            d.modules.astGroup("submodules", tail = d.functions.isEmpty() && d.variables.isEmpty())
 //            d.functions.astGroup("functions", tail = d.variables.isEmpty())
 //            d.variables.astGroup("variables", tail = true)
 //        }
 //    }
 
-//    override fun visit(expr: ExternalLetExpr) {
+//    override fun visit(node: ExternalLetExpr) {
 //        base("external let")
 //
-//        label("name: ${expr.name}", true)
+//        label("name: ${node.name}", true)
 //    }
 
-//    override fun visit(expr: ExternalFunctionExpr) {
+//    override fun visit(node: ExternalFunctionExpr) {
 //        base("external function")
 //
-//        label("name: ${expr.name}", true)
+//        label("name: ${node.name}", true)
 //
-//        if (expr.generics.isNotEmpty()) {
-//            label(expr.generics.joinToString(prefix = "generics: <", postfix = ">"), false)
+//        if (node.generics.isNotEmpty()) {
+//            label(node.generics.joinToString(prefix = "generics: <", postfix = ">"), false)
 //        }
 //
-//        label(expr.arguments.joinToString(prefix = "arguments: (", postfix = ")"), false)
-//        label("return: ${expr.returnType}", true)
+//        label(node.arguments.joinToString(prefix = "arguments: (", postfix = ")"), false)
+//        label("return: ${node.returnType}", true)
 //    }
 
-    override fun visit(expr: AssignNode) {
-        base("assign ${expr.name}")
+    override fun visit(node: AssignNode) {
+        base("assign ${node.name}")
 
-        expr.value.ast(tail = true)
+        node.value.ast(tail = true)
     }
 
-//    override fun visit(expr: ClosureExpr) {
+//    override fun visit(node: ClosureExpr) {
 //        base("closure")
 //
-//        label(expr.arguments.joinToString(prefix = "arguments: (", postfix = ")"), false)
-//        expr.body.astLabel("body", tail = true)
+//        label(node.arguments.joinToString(prefix = "arguments: (", postfix = ")"), false)
+//        node.body.astLabel("body", tail = true)
 //    }
 
-    override fun visit(expr: UnitExpr) {
+    override fun visit(node: UnitExpr) {
         base("unit")
     }
 
-//    override fun visit(expr: TupleExpr) {
+//    override fun visit(node: TupleExpr) {
 //        base("tuple")
 //
-//        for (i in 0 until expr.list.size) {
-//            expr.list[i].ast(tail = i == expr.list.lastIndex)
+//        for (i in 0 until node.list.size) {
+//            node.list[i].ast(tail = i == node.list.lastIndex)
 //        }
 //    }
 
-//    override fun visit(expr: ListLiteralExpr) {
+//    override fun visit(node: ListLiteralExpr) {
 //        base("list literal")
 //
-//        for (i in 0 until expr.list.size) {
-//            expr.list[i].ast(tail = i == expr.list.lastIndex)
+//        for (i in 0 until node.list.size) {
+//            node.list[i].ast(tail = i == node.list.lastIndex)
 //        }
 //    }
 
-//    override fun visit(expr: MapLiteralExpr) {
+//    override fun visit(node: MapLiteralExpr) {
 //        base("map literal")
 //
-//        for ((i, entry) in expr.map.entries.withIndex()) {
-//            listOf(entry.key, entry.value).astGroup("entry $i", tail = i == expr.map.size - 1)
+//        for ((i, entry) in node.map.entries.withIndex()) {
+//            listOf(entry.key, entry.value).astGroup("entry $i", tail = i == node.map.size - 1)
 //        }
 //    }
 
-//    override fun visit(expr: TemplateExpr) {
+//    override fun visit(node: TemplateExpr) {
 //        base("template")
 //
-//        expr.target.astLabel("target", tail = false)
-//        label(expr.typeArguments.joinToString(prefix = "type arguments: <", postfix = ">"), true)
+//        node.target.astLabel("target", tail = false)
+//        label(node.typeArguments.joinToString(prefix = "type arguments: <", postfix = ">"), true)
 //    }
 
-    override fun visit(expr: InvokeExpr) {
+    override fun visit(node: InvokeExpr) {
         base("invoke")
 
-        expr.target.astLabel("target", tail = expr.arguments.isEmpty())
-        expr.arguments.astGroup("arguments", tail = true)
+        node.target.astLabel("target", tail = node.arguments.isEmpty())
+        node.arguments.astGroup("arguments", tail = true)
     }
 
-    override fun visit(expr: InvokeLocalExpr) {
+    override fun visit(node: InvokeLocalExpr) {
         base("invoke local")
 
-        label("name: ${expr.name}", tail = expr.arguments.isEmpty())
-        expr.arguments.astGroup("arguments", tail = true)
+        label("name: ${node.name}", tail = node.arguments.isEmpty())
+        node.arguments.astGroup("arguments", tail = true)
     }
 
-    override fun visit(expr: InvokeMemberExpr) {
+    override fun visit(node: InvokeMemberExpr) {
         base("invoke member function")
 
-        expr.target.astLabel("target", tail = false)
-        label("null safe: ${expr.nullSafe}", tail = false)
-        label("name: ${expr.name}", expr.arguments.isEmpty())
-        expr.arguments.astGroup("arguments", tail = true)
+        node.target.astLabel("target", tail = false)
+        label("null safe: ${node.nullSafe}", tail = false)
+        label("name: ${node.name}", node.arguments.isEmpty())
+        node.arguments.astGroup("arguments", tail = true)
     }
 
-    override fun visit(expr: UnaryOperation) {
-        base("unary ${expr.operator}")
+    override fun visit(node: UnaryOperation) {
+        base("unary ${node.operator}")
 
-        expr.target.ast(tail = true)
+        node.target.ast(tail = true)
     }
 
-    override fun visit(expr: PreAssignUnaryOperation) {
-        base("pre-assign unary ${expr.operator}")
+    override fun visit(node: PreAssignUnaryOperation) {
+        base("pre-assign unary ${node.operator}")
 
-        expr.target.ast(tail = true)
+        node.target.ast(tail = true)
     }
 
-    override fun visit(expr: PostAssignUnaryOperation) {
-        base("post-assign unary ${expr.operator}")
+    override fun visit(node: PostAssignUnaryOperation) {
+        base("post-assign unary ${node.operator}")
 
-        expr.target.ast(tail = true)
+        node.target.ast(tail = true)
     }
 
-    override fun visit(expr: BinaryOperation) {
-        base("binary ${expr.operator}")
+    override fun visit(node: BinaryOperation) {
+        base("binary ${node.operator}")
 
-        expr.left.ast(tail = false)
-        expr.right.ast(tail = true)
+        node.left.ast(tail = false)
+        node.right.ast(tail = true)
     }
 
-    override fun visit(expr: AssignOperation) {
-        base("assign operation ${expr.operator}")
+    override fun visit(node: AssignOperation) {
+        base("assign operation ${node.operator}")
 
-        expr.left.ast(tail = false)
-        expr.right.ast(tail = true)
+        node.left.ast(tail = false)
+        node.right.ast(tail = true)
     }
 
-    override fun visit(expr: ReturnExpr) {
+    override fun visit(node: ReturnExpr) {
         base("return")
 
-        expr.value.ast(tail = true)
+        node.value.ast(tail = true)
     }
 
-    override fun visit(expr: ThrowExpr) {
+    override fun visit(node: ThrowExpr) {
         base("throw")
 
-        expr.value.ast(tail = true)
+        node.value.ast(tail = true)
     }
 
-    override fun visit(expr: NotNullExpr) {
+    override fun visit(node: NotNullExpr) {
         base("not null")
 
-        expr.value.ast(tail = true)
+        node.value.ast(tail = true)
     }
 
-    override fun visit(expr: IfExpr) {
+    override fun visit(node: IfExpr) {
         base("if expr")
 
-        expr.condition.astLabel("condition", tail = false)
-        expr.thenBranch.astLabel("then", tail = expr.elseBranch == null)
+        node.condition.astLabel("condition", tail = false)
+        node.thenBranch.astLabel("then", tail = node.elseBranch == null)
 
-        if (expr.elseBranch != null) {
-            expr.elseBranch.astLabel("else", tail = true)
+        if (node.elseBranch != null) {
+            node.elseBranch.astLabel("else", tail = true)
         }
     }
 
-    override fun visit(expr: IfNode) {
+    override fun visit(node: IfNode) {
         base("if node")
 
-        expr.condition.astLabel("condition", tail = false)
-        expr.thenBranch.astLabel("then", tail = false)
-        expr.elseBranch.astLabel("else", tail = true)
+        node.condition.astLabel("condition", tail = false)
+        node.thenBranch.astLabel("then", tail = false)
+        node.elseBranch.astLabel("else", tail = true)
     }
 
-    override fun visit(expr: DoWhileNode) {
+    override fun visit(node: DoWhileNode) {
         base("do-while")
 
-        expr.body.astLabel("body", tail = false)
-        expr.condition.astLabel("condition", tail = true)
+        node.body.astLabel("body", tail = false)
+        node.condition.astLabel("condition", tail = true)
     }
 
-    override fun visit(expr: WhileNode) {
+    override fun visit(node: WhileNode) {
         base("while")
 
-        expr.condition.astLabel("condition", tail = false)
-        expr.body.astLabel("body", tail = true)
+        node.condition.astLabel("condition", tail = false)
+        node.body.astLabel("body", tail = true)
     }
 
-    override fun visit(expr: ForNode) {
+    override fun visit(node: BreakExpr) = base("break")
+
+    override fun visit(node: ContinueExpr) = base("continue")
+
+    override fun visit(node: ForNode) {
         base("for")
 
-        label("variable name: ${expr.variableName}", tail = false)
-        expr.iterable.astLabel("iterable", tail = false)
-        expr.body.astLabel("body", tail = true)
+        label("variable name: ${node.variableName}", tail = false)
+        node.iterable.astLabel("iterable", tail = false)
+        node.body.astLabel("body", tail = true)
     }
 
-    override fun visit(expr: SubscriptAccessExpr) {
+    override fun visit(node: SubscriptAccessExpr) {
         base("subscript access")
 
-        expr.target.astLabel("target", tail = false)
-        expr.arguments.astGroup("arguments", tail = true)
+        node.target.astLabel("target", tail = false)
+        node.arguments.astGroup("arguments", tail = true)
     }
 
-    override fun visit(expr: SubscriptAssignNode) {
+    override fun visit(node: SubscriptAssignNode) {
         base("subscript assign")
 
-        expr.target.astLabel("target", tail = false)
-        expr.arguments.astGroup("arguments", tail = false)
-        expr.value.astLabel("value", tail = true)
+        node.target.astLabel("target", tail = false)
+        node.arguments.astGroup("arguments", tail = false)
+        node.value.astLabel("value", tail = true)
     }
 
-//    override fun visit(expr: TupleIndexAccessExpr) {
+//    override fun visit(node: TupleIndexAccessExpr) {
 //        base("tuple index access")
 //
-//        expr.target.astLabel("target", tail = false)
-//        label("index: ${expr.index}", true)
+//        node.target.astLabel("target", tail = false)
+//        label("index: ${node.index}", true)
 //    }
 
-    override fun visit(expr: PropertyAccessExpr) {
+    override fun visit(node: PropertyAccessExpr) {
         base("property access")
 
-        expr.target.astLabel("target", tail = false)
-        label("null safe: ${expr.nullSafe}", tail = false)
-        label("name: ${expr.name}", true)
+        node.target.astLabel("target", tail = false)
+        label("null safe: ${node.nullSafe}", tail = false)
+        label("name: ${node.name}", true)
     }
 
-    override fun visit(expr: PropertyAssignNode) {
+    override fun visit(node: PropertyAssignNode) {
         base("property access")
 
-        expr.target.astLabel("target", tail = false)
-        label("null safe: ${expr.nullSafe}", tail = false)
-        label("name: ${expr.name}", true)
-        expr.value.astLabel("value", tail = true)
+        node.target.astLabel("target", tail = false)
+        label("null safe: ${node.nullSafe}", tail = false)
+        label("name: ${node.name}", true)
+        node.value.astLabel("value", tail = true)
     }
 }

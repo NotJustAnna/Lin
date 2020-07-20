@@ -13,54 +13,54 @@ import xyz.avarel.lobos.ast.expr.ops.BinaryOperation
 import xyz.avarel.lobos.ast.expr.ops.UnaryOperation
 
 interface ExprVisitor<R> {
-    fun visit(expr: UseExpr): R
-    fun visit(expr: FileModuleExpr): R
-    fun visit(expr: FolderModuleExpr): R
+    fun visit(node: UseExpr): R
+    fun visit(node: FileModuleExpr): R
+    fun visit(node: FolderModuleExpr): R
 
-    fun visit(expr: I32Expr): R
-    fun visit(expr: I64Expr): R
-    fun visit(expr: F64Expr): R
-    fun visit(expr: NullExpr): R
+    fun visit(node: I32Expr): R
+    fun visit(node: I64Expr): R
+    fun visit(node: F64Expr): R
+    fun visit(node: NullExpr): R
 
-    fun visit(expr: InvalidExpr): R
-    fun visit(expr: StringExpr): R
-    fun visit(expr: BooleanExpr): R
+    fun visit(node: InvalidExpr): R
+    fun visit(node: StringExpr): R
+    fun visit(node: BooleanExpr): R
 
-    fun visit(expr: DeclareLetExpr): R
-    fun visit(expr: DeclareModuleExpr): R
-    fun visit(expr: DeclareFunctionExpr): R
+    fun visit(node: DeclareLetExpr): R
+    fun visit(node: DeclareModuleExpr): R
+    fun visit(node: DeclareFunctionExpr): R
 
-    fun visit(expr: TypeAliasExpr): R
-    fun visit(expr: AssignExpr): R
+    fun visit(node: TypeAliasExpr): R
+    fun visit(node: AssignExpr): R
 
-    fun visit(expr: IdentExpr): R
+    fun visit(node: IdentExpr): R
 
-    fun visit(expr: ClosureExpr): R
-    fun visit(expr: TupleExpr): R
-    fun visit(expr: ListLiteralExpr): R
-    fun visit(expr: MapLiteralExpr): R
+    fun visit(node: ClosureExpr): R
+    fun visit(node: TupleExpr): R
+    fun visit(node: ListLiteralExpr): R
+    fun visit(node: MapLiteralExpr): R
 
-    fun visit(expr: TemplateExpr): R
-    fun visit(expr: UnaryOperation): R
-    fun visit(expr: BinaryOperation): R
+    fun visit(node: TemplateExpr): R
+    fun visit(node: UnaryOperation): R
+    fun visit(node: BinaryOperation): R
 
-    fun visit(expr: InvokeExpr): R
-    fun visit(expr: InvokeMemberExpr): R
-    fun visit(expr: InvokeLocalExpr): R
+    fun visit(node: InvokeExpr): R
+    fun visit(node: InvokeMemberExpr): R
+    fun visit(node: InvokeLocalExpr): R
 
-    fun visit(expr: ReturnExpr): R
-    fun visit(expr: IfExpr): R
-    fun visit(expr: WhileExpr): R
+    fun visit(node: ReturnExpr): R
+    fun visit(node: IfExpr): R
+    fun visit(node: WhileExpr): R
 
-    fun visit(expr: SubscriptAccessExpr): R
-    fun visit(expr: SubscriptAssignExpr): R
-    fun visit(expr: PropertyAccessExpr): R
-    fun visit(expr: PropertyAssignExpr): R
-    fun visit(expr: TupleIndexAccessExpr): R
+    fun visit(node: SubscriptAccessExpr): R
+    fun visit(node: SubscriptAssignExpr): R
+    fun visit(node: PropertyAccessExpr): R
+    fun visit(node: PropertyAssignExpr): R
+    fun visit(node: TupleIndexAccessExpr): R
 
-    fun visit(expr: ExternalModuleExpr): R
-    fun visit(expr: ExternalLetExpr): R
-    fun visit(expr: ExternalFunctionExpr): R
+    fun visit(node: ExternalModuleExpr): R
+    fun visit(node: ExternalLetExpr): R
+    fun visit(node: ExternalFunctionExpr): R
 
-    fun visit(expr: MultiExpr): R
+    fun visit(node: MultiExpr): R
 }

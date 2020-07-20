@@ -4,11 +4,11 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.PrefixParser
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.ast.expr.AccessExpr
-import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.misc.InvalidNode
-import io.github.cafeteriaguild.lin.ast.expr.ops.PreAssignUnaryOperation
-import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryAssignOperationType
+import io.github.cafeteriaguild.lin.ast.node.AccessExpr
+import io.github.cafeteriaguild.lin.ast.node.Node
+import io.github.cafeteriaguild.lin.ast.node.misc.InvalidNode
+import io.github.cafeteriaguild.lin.ast.node.ops.PreAssignUnaryOperation
+import io.github.cafeteriaguild.lin.ast.node.ops.UnaryAssignOperationType
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.parser.Precedence
 import io.github.cafeteriaguild.lin.parser.utils.matchAll

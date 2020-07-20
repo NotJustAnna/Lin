@@ -1,11 +1,13 @@
 package io.github.cafeteriaguild.lin.parser
 
 import net.notjustanna.tartar.createGrammar
-import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.ops.AssignOperationType
-import io.github.cafeteriaguild.lin.ast.expr.ops.BinaryOperationType
-import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryAssignOperationType
-import io.github.cafeteriaguild.lin.ast.expr.ops.UnaryOperationType
+import io.github.cafeteriaguild.lin.ast.node.Node
+import io.github.cafeteriaguild.lin.ast.node.misc.BreakExpr
+import io.github.cafeteriaguild.lin.ast.node.misc.ContinueExpr
+import io.github.cafeteriaguild.lin.ast.node.ops.AssignOperationType
+import io.github.cafeteriaguild.lin.ast.node.ops.BinaryOperationType
+import io.github.cafeteriaguild.lin.ast.node.ops.UnaryAssignOperationType
+import io.github.cafeteriaguild.lin.ast.node.ops.UnaryOperationType
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.lexer.TokenType.*
 import io.github.cafeteriaguild.lin.parser.parselets.*
@@ -86,4 +88,7 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     prefix(L_PAREN, ParenthesisParser)
     prefix(L_BRACE, LambdaParser)
     infix(L_BRACE, LambdaInvocationParser)
+
+    prefix(BREAK) { BreakExpr(it.section) }
+    prefix(CONTINUE) { ContinueExpr(it.section) }
 }

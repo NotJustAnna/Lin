@@ -5,11 +5,11 @@ import net.notjustanna.tartar.api.parser.PrefixParser
 import net.notjustanna.tartar.api.parser.Token
 import net.notjustanna.tartar.createGrammar
 import io.github.cafeteriaguild.lin.ast.LinModifier
-import io.github.cafeteriaguild.lin.ast.expr.Node
-import io.github.cafeteriaguild.lin.ast.expr.access.AssignNode
-import io.github.cafeteriaguild.lin.ast.expr.declarations.*
-import io.github.cafeteriaguild.lin.ast.expr.nodes.IdentifierExpr
-import io.github.cafeteriaguild.lin.ast.expr.nodes.ObjectExpr
+import io.github.cafeteriaguild.lin.ast.node.Node
+import io.github.cafeteriaguild.lin.ast.node.access.AssignNode
+import io.github.cafeteriaguild.lin.ast.node.declarations.*
+import io.github.cafeteriaguild.lin.ast.node.nodes.IdentifierExpr
+import io.github.cafeteriaguild.lin.ast.node.nodes.ObjectExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.lexer.TokenType.*
 import io.github.cafeteriaguild.lin.parser.linStdGrammar
