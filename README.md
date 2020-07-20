@@ -4,21 +4,18 @@ An attempt to create a parser and interpreter for a language which resembles a l
 
 Lin most likely will never fully parse Kotlin, but might ending up parsing _a lot_ of Kotlin.
 
-## Implemented (Parser)
+## Implemented
 
 - Booleans, Null
 - Ints, Longs, Floats, Doubles, Chars
 - Strings (with support for raw and template strings)
 - Variables
     - Vals, Vars, Destructuring variables
-- access/assignments of variables
-- Function declaration (named, anonymous)
+- Access/assignments of variables
 - Function invocation
 - Infix function invocation
 - Property access/assignment
-- Subscript access/assignment (`a[...]`, `a[...] = b`)
 - While/Do-While loops
-- For Loops
 - If/else (both as statement and expression)
 - Return/Throw
 - Null-safe operator (`?.`)
@@ -28,6 +25,12 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
     - `a+b`, `a-b`, `a*b`, `a/b`, `a%b`
     - `a==b`, `a!=b`, `a&&b`, `a||b`, `a<b`, `a<=b`, `a>b`, `a>=b`
     - `a ?: b`, `a in b`, `a !in b`, `a..b`
+
+## Parsing
+
+- For Loops
+- Function declaration (named, anonymous)
+- Subscript access/assignment (`a[...]`, `a[...] = b`)
 - Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
 - Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
 - Objects, Classes and Interfaces

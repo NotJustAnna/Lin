@@ -3,56 +3,21 @@ package io.github.cafeteriaguild.lin.rt.lib
 interface LNumber : LObj {
     val value: Number
 
-    operator fun plus(other: LNumber) =
-        box(
-            plus(
-                value,
-                other.value
-            )
-        )
+    operator fun plus(other: LNumber) = box(plus(value, other.value))
 
-    operator fun minus(other: LNumber) =
-        box(
-            minus(
-                value,
-                other.value
-            )
-        )
+    operator fun minus(other: LNumber) = box(minus(value, other.value))
 
-    operator fun times(other: LNumber) =
-        box(
-            times(
-                value,
-                other.value
-            )
-        )
+    operator fun times(other: LNumber) = box(times(value, other.value))
 
-    operator fun div(other: LNumber) =
-        box(
-            div(
-                value,
-                other.value
-            )
-        )
+    operator fun div(other: LNumber) = box(div(value, other.value))
 
-    operator fun rem(other: LNumber) =
-        box(
-            rem(
-                value,
-                other.value
-            )
-        )
+    operator fun rem(other: LNumber) = box(rem(value, other.value))
 
-    operator fun unaryPlus() = box(
-        unaryPlus(value)
-    )
+    operator fun unaryPlus() = box(unaryPlus(value))
 
-    operator fun unaryMinus() = box(
-        unaryMinus(value)
-    )
+    operator fun unaryMinus() = box(unaryMinus(value))
 
-    operator fun compareTo(other: LNumber) =
-        compareTo(value, other.value)
+    operator fun compareTo(other: LNumber) = compareTo(value, other.value)
 
     companion object {
         fun box(target: Number): LNumber {
@@ -77,7 +42,7 @@ interface LNumber : LObj {
             return when {
                 left is Double || right is Double -> left.toDouble() - right.toDouble()
                 left is Float || right is Float -> left.toFloat() - right.toFloat()
-                left is Long || right is Long -> left.toLong() - right.toFloat()
+                left is Long || right is Long -> left.toLong() - right.toLong()
                 else -> left.toInt() - right.toInt()
             }
         }
@@ -86,7 +51,7 @@ interface LNumber : LObj {
             return when {
                 left is Double || right is Double -> left.toDouble() * right.toDouble()
                 left is Float || right is Float -> left.toFloat() * right.toFloat()
-                left is Long || right is Long -> left.toLong() * right.toFloat()
+                left is Long || right is Long -> left.toLong() * right.toLong()
                 else -> left.toInt() * right.toInt()
             }
         }
@@ -95,7 +60,7 @@ interface LNumber : LObj {
             return when {
                 left is Double || right is Double -> left.toDouble() / right.toDouble()
                 left is Float || right is Float -> left.toFloat() / right.toFloat()
-                left is Long || right is Long -> left.toLong() / right.toFloat()
+                left is Long || right is Long -> left.toLong() / right.toLong()
                 else -> left.toInt() / right.toInt()
             }
         }
@@ -104,7 +69,7 @@ interface LNumber : LObj {
             return when {
                 left is Double || right is Double -> left.toDouble() % right.toDouble()
                 left is Float || right is Float -> left.toFloat() % right.toFloat()
-                left is Long || right is Long -> left.toLong() % right.toFloat()
+                left is Long || right is Long -> left.toLong() % right.toLong()
                 else -> left.toInt() / right.toInt()
             }
         }
@@ -131,7 +96,7 @@ interface LNumber : LObj {
             return when {
                 left is Double || right is Double -> left.toDouble().compareTo(right.toDouble())
                 left is Float || right is Float -> left.toFloat().compareTo(right.toFloat())
-                left is Long || right is Long -> left.toLong().compareTo(right.toFloat())
+                left is Long || right is Long -> left.toLong().compareTo(right.toLong())
                 else -> left.toInt() / right.toInt()
             }
         }

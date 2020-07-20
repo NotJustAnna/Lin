@@ -284,8 +284,14 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj> {
                 if (left is LString) {
                     return left + right
                 }
+                if (right is LString) {
+                    return LString(left.toString() + right.value)
+                }
                 if (left is LChar) {
                     return left + right
+                }
+                if (right is LChar) {
+                    return LString(left.toString() + right.value)
                 }
                 throw LinTypeException("Unsupported operation $left + $right")
             }

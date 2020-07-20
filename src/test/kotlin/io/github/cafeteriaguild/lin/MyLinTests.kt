@@ -13,9 +13,9 @@ import io.github.cafeteriaguild.lin.rt.scope.GlobalScope
 fun main() {
     val source = Source(
         """
-        val was = millis()
-        val now = millis()
-        was - now
+        val was = nanos()
+        val now = nanos()
+        now - was + " nanos"
         """.trimIndent()
     )
     val expr = linStdParser.parse(source, linStdLexer)
@@ -35,8 +35,9 @@ fun main() {
     })
     val scope = GlobalScope()
     scope["millis"] = LinRuntime.millis
+    scope["nanos"] = LinRuntime.nanos
     try {
-        println("RESULT:\n    ${LinInterpreter().execute(expr)}")
+        println("RESULT:\n    ${LinInterpreter().execute(expr, scope)}")
 
     } catch (e: Exception) {
         e.printStackTrace()
