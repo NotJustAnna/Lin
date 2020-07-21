@@ -9,7 +9,7 @@ import io.github.cafeteriaguild.lin.rt.scope.Property
 class LObjBuilder {
     val properties = LinkedHashMap<String, Property>()
     private var component: (Int) -> LObj? = { null }
-    private var toString: (LObj) -> String = { it.toString() }
+    private var toString: (LObj) -> String = { "<native object>" }
     private var call: ((List<LObj>) -> LObj)? = null
 
     fun toString(block: (LObj) -> String) {
