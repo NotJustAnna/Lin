@@ -10,41 +10,10 @@ import io.github.cafeteriaguild.lin.rt.LinInterpreter
 import io.github.cafeteriaguild.lin.rt.LinRuntime
 import io.github.cafeteriaguild.lin.rt.lib.LCallable
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
-
-val code = """
-    fun listOf(vararg values) = values
-        
-        println(nanos())
-        var i = 0
-        val a = listOf(1)
-        a[i++] += ++i
-        println(nanos())
-        println(a + " " + i)
-        
-        object native {
-            class Screen {
-                var x = 0
-                var y = 0
-                object Size {
-                    val w = 854
-                    val h = 480
-                }
-            }
-            val prefix = "haha "
-            fun toJson() = prefix + "yesn't"
-            fun fromJson() = prefix + "no"
-        }
-        val screen = native.Screen()
-        screen.x = 5
-        return screen.x + " of " + native.Screen.Size.w
-""".trimIndent()
+import java.io.File
 
 fun main() {
-    val source = Source(
-        """
-            return 0 == 0
-        """.trimIndent()
-    )
+    val source = Source(File("examples/projecting.lin"))
     val expr = linStdParser.parse(source, linStdLexer)
     println(expr is Expr)
     println(buildString {

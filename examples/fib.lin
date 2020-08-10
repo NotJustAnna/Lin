@@ -1,0 +1,14 @@
+fun fib(n) {
+    if (n <= 0) return
+    fib_impl(n,1,0)
+}
+
+fun fib_impl(n, eax, ebx) {
+    if ((n - 1) == 0) {
+        println(eax+ebx)
+        return
+    }
+    fib_impl(n - 1,ebx,eax+ebx)
+}
+
+fib(6)

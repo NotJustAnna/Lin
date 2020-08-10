@@ -6,6 +6,7 @@ import io.github.cafeteriaguild.lin.ast.node.*
 
 class DeclareInterfaceNode(
     val name: String,
+    val implements: List<AccessExpr>,
     val body: List<Declaration>,
     section: Section,
     val modifiers: Set<LinModifier> = emptySet()

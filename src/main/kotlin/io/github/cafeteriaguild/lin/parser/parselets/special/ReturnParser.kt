@@ -13,7 +13,7 @@ import io.github.cafeteriaguild.lin.lexer.TokenType
 
 object ReturnParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
-        val node = if (ctx.matchAny(TokenType.NL, TokenType.SEMICOLON)) {
+        val node = if (ctx.nextIsAny(TokenType.SEMICOLON, TokenType.NL)) {
             UnitExpr(token.section)
         } else {
             ctx.parseExpression().let {

@@ -54,18 +54,18 @@ object IdentifierParser : PrefixParser<TokenType, Node> {
         when (node) {
             is DeclareObjectNode -> {
                 return DeclareObjectNode(
-                    node.name, node.body, node.section, set + node.modifiers
+                    node.name, node.implements, node.body, node.section, set + node.modifiers
                 )
             }
             is ObjectExpr -> {
                 val companionToken = map[LinModifier.COMPANION]
                 if (companionToken != null) {
-                    return DeclareObjectNode("Companion", node.body, companionToken.section, set)
+                    return DeclareObjectNode("Companion", node.implements, node.body, companionToken.section, set)
                 }
             }
             is DeclareClassNode -> {
                 return DeclareClassNode(
-                    node.name, node.body, node.section, set + node.modifiers
+                    node.name, node.parameters, node.implements, node.body, node.section, set + node.modifiers
                 )
             }
             is DeclareEnumClassNode -> {
@@ -80,7 +80,7 @@ object IdentifierParser : PrefixParser<TokenType, Node> {
             }
             is DeclareInterfaceNode -> {
                 return DeclareInterfaceNode(
-                    node.name, node.body, node.section, set + node.modifiers
+                    node.name, node.implements, node.body, node.section, set + node.modifiers
                 )
             }
             is DeclareVariableNode -> {

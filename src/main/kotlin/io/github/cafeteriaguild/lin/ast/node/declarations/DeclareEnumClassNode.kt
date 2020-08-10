@@ -6,6 +6,8 @@ import io.github.cafeteriaguild.lin.ast.node.*
 
 class DeclareEnumClassNode(
     val name: String,
+    //val parameters: List<DeclareClassNode.Parameter>,
+    //val implements: List<AccessExpr>,
     val values: List<String>,
     val body: List<Declaration>,
     section: Section,

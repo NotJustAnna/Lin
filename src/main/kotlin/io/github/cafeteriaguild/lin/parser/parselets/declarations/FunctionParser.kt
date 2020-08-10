@@ -17,7 +17,6 @@ import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
 import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
-
 object FunctionParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)

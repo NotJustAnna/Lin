@@ -74,7 +74,7 @@ interface LNumber : LObj {
                 left is Double || right is Double -> left.toDouble() % right.toDouble()
                 left is Float || right is Float -> left.toFloat() % right.toFloat()
                 left is Long || right is Long -> left.toLong() % right.toLong()
-                else -> left.toInt() / right.toInt()
+                else -> left.toInt() % right.toInt()
             }
         }
 
@@ -101,7 +101,7 @@ interface LNumber : LObj {
                 left is Double || right is Double -> left.toDouble().compareTo(right.toDouble())
                 left is Float || right is Float -> left.toFloat().compareTo(right.toFloat())
                 left is Long || right is Long -> left.toLong().compareTo(right.toLong())
-                else -> left.toInt() / right.toInt()
+                else -> left.toInt().compareTo(right.toInt())
             }
         }
 

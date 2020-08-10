@@ -1,0 +1,25 @@
+
+class Shitshow1() [Iterable]
+
+class Shitshow2() [lin.Iterable]
+
+class Shitshow3() [lin.exports["Iterable"]]
+
+class Shitshow4() [callFile("stdlib").exports.Iterable]
+
+class Shitshow5() [callFile("stdlib").exports["Iterable"]]
+
+//interface Iterator {
+//    fun next()
+//    fun hasNext()
+//}
+
+//interface Iterable {
+//    fun iterator()
+//}
+
+//val test = Test()
+
+//for (value in test) {
+//
+//}

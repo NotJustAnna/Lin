@@ -1,8 +1,8 @@
 # Lin
 
-An attempt to create a parser and interpreter for a language which resembles a lot Kotlin but borrow elements from JavaScript.
+An attempt to create a parser and interpreter for a language which resembles a lot Kotlin but borrow elements from JavaScript... and Rust.
 
-Lin most likely will never fully parse Kotlin, but might ending up parsing _a lot_ of Kotlin.
+Lin will never fully parse Kotlin, but hit really closes to home.
 
 ## Implemented
 
@@ -37,11 +37,10 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
 
 - Objects, Classes and Interfaces
     - Support for Companion Objects, Enum classes, Functional Interfaces (Kotlin 1.4+)
+    - Support for Class Constructors and Interface delegation
     - **CAVEATS**:
         - Data, Sealed and Annotation classes are supported only as Modifiers
-        - No support for:
-            - Class Constructors
-            - Interface delegation
+        - Enum class doesn't support anything fancy
 - Modifiers 
     - Abstract, Sealed, Data, Annotation
     - Open, Final, Override, Const
@@ -76,6 +75,13 @@ Lin most likely will never fully parse Kotlin, but might ending up parsing _a lo
         - `a { b -> c(b) }` turns into `a { | b | -> c(b) }`
         - `a { b, c -> c(b) }` turns into `a { | b, c | -> c(b) }`
         - `a { (b, c) -> c(b) }` turns into `a { | (b, c) | -> c(b) }`
+- Inheritance declarations
+    - Inheritancles must be enclosed in brackets.
+        - `class A` stays the same
+        - `class A(val a)` stays the same
+        - `class A : Iterable` turns into `class A [Iterable]`
+        - `class A(val a) : Iterable` turns into `class A(val a) [Iterable]`
+- Function overloading won't ever be implemented.
 
 ## Stuff that will most likely be different
 

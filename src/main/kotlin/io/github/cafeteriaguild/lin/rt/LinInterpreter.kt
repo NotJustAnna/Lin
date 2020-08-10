@@ -127,27 +127,27 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: MultiNode, param: Scope) = block {
         for (child in node.list) {
-            try {
-                child.accept(this, param)
-            } catch (r: ReturnException) {
-                return r.value
-            }
+            //try {
+            child.accept(this, param)
+            //} catch (r: ReturnException) {
+            //    return r.value
+            //}
         }
     }
 
     override fun visit(node: MultiExpr, param: Scope): LObj {
         for (child in node.list) {
-            try {
-                child.accept(this, param)
-            } catch (r: ReturnException) {
-                return r.value
-            }
+            //try {
+            child.accept(this, param)
+            //} catch (r: ReturnException) {
+            //    return r.value
+            //}
         }
-        return try {
-            node.last.accept(this, param)
-        } catch (r: ReturnException) {
-            r.value
-        }
+        return node.last.accept(this, param)
+        //try {
+        //} catch (r: ReturnException) {
+        //    r.value
+        //}
     }
 
     override fun visit(node: InvalidNode, param: Scope): LObj {

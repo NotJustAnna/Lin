@@ -141,7 +141,13 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${node.name}", node.body.isEmpty())
+        label("name: ${node.name}", node.body.isEmpty() && node.implements.isEmpty() && node.parameters.isEmpty())
+        val (names, values) = node.parameters.map { it.name to it.value }.unzip()
+        if (names.isNotEmpty()) {
+            label("parameters: ${names.joinToString(", ")}", tail = values.isNotEmpty() && node.body.isEmpty() && node.implements.isEmpty())
+        }
+        values.filterNotNull().astGroup("default values", tail = node.body.isEmpty() && node.implements.isEmpty())
+        node.implements.astGroup("implements", tail = node.body.isEmpty())
         node.body.astGroup("body", tail = true)
     }
 
@@ -165,7 +171,8 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${node.name}", node.body.isEmpty())
+        label("name: ${node.name}", node.body.isEmpty() && node.implements.isEmpty())
+        node.implements.astGroup("implements", tail = node.body.isEmpty())
         node.body.astGroup("body", tail = true)
     }
 
@@ -175,7 +182,8 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         if (modifiers.isNotEmpty()) {
             label("modifiers: ${modifiers.joinToString { it.name.toLowerCase() }}", false)
         }
-        label("name: ${node.name}", node.body.isEmpty())
+        label("name: ${node.name}", node.body.isEmpty() && node.implements.isEmpty())
+        node.implements.astGroup("implements", tail = node.body.isEmpty())
         node.body.astGroup("body", tail = true)
     }
 
@@ -221,6 +229,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
 
     override fun visit(node: ObjectExpr) {
         base("object")
+        node.implements.astGroup("implements", tail = node.body.isEmpty())
         node.body.astGroup("body", tail = true)
     }
 
