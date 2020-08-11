@@ -6,7 +6,7 @@ package io.github.cafeteriaguild.lin.oldrt//package io.github.cafeteriaguild.lin
 //import io.github.cafeteriaguild.lin.parser.linStdParser
 //import io.github.cafeteriaguild.lin.rt.LinRuntime
 //import io.github.cafeteriaguild.lin.rt.lib.LObj
-//import io.github.cafeteriaguild.lin.rt.lib.LString
+//import io.github.cafeteriaguild.lin.rt.lib.lang.LString
 //import io.github.cafeteriaguild.lin.rt.scope.FunctionScope
 //import io.github.cafeteriaguild.lin.rt.types.LTClass
 //import io.github.cafeteriaguild.lin.rt.types.functions.LFunction

@@ -2,7 +2,7 @@ package io.github.cafeteriaguild.lin.oldrt.coroutines
 
 import io.github.cafeteriaguild.lin.oldrt.LinThrowable
 import io.github.cafeteriaguild.lin.rt.lib.LObj
-import io.github.cafeteriaguild.lin.rt.lib.LUnit
+import io.github.cafeteriaguild.lin.rt.lib.lang.LUnit
 
 sealed class LinResult {
     object Empty : LinResult() {

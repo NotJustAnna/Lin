@@ -10,8 +10,16 @@ import io.github.cafeteriaguild.lin.ast.node.invoke.InvokeMemberExpr
 import io.github.cafeteriaguild.lin.ast.node.misc.*
 import io.github.cafeteriaguild.lin.ast.node.nodes.*
 import io.github.cafeteriaguild.lin.ast.node.ops.*
-import io.github.cafeteriaguild.lin.rt.exc.*
-import io.github.cafeteriaguild.lin.rt.lib.*
+import io.github.cafeteriaguild.lin.rt.exceptions.*
+import io.github.cafeteriaguild.lin.rt.lib.LObj
+import io.github.cafeteriaguild.lin.rt.lib.lang.*
+import io.github.cafeteriaguild.lin.rt.lib.lang.functions.LFunction
+import io.github.cafeteriaguild.lin.rt.lib.lang.functions.LLambda
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.*
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeGet
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeIterable
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeRangeTo
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeSet
 import io.github.cafeteriaguild.lin.rt.scope.*
 
 class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Property?> {
@@ -44,7 +52,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: DoubleExpr, param: Scope) = LDouble(node.value)
 
-    override fun visit(node: BooleanExpr, param: Scope) = LBoolean.valueOf(node.value)
+    override fun visit(node: BooleanExpr, param: Scope) = LBoolean.of(node.value)
 
     override fun visit(node: AssignNode, param: Scope) = block {
         val property = resolve(IdentifierExpr(node.name, node.section), param)
@@ -60,9 +68,10 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: DeclareClassNode, param: Scope) = block {
-        val p = LocalProperty(false)
-        param.declareProperty(node.name, p)
-        p.set(LClass(node.name, this, param, node.body))
+        TODO("Not yet implemented")
+//        val p = SimpleProperty(false)
+//        param.declareProperty(node.name, p)
+//        p.set(LClass(node.name, this, param, node.body))
     }
 
     override fun visit(node: DeclareEnumClassNode, param: Scope) = block {
@@ -74,19 +83,20 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: DeclareObjectNode, param: Scope) = block {
-        val p = LocalProperty(false)
-        param.declareProperty(node.name, p)
-        p.set(LObject(node.name, this, param, node.body))
+        TODO("Not yet implemented")
+//        val p = SimpleProperty(false)
+//        param.declareProperty(node.name, p)
+//        p.set(LObject(node.name, this, param, node.body))
     }
 
     override fun visit(node: DeclareFunctionNode, param: Scope) = block {
-        val p = LocalProperty(false)
+        val p = SimpleProperty(false)
         param.declareProperty(node.name, p)
         p.set(node.function.accept(this, param))
     }
 
     override fun visit(node: DeclareVariableNode, param: Scope) = block {
-        val p = LocalProperty(node.mutable)
+        val p = SimpleProperty(node.mutable)
         param.declareProperty(node.name, p)
         node.value?.let {
             if (p.setAllowed) {
@@ -102,7 +112,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: DestructuringVariableNode, param: Scope) = block {
         val properties = node.names
-            .map { it to LocalProperty(node.mutable) }
+            .map { it to SimpleProperty(node.mutable) }
             .onEach { (s, p) -> param.declareProperty(s, p) }
         val value = node.value.accept(this, param)
         for (index in properties.indices) {
@@ -157,7 +167,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     override fun visit(node: PropertyAccessExpr, param: Scope): LObj {
         val target = node.target.accept(this, param)
         if (node.nullSafe && target == LNull) return LNull
-        val property = target.property(node.name) ?: throw LinException("$target.${node.name} does not exist.")
+        val property = target.propertyOf(node.name) ?: throw LinException("$target.${node.name} does not exist.")
         if (!property.getAllowed) throw LinException("Property $target.${node.name} does not allow access.")
         return property.get()
     }
@@ -165,7 +175,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     override fun visit(node: PropertyAssignNode, param: Scope) = block {
         val target = node.target.accept(this, param)
         if (node.nullSafe && target == LNull) return LUnit
-        val property = target.property(node.name) ?: throw LinException("$target.${node.name} does not exist.")
+        val property = target.propertyOf(node.name) ?: throw LinException("$target.${node.name} does not exist.")
         if (!property.setAllowed) throw LinException("Property $target.${node.name} does not allow assignments.")
         val value = node.value.accept(this, param)
         property.set(value)
@@ -173,7 +183,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: SubscriptAccessExpr, param: Scope): LObj {
         val target = node.target.accept(this, param)
-        if (target !is LSubscript) {
+        if (target !is LinNativeGet) {
             throw LinException("$target is not subscript")
         }
         return target[node.arguments.map { it.accept(this, param) }]
@@ -181,7 +191,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: SubscriptAssignNode, param: Scope) = block {
         val target = node.target.accept(this, param)
-        if (target !is LSubscript) {
+        if (target !is LinNativeSet) {
             throw LinException("$target is not subscript")
         }
         target[node.arguments.map { it.accept(this, param) }] = node.value.accept(this, param)
@@ -189,7 +199,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: InvokeExpr, param: Scope): LObj {
         val target = node.target.accept(this, param)
-        if (target !is LCallable) {
+        if (!target.canInvoke()) {
             throw LinException("$target is not callable")
         }
         val args = node.arguments.map { it.accept(this, param) }
@@ -200,7 +210,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         val property = param.findProperty(node.name) ?: throw LinException("${node.name} does not exist.")
         if (!property.getAllowed) throw LinException("Property ${node.name} does not allow access.")
         val callable = property.get()
-        if (callable !is LCallable) {
+        if (!callable.canInvoke()) {
             throw LinException("$callable is not callable")
         }
         val args = node.arguments.map { it.accept(this, param) }
@@ -210,10 +220,10 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     override fun visit(node: InvokeMemberExpr, param: Scope): LObj {
         val target = node.target.accept(this, param)
         if (node.nullSafe && target == LNull) return LNull
-        val property = target.property(node.name) ?: throw LinException("$target.${node.name} does not exist.")
+        val property = target.propertyOf(node.name) ?: throw LinException("$target.${node.name} does not exist.")
         if (!property.getAllowed) throw LinException("Property $target.${node.name} does not allow access.")
         val callable = property.get()
-        if (callable !is LCallable) {
+        if (!callable.canInvoke()) {
             throw LinException("$callable is not callable")
         }
         val args = node.arguments.map { it.accept(this, param) }
@@ -284,7 +294,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: ForNode, param: Scope) = block {
         val iterable = node.iterable.accept(this, param)
-        if (iterable !is LIterable) {
+        if (iterable !is LinNativeIterable) {
             throw LinTypeException("$iterable is not an Iterable")
         }
         for (each in iterable) {
@@ -356,11 +366,11 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             }
             BinaryOperationType.EQUALS -> {
                 val right = node.right.accept(this, param)
-                return LBoolean.valueOf(left == right)
+                return LBoolean.of(left == right)
             }
             BinaryOperationType.NOT_EQUALS -> {
                 val right = node.right.accept(this, param)
-                return LBoolean.valueOf(left != right)
+                return LBoolean.of(left != right)
             }
             BinaryOperationType.AND -> {
                 if (left is LBoolean) {
@@ -391,28 +401,28 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             BinaryOperationType.LT -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return LBoolean.valueOf(left < right)
+                    return LBoolean.of(left < right)
                 }
                 throw LinTypeException("Unsupported operation $left < $right")
             }
             BinaryOperationType.LTE -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return LBoolean.valueOf(left <= right)
+                    return LBoolean.of(left <= right)
                 }
                 throw LinTypeException("Unsupported operation $left <= $right")
             }
             BinaryOperationType.GT -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return LBoolean.valueOf(left > right)
+                    return LBoolean.of(left > right)
                 }
                 throw LinTypeException("Unsupported operation $left > $right")
             }
             BinaryOperationType.GTE -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return LBoolean.valueOf(left >= right)
+                    return LBoolean.of(left >= right)
                 }
                 throw LinTypeException("Unsupported operation $left >= $right")
             }
@@ -425,7 +435,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             }
             BinaryOperationType.RANGE -> {
                 val right = node.right.accept(this, param)
-                if (left is LRangeTo) {
+                if (left is LinNativeRangeTo) {
                     return left.rangeTo(right)
                 }
                 throw LinTypeException("Unsupported operation $left..$right")
@@ -544,7 +554,8 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: ObjectExpr, param: Scope): LObj {
-        return LObject(null, this, param, node.body)
+        TODO("Not yet implemented")
+//        return LObject(null, this, param, node.body)
     }
 
     override fun visit(node: FunctionExpr, param: Scope): LObj {
@@ -578,7 +589,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         if (node.nullSafe && target == LNull) {
             return null
         }
-        val property = target.property(node.name)
+        val property = target.propertyOf(node.name)
         if (property == null) {
             if (node.nullSafe) return null
             throw LinException("${node.name} does not exist.")
@@ -588,7 +599,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun resolve(node: SubscriptAccessExpr, param: Scope): Property {
         val target = node.target.accept(this, param)
-        if (target !is LSubscript) {
+        if (target !is LinNativeGet || target !is LinNativeSet) {
             throw LinException("$node does not accept subscript operations")
         }
         val args = node.arguments.map { it.accept(this, param) }

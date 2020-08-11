@@ -1,6 +1,6 @@
 package io.github.cafeteriaguild.lin.rt.scope
 
-import io.github.cafeteriaguild.lin.rt.exc.LinException
+import io.github.cafeteriaguild.lin.rt.exceptions.LinException
 import java.util.concurrent.ConcurrentHashMap
 
 class BasicScope(override val parent: Scope? = null) : Scope() {

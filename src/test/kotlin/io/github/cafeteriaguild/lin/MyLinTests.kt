@@ -8,7 +8,6 @@ import io.github.cafeteriaguild.lin.lexer.linStdLexer
 import io.github.cafeteriaguild.lin.parser.linStdParser
 import io.github.cafeteriaguild.lin.rt.LinInterpreter
 import io.github.cafeteriaguild.lin.rt.LinRuntime
-import io.github.cafeteriaguild.lin.rt.lib.LCallable
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 val code = """
@@ -63,15 +62,12 @@ fun main() {
     val scope = UserScope()
     scope["millis"] = LinRuntime.millis
     scope["nanos"] = LinRuntime.nanos
-    scope.declareProperty("threadName", LinRuntime.getThreadName)
+    scope["threadName"] = LinRuntime.threadName
     scope["thread"] = LinRuntime.runOnThread
     scope["println"] = LinRuntime.printlnConsole
     try {
         val execute = LinInterpreter().execute(expr, scope)
         println("RESULT:\n    $execute")
-        if (execute is LCallable) {
-            println(execute.invoke(emptyList()))
-        }
     } catch (e: Exception) {
         e.printStackTrace()
     }

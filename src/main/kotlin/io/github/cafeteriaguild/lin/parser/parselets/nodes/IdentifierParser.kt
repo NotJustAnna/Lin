@@ -2,20 +2,20 @@ package io.github.cafeteriaguild.lin.parser.parselets.nodes
 
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.PrefixParser
+import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
-import net.notjustanna.tartar.createGrammar
 import io.github.cafeteriaguild.lin.ast.LinModifier
+import io.github.cafeteriaguild.lin.ast.node.Expr
 import io.github.cafeteriaguild.lin.ast.node.Node
 import io.github.cafeteriaguild.lin.ast.node.access.AssignNode
-import io.github.cafeteriaguild.lin.ast.node.declarations.*
+import io.github.cafeteriaguild.lin.ast.node.misc.InvalidNode
 import io.github.cafeteriaguild.lin.ast.node.nodes.IdentifierExpr
-import io.github.cafeteriaguild.lin.ast.node.nodes.ObjectExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
 import io.github.cafeteriaguild.lin.lexer.TokenType.*
-import io.github.cafeteriaguild.lin.parser.linStdGrammar
-import io.github.cafeteriaguild.lin.parser.parselets.declarations.EnumClassParser
+import io.github.cafeteriaguild.lin.parser.ModifierHandler
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
+import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
 object IdentifierParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
@@ -25,82 +25,23 @@ object IdentifierParser : PrefixParser<TokenType, Node> {
             val ahead = listOf(token) + ctx.peekAheadUntil(OBJECT, FUN, CLASS, INTERFACE, VAL, VAR)
             if (ahead.all { it.type == IDENTIFIER && it.value in LinModifier.names || it.type == NL }) {
                 ctx.matchAll(IDENTIFIER)
-                return parseModifiers(ctx, LinModifier.parse(ahead.filter { it.type == IDENTIFIER }))
+                return ModifierHandler.handle(ctx, LinModifier.parse(ahead.filter { it.type == IDENTIFIER }))
             }
         }
 
+        ctx.skipOnlyUntil(ASSIGN)
         if (ctx.match(ASSIGN)) {
-            val expr = ctx.parseExpression()
-
+            ctx.matchAll(NL)
+            val expr = ctx.parseExpression().let {
+                it as? Expr ?: return InvalidNode {
+                    section(token.section)
+                    child(it)
+                    error(SyntaxException("Expected an expression", it.section))
+                }
+            }
             return AssignNode(name, expr, token.section)
         }
         ctx.maybeIgnoreNL()
         return IdentifierExpr(name, token.section)
-    }
-
-    private fun parseModifiers(ctx: ParserContext<TokenType, Node>, map: Map<LinModifier, Token<TokenType>>): Node {
-        if (ctx.nextIs(CLASS)) {
-            when {
-                map.containsKey(LinModifier.ENUM) -> {
-                    return applyModifiers(ctx.withGrammar(specialGrammar).parseExpression(), map)
-                }
-            }
-        }
-        return applyModifiers(ctx.parseExpression(), map)
-    }
-
-    fun applyModifiers(node: Node, map: Map<LinModifier, Token<TokenType>>): Node {
-        val set = map.keys.toSet()
-        when (node) {
-            is DeclareObjectNode -> {
-                return DeclareObjectNode(
-                    node.name, node.implements, node.body, node.section, set + node.modifiers
-                )
-            }
-            is ObjectExpr -> {
-                val companionToken = map[LinModifier.COMPANION]
-                if (companionToken != null) {
-                    return DeclareObjectNode("Companion", node.implements, node.body, companionToken.section, set)
-                }
-            }
-            is DeclareClassNode -> {
-                return DeclareClassNode(
-                    node.name, node.parameters, node.implements, node.body, node.section, set + node.modifiers
-                )
-            }
-            is DeclareEnumClassNode -> {
-                return DeclareEnumClassNode(
-                    node.name, node.values, node.body, node.section, set + node.modifiers
-                )
-            }
-            is DeclareFunctionNode -> {
-                return DeclareFunctionNode(
-                    node.name, node.function, node.section, set + node.modifiers
-                )
-            }
-            is DeclareInterfaceNode -> {
-                return DeclareInterfaceNode(
-                    node.name, node.implements, node.body, node.section, set + node.modifiers
-                )
-            }
-            is DeclareVariableNode -> {
-                return DeclareVariableNode(
-                    node.name, node.mutable, node.value, node.section, set + node.modifiers
-                )
-            }
-            is DestructuringVariableNode -> {
-                return DestructuringVariableNode(
-                    node.names, node.mutable, node.value, node.section, set + node.modifiers
-                )
-            }
-        }
-        return node
-    }
-
-    private val specialGrammar by lazy {
-        createGrammar<TokenType, Node> {
-            import(true, linStdGrammar)
-            prefix(CLASS, EnumClassParser, override = true)
-        }
     }
 }

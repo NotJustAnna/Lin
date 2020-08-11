@@ -1,29 +1,26 @@
 package io.github.cafeteriaguild.lin.rt
 
-import io.github.cafeteriaguild.lin.rt.exc.LinException
-import io.github.cafeteriaguild.lin.rt.lib.LCallable
-import io.github.cafeteriaguild.lin.rt.lib.LLong
-import io.github.cafeteriaguild.lin.rt.lib.LString
-import io.github.cafeteriaguild.lin.rt.lib.LUnit
-import io.github.cafeteriaguild.lin.rt.lib.dsl.createGetter
-import io.github.cafeteriaguild.lin.rt.lib.dsl.createLFun
+import io.github.cafeteriaguild.lin.rt.exceptions.LinException
+import io.github.cafeteriaguild.lin.rt.lib.lang.LString
+import io.github.cafeteriaguild.lin.rt.lib.lang.LUnit
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LLong
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.LinNativeFunction
+import io.github.cafeteriaguild.lin.rt.utils.returningUnit
 import kotlin.concurrent.thread
 
 object LinRuntime {
-    val millis = createLFun { LLong(System.currentTimeMillis()) }
-    val nanos = createLFun { LLong(System.nanoTime()) }
-    val printlnConsole = createLFun {
+    val millis = LinNativeFunction { LLong(System.currentTimeMillis()) }
+    val nanos = LinNativeFunction { LLong(System.nanoTime()) }
+    val printlnConsole = LinNativeFunction {
         println(it.joinToString(" "))
         LUnit
     }
-    val getThreadName = createGetter {
-        LString(Thread.currentThread().name)
-    }
-    val runOnThread = createLFun {
-        val callable = it.single() as? LCallable ?: throw LinException("$it is not callable.")
-        thread {
-            callable(emptyList())
+    val threadName = LinNativeFunction { LString(Thread.currentThread().name) }
+    val runOnThread = LinNativeFunction {
+        returningUnit {
+            val callable = it.single()
+            if (!callable.canInvoke()) throw LinException("$it is not callable.")
+            thread { callable(emptyList()) }
         }
-        LUnit
     }
 }

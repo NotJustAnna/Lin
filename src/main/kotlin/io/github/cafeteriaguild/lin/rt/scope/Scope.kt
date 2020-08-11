@@ -1,6 +1,6 @@
 package io.github.cafeteriaguild.lin.rt.scope
 
-import io.github.cafeteriaguild.lin.rt.exc.LinException
+import io.github.cafeteriaguild.lin.rt.exceptions.LinException
 
 abstract class Scope {
     protected abstract val parent: Scope?
