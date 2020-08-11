@@ -9,5 +9,7 @@ class LinNativeFunction(val name: String = "<native function>", val block: (List
         lazyImmutableProperty("invoke") { this }
     }
 
+    override fun canInvoke() = true
+
     override fun invoke(args: List<LObj>) = block(args)
 }

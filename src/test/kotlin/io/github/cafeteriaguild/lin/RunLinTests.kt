@@ -12,7 +12,7 @@ import io.github.cafeteriaguild.lin.rt.scope.UserScope
 import java.io.File
 
 fun main() {
-    val source = Source(File("examples/projecting.lin"))
+    val source = Source(File("examples/fib.lin"))
     val expr = linStdParser.parse(source, linStdLexer)
     println(expr is Expr)
     println(buildString {

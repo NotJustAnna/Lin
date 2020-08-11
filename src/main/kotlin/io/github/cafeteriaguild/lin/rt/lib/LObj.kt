@@ -42,7 +42,10 @@ interface LObj {
 
     fun propertyOf(name: String): Property? = if (properties().contains(name)) ObjProperty(this, name) else null
 
-    fun component(value: Int): LObj {
-        return get("component$value")
+    fun component(value: Int): LObj? {
+        val property = propertyOf("component$value") ?: return null
+        val componentFn = property.get()
+        if (!componentFn.canInvoke()) return null
+        return componentFn.invoke()
     }
 }

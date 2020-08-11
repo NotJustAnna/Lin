@@ -11,7 +11,7 @@ import io.github.cafeteriaguild.lin.ast.node.declarations.DeclareFunctionNode
 import io.github.cafeteriaguild.lin.ast.node.misc.InvalidNode
 import io.github.cafeteriaguild.lin.ast.node.nodes.FunctionExpr
 import io.github.cafeteriaguild.lin.lexer.TokenType
-import io.github.cafeteriaguild.lin.parser.parselets.nodes.IdentifierParser
+import io.github.cafeteriaguild.lin.parser.ModifierHandler
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 import io.github.cafeteriaguild.lin.parser.utils.maybeIgnoreNL
 import io.github.cafeteriaguild.lin.parser.utils.parseBlock
@@ -21,7 +21,7 @@ object FunctionParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         if (ctx.nextIs(TokenType.INTERFACE)) {
-            return IdentifierParser.applyModifiers(ctx.parseExpression(), mapOf(LinModifier.FUN to token))
+            return ModifierHandler.apply(ctx.parseExpression(), mapOf(LinModifier.FUN to token))
         }
         val ident = if (ctx.nextIs(TokenType.IDENTIFIER)) ctx.eat(TokenType.IDENTIFIER) else null
         ctx.matchAll(TokenType.NL)

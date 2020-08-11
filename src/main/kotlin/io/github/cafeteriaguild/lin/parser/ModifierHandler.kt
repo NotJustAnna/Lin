@@ -22,7 +22,7 @@ object ModifierHandler {
         return apply(ctx.parseExpression(), map)
     }
 
-    private fun apply(node: Node, map: Map<LinModifier, Token<TokenType>>): Node {
+    fun apply(node: Node, map: Map<LinModifier, Token<TokenType>>): Node {
         val set = map.keys.toSet()
         when (node) {
             is DeclareObjectNode -> {
