@@ -83,6 +83,7 @@ object ClassParser : TypeParser() {
         if (node !is MultiNode) return invalidNode(node)
         val (decl, other) = node.list.remapInitializers().partition { it is Declaration }
         if (other.isNotEmpty()) return invalidChildNodes(node.list)
-        return DeclareClassNode(ident.value, parameters, implements, decl.filterIsInstance<Declaration>(), ident.section)
+        val declarations = decl.filterIsInstance<Declaration>().initializersLast()
+        return DeclareClassNode(ident.value, parameters, implements, declarations, ident.section)
     }
 }

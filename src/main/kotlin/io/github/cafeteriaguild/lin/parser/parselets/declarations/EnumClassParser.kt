@@ -51,6 +51,7 @@ object EnumClassParser : TypeParser() {
         if (node !is MultiNode) return invalidNode(node)
         val (decl, other) = node.list.remapInitializers().partition { it is Declaration }
         if (other.isNotEmpty()) return invalidChildNodes(node.list)
-        return DeclareEnumClassNode(ident.value, values, decl.filterIsInstance<Declaration>(), ident.section)
+        val declarations = decl.filterIsInstance<Declaration>().initializersLast()
+        return DeclareEnumClassNode(ident.value, values, declarations, ident.section)
     }
 }

@@ -57,4 +57,6 @@ abstract class TypeParser : PrefixParser<TokenType, Node> {
             } else it
         } else it
     }
+
+    fun List<Declaration>.initializersLast() = partition { it !is InitializerNode }.run { first + second }
 }

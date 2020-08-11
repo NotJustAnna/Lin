@@ -43,7 +43,7 @@ object ObjectParser : TypeParser() {
             if (node !is MultiNode) return invalidNode(node)
             val (decl, other) = node.list.remapInitializers().partition { it is Declaration }
             if (other.isNotEmpty()) return invalidChildNodes(node.list)
-            decl.filterIsInstance<Declaration>()
+            decl.filterIsInstance<Declaration>().initializersLast()
         } else emptyList()
 
         if (ident == null) {
