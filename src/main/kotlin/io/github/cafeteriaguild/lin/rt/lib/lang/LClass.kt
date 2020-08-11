@@ -8,7 +8,7 @@
 //import io.github.cafeteriaguild.lin.rt.exc.LinException
 //import io.github.cafeteriaguild.lin.rt.lib.LObj
 //import io.github.cafeteriaguild.lin.rt.scope.BasicScope
-//import io.github.cafeteriaguild.lin.rt.scope.Property
+//import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
 //import io.github.cafeteriaguild.lin.rt.scope.Scope
 //
 //class LClass(

@@ -4,10 +4,10 @@ import io.github.cafeteriaguild.lin.rt.lib.LObj
 import io.github.cafeteriaguild.lin.rt.lib.lang.LBoolean
 import io.github.cafeteriaguild.lin.rt.lib.lang.LString
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LInt
-import io.github.cafeteriaguild.lin.rt.scope.GetterProperty
-import io.github.cafeteriaguild.lin.rt.scope.LazyProperty
-import io.github.cafeteriaguild.lin.rt.scope.Property
-import io.github.cafeteriaguild.lin.rt.scope.SimpleProperty
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.GetterProperty
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.LazyProperty
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.SimpleProperty
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class LinNativeObj : LObj {
@@ -17,24 +17,24 @@ abstract class LinNativeObj : LObj {
         return properties.keys
     }
 
-    override fun propertyOf(name: String): Property {
-        return properties.getValue(name)
+    override fun propertyOf(name: String): Property? {
+        return properties[name]
     }
 
     override fun canGet(name: String): Boolean {
-        return propertyOf(name).getAllowed
+        return propertyOf(name)?.getAllowed ?: false
     }
 
     override fun get(name: String): LObj {
-        return propertyOf(name).get()
+        return propertyOf(name)!!.get()
     }
 
     override fun canSet(name: String): Boolean {
-        return propertyOf(name).setAllowed
+        return propertyOf(name)?.setAllowed ?: false
     }
 
     override fun set(name: String, value: LObj) {
-        propertyOf(name).set(value)
+        propertyOf(name)!!.set(value)
     }
 
     override fun toString(): String {

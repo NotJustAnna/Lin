@@ -1,8 +1,8 @@
 package io.github.cafeteriaguild.lin.rt.lib
 
 import io.github.cafeteriaguild.lin.rt.exceptions.LinException
-import io.github.cafeteriaguild.lin.rt.scope.ObjProperty
-import io.github.cafeteriaguild.lin.rt.scope.Property
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.ObjProperty
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
 
 interface LObj {
     fun properties(): Set<String> {
@@ -40,7 +40,7 @@ interface LObj {
         return get("invoke").invoke(args)
     }
 
-    fun propertyOf(name: String): Property = ObjProperty(this, name)
+    fun propertyOf(name: String): Property? = if (properties().contains(name)) ObjProperty(this, name) else null
 
     fun component(value: Int): LObj {
         return get("component$value")

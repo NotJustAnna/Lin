@@ -2,6 +2,8 @@ package io.github.cafeteriaguild.lin.rt.scope
 
 import io.github.cafeteriaguild.lin.rt.exceptions.LinException
 import io.github.cafeteriaguild.lin.rt.lib.LObj
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.SimpleProperty
 import java.util.concurrent.ConcurrentHashMap
 
 class UserScope(override val parent: Scope? = null) : Scope() {

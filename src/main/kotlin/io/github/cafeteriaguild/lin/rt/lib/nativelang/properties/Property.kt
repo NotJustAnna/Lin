@@ -1,4 +1,4 @@
-package io.github.cafeteriaguild.lin.rt.scope
+package io.github.cafeteriaguild.lin.rt.lib.nativelang.properties
 
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 

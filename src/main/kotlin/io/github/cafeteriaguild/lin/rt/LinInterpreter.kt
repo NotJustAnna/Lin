@@ -16,11 +16,15 @@ import io.github.cafeteriaguild.lin.rt.lib.lang.*
 import io.github.cafeteriaguild.lin.rt.lib.lang.functions.LFunction
 import io.github.cafeteriaguild.lin.rt.lib.lang.functions.LLambda
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.*
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.SimpleProperty
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeGet
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeIterable
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeRangeTo
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeSet
-import io.github.cafeteriaguild.lin.rt.scope.*
+import io.github.cafeteriaguild.lin.rt.scope.BasicScope
+import io.github.cafeteriaguild.lin.rt.scope.Scope
+import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Property?> {
     fun execute(node: Node, scope: Scope = BasicScope()): LObj {
