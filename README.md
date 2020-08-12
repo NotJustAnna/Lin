@@ -30,8 +30,7 @@ Lin will never fully parse Kotlin, but hit really closes to home.
 - Subscript access/assignment (`a[...]`, `a[...] = b`)
 - Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
 - Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
-- Objects, Classes
-    - Support for Companion Objects
+- Objects
 
 ## Parsing
 
@@ -63,7 +62,7 @@ Lin will never fully parse Kotlin, but hit really closes to home.
 - Labels on Loops
 - When
 - Lambdas
-- Modifiers are not validated
+- Modifiers don't get validated
 - The interpreter
 
 ## Stuff that is different
@@ -76,7 +75,7 @@ Lin will never fully parse Kotlin, but hit really closes to home.
         - `a { b, c -> c(b) }` turns into `a { | b, c | -> c(b) }`
         - `a { (b, c) -> c(b) }` turns into `a { | (b, c) | -> c(b) }`
 - Inheritance declarations
-    - Inheritancles must be enclosed in brackets.
+    - Inheritances must be enclosed in brackets.
         - `class A` stays the same
         - `class A(val a)` stays the same
         - `class A : Iterable` turns into `class A [Iterable]`
@@ -85,9 +84,9 @@ Lin will never fully parse Kotlin, but hit really closes to home.
 
 ## Stuff that will most likely be different
 
-- Mostly everything regarding to imports/packages will be different.
+- Mostly everything regarding imports/packages will be different.
     - **Lin** will most likely follow Python/Javascript ideas in this scenario.
-    - It is almost sure that the `package x; import ...` won't happen.
+    - It is almost sure that `package x; import ...` won't happen.
 - All **Lin** files will be script files.
     - This means that loading classes means loading and executing the script to get the classes.
 - Inline and _tailrec_ functions will most likely never get implemented.

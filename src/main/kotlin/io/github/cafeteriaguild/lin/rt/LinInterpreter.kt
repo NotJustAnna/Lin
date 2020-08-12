@@ -87,10 +87,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: DeclareObjectNode, param: Scope) = block {
-        TODO("Not yet implemented")
-//        val p = SimpleProperty(false)
-//        param.declareProperty(node.name, p)
-//        p.set(LObject(node.name, this, param, node.body))
+        val p = SimpleProperty(false)
+        param.declareProperty(node.name, p)
+        p.set(LObject(node.name, this, param, node.body))
     }
 
     override fun visit(node: DeclareFunctionNode, param: Scope) = block {
@@ -558,8 +557,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: ObjectExpr, param: Scope): LObj {
-        TODO("Not yet implemented")
-//        return LObject(null, this, param, node.body)
+        return LObject(null, this, param, node.body)
     }
 
     override fun visit(node: FunctionExpr, param: Scope): LObj {

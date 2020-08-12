@@ -10,7 +10,7 @@ import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.SimpleProperty
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class LinNativeObj : LObj {
+abstract class LinNativeObj : AbstractObj() {
     protected val properties = ConcurrentHashMap<String, Property>()
 
     override fun properties(): Set<String> {
@@ -19,62 +19,6 @@ abstract class LinNativeObj : LObj {
 
     override fun propertyOf(name: String): Property? {
         return properties[name]
-    }
-
-    override fun canGet(name: String): Boolean {
-        return propertyOf(name)?.getAllowed ?: false
-    }
-
-    override fun get(name: String): LObj {
-        return propertyOf(name)!!.get()
-    }
-
-    override fun canSet(name: String): Boolean {
-        return propertyOf(name)?.setAllowed ?: false
-    }
-
-    override fun set(name: String, value: LObj) {
-        propertyOf(name)!!.set(value)
-    }
-
-    override fun toString(): String {
-        if (canGet("toString")) {
-            val toStringFn = get("toString")
-            if (toStringFn.canInvoke()) {
-                val result = toStringFn.invoke()
-                if (result is LString) {
-                    return result.value
-                }
-            }
-        }
-        return "Lin object"
-    }
-
-    override fun hashCode(): Int {
-        if (canGet("hashCode")) {
-            val hashCodeFn = get("hashCode")
-            if (hashCodeFn.canInvoke()) {
-                val result = hashCodeFn.invoke()
-                if (result is LInt) {
-                    return result.value
-                }
-            }
-        }
-        return super.hashCode()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is LObj) return false
-        if (canGet("equals")) {
-            val equalsFn = get("equals")
-            if (equalsFn.canInvoke()) {
-                val result = equalsFn.invoke(listOf(other))
-                if (result is LBoolean) {
-                    return result.value
-                }
-            }
-        }
-        return super.equals(other)
     }
 
     // utility methods below

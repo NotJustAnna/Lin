@@ -11,7 +11,9 @@ import io.github.cafeteriaguild.lin.rt.LinRuntime
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 val code = """
-    fun listOf(vararg values) = values
+        fun listOf(vararg values) = values
+        
+        
         
         println(nanos())
         var i = 0
@@ -21,13 +23,13 @@ val code = """
         println(a + " " + i)
         
         object native {
-            class Screen {
+            object ScreenSize {
+                val w = 854
+                val h = 480
+            }
+            fun Screen() = object {
                 var x = 0
                 var y = 0
-                object Size {
-                    val w = 854
-                    val h = 480
-                }
             }
             val prefix = "haha "
             fun toJson() = prefix + "yesn't"
@@ -35,14 +37,12 @@ val code = """
         }
         val screen = native.Screen()
         screen.x = 5
-        return screen.x + " of " + native.Screen.Size.w
+        return screen.x + " of " + native.ScreenSize.w
 """.trimIndent()
 
 fun main() {
     val source = Source(
-        """
-            return 0 == 0
-        """.trimIndent()
+        code.trimIndent()
     )
     val expr = linStdParser.parse(source, linStdLexer)
     println(expr is Expr)

@@ -21,7 +21,7 @@ class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Node
             return parseDestructuring(ctx, token)
         }
         val ident = ctx.eat(TokenType.IDENTIFIER)
-        ctx.skipOnlyUntil(TokenType.ASSIGN, TokenType.IDENTIFIER)
+        ctx.skipOnlyUntil(TokenType.ASSIGN)
         if (ctx.match(TokenType.ASSIGN)) {
             ctx.matchAll(TokenType.NL)
             val expr = ctx.parseExpression().let {
@@ -32,15 +32,10 @@ class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Node
                 }
             }
             return DeclareVariableNode(ident.value, mutable, expr, token.section)
-        } else if (ctx.match(TokenType.IDENTIFIER)) {
-            val last = ctx.last
-            if (last.value != "by") {
-                return InvalidNode {
-                    section(ctx.last.section)
-                    child(DeclareVariableNode(ident.value, mutable, null, token.section))
-                    error(SyntaxException("Expected 'by'", ctx.last.section))
-                }
-            }
+        }
+        val mark = ctx.index
+        ctx.skipOnlyUntil(TokenType.IDENTIFIER)
+        if (ctx.nextIs(TokenType.IDENTIFIER) && ctx.eat().value == "by") {
             ctx.matchAll(TokenType.NL)
             val expr = ctx.parseExpression().let {
                 it as? Expr ?: return InvalidNode {
@@ -51,6 +46,8 @@ class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Node
             }
             return DelegatingVariableNode(ident.value, mutable, expr, token.section)
         }
+        ctx.index = mark
+
         return DeclareVariableNode(ident.value, mutable, null, token.section)
     }
 
