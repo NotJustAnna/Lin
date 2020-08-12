@@ -3,25 +3,45 @@ package io.github.cafeteriaguild.lin.rt.lib.lang.functions
 import io.github.cafeteriaguild.lin.ast.node.Node
 import io.github.cafeteriaguild.lin.ast.node.nodes.LambdaExpr
 import io.github.cafeteriaguild.lin.rt.LinInterpreter
+import io.github.cafeteriaguild.lin.rt.exceptions.BreakException
+import io.github.cafeteriaguild.lin.rt.exceptions.ContinueException
 import io.github.cafeteriaguild.lin.rt.exceptions.LinException
+import io.github.cafeteriaguild.lin.rt.exceptions.ReturnException
 import io.github.cafeteriaguild.lin.rt.lib.LObj
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinDirectCall
 import io.github.cafeteriaguild.lin.rt.scope.BasicScope
 import io.github.cafeteriaguild.lin.rt.scope.Scope
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
-class LLambda(
+class CompiledLambda(
     private val parentScope: Scope,
     private val parameters: List<LambdaExpr.Parameter>,
     private val body: Node
-) : LObj {
-
+) : LObj, LinDirectCall {
     override fun canInvoke(): Boolean {
         return true
     }
 
     override fun invoke(args: List<LObj>): LObj {
-        val params = UserScope(parentScope)
+        val params = prepareParameters(args)
+        return LinInterpreter().execute(body, BasicScope(params))
+    }
 
+    override fun call(interpreter: LinInterpreter, args: List<LObj>): LObj {
+        val params = prepareParameters(args)
+        return try {
+            body.accept(interpreter, params)
+        } catch (r: ReturnException) {
+            r.value
+        } catch (b: BreakException) {
+            throw LinException("Unbound break signal", b)
+        } catch (c: ContinueException) {
+            throw LinException("Unbound continue signal", c)
+        }
+    }
+
+    private fun prepareParameters(args: List<LObj>): UserScope {
+        val params = UserScope(parentScope)
         if (parameters.isEmpty()) {
             if (args.size == 1) {
                 params["it"] = args.single()
@@ -46,8 +66,7 @@ class LLambda(
                 "Lambda accepts ${parameters.size} parameter${if (parameters.size == 1) "" else "s"}."
             )
         }
-
-        return LinInterpreter().execute(body, BasicScope(params))
+        return params
     }
 
     override fun toString(): String {

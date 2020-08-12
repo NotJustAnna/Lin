@@ -13,15 +13,12 @@ import io.github.cafeteriaguild.lin.ast.node.ops.*
 import io.github.cafeteriaguild.lin.rt.exceptions.*
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 import io.github.cafeteriaguild.lin.rt.lib.lang.*
-import io.github.cafeteriaguild.lin.rt.lib.lang.functions.LFunction
-import io.github.cafeteriaguild.lin.rt.lib.lang.functions.LLambda
+import io.github.cafeteriaguild.lin.rt.lib.lang.functions.CompiledFunction
+import io.github.cafeteriaguild.lin.rt.lib.lang.functions.CompiledLambda
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.*
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.SimpleProperty
-import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeGet
-import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeIterable
-import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeRangeTo
-import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeSet
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.*
 import io.github.cafeteriaguild.lin.rt.scope.BasicScope
 import io.github.cafeteriaguild.lin.rt.scope.Scope
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
@@ -205,6 +202,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         if (!target.canInvoke()) {
             throw LinException("$target is not callable")
         }
+        if (target is LinDirectCall) {
+            return target.call(this, node.arguments.map { it.accept(this, param) })
+        }
         val args = node.arguments.map { it.accept(this, param) }
         return target.invoke(args)
     }
@@ -215,6 +215,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         val callable = property.get()
         if (!callable.canInvoke()) {
             throw LinException("$callable is not callable")
+        }
+        if (callable is LinDirectCall) {
+            return callable.call(this, node.arguments.map { it.accept(this, param) })
         }
         val args = node.arguments.map { it.accept(this, param) }
         return callable.invoke(args)
@@ -228,6 +231,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         val callable = property.get()
         if (!callable.canInvoke()) {
             throw LinException("$callable is not callable")
+        }
+        if (callable is LinDirectCall) {
+            return callable.call(this, node.arguments.map { it.accept(this, param) })
         }
         val args = node.arguments.map { it.accept(this, param) }
         return callable.invoke(args)
@@ -297,20 +303,50 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: ForNode, param: Scope) = block {
         val iterable = node.iterable.accept(this, param)
-        if (iterable !is LinNativeIterable) {
-            throw LinTypeException("$iterable is not an Iterable")
-        }
-        for (each in iterable) {
-            try {
-                val child = UserScope(param)
-                child[node.variableName] = each
-                node.body.accept(this, child)
-            } catch (_: BreakException) {
-                break
-            } catch (_: ContinueException) {
-                continue
+        if (iterable is LinNativeIterable) {
+            for (each in iterable) {
+                try {
+                    val child = UserScope(param)
+                    child[node.variableName] = each
+                    node.body.accept(this, child)
+                } catch (_: BreakException) {
+                    break
+                } catch (_: ContinueException) {
+                    continue
+                }
+            }
+        } else if (iterable.canGet("iterator")) {
+            val iteratorFn = iterable["iterator"]
+            if (iteratorFn.canInvoke()) {
+                val iteratorInst = if (iteratorFn is LinDirectCall) iteratorFn.call(this) else iteratorFn.invoke()
+                if (iteratorInst.canGet("hasNext") && iteratorInst.canGet("next")) {
+                    val hasNextFn = iteratorInst["hasNext"]
+                    val nextFn = iteratorInst["next"]
+                    if (hasNextFn.canInvoke() && nextFn.canInvoke()) {
+                        while (true) {
+                            val hasNext = if (hasNextFn is LinDirectCall) hasNextFn.call(this) else hasNextFn.invoke()
+                            if (hasNext !is LBoolean) {
+                                throw LinTypeException("$hasNext is not a Boolean")
+                            }
+                            if (!hasNext.value) {
+                                break
+                            }
+                            val next = if (nextFn is LinDirectCall) nextFn.call(this) else nextFn.invoke()
+                            try {
+                                val child = UserScope(param)
+                                child[node.variableName] = next
+                                node.body.accept(this, child)
+                            } catch (_: BreakException) {
+                                break
+                            } catch (_: ContinueException) {
+                                continue
+                            }
+                        }
+                    }
+                }
             }
         }
+        throw LinTypeException("$iterable is not an Iterable")
     }
 
     override fun visit(node: BreakExpr, param: Scope) = throw BreakException()
@@ -561,11 +597,11 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: FunctionExpr, param: Scope): LObj {
-        return LFunction(param, node.parameters, node.body)
+        return CompiledFunction(param, node.parameters, node.body)
     }
 
     override fun visit(node: LambdaExpr, param: Scope): LObj {
-        return LLambda(param, node.parameters, node.body)
+        return CompiledLambda(param, node.parameters, node.body)
     }
 
     override fun visit(node: InitializerNode, param: Scope) = block {

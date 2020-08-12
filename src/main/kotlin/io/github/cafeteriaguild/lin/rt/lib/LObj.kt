@@ -13,7 +13,7 @@ interface LObj {
         return false
     }
 
-    fun get(name: String): LObj {
+    operator fun get(name: String): LObj {
         throw UnsupportedOperationException()
     }
 
@@ -21,7 +21,7 @@ interface LObj {
         return false
     }
 
-    fun set(name: String, value: LObj) {
+    operator fun set(name: String, value: LObj) {
         throw UnsupportedOperationException()
     }
 
