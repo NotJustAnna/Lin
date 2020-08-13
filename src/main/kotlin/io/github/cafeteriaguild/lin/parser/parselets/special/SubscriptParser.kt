@@ -41,8 +41,6 @@ object SubscriptParser : InfixParser<TokenType, Node> {
 
         val rBracket = ctx.last
 
-        // TODO implement all the op-assign (plusAssign, etc)
-        // TL;DR "a[b] += c" is completely valid...
         return if (ctx.match(TokenType.ASSIGN)) {
             val value = ctx.parseExpression().let {
                 it as? Expr ?: return InvalidNode {

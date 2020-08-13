@@ -31,7 +31,6 @@ class DotParser(val nullSafe: Boolean) : InfixParser<TokenType, Node> {
         if (identifier.type == TokenType.IDENTIFIER) {
             val name = identifier.value
 
-            // TODO implement all the op-assign (plusAssign, etc)
             return if (ctx.match(TokenType.ASSIGN)) {
                 val value = ctx.parseExpression().let {
                     it as? Expr ?: return InvalidNode {

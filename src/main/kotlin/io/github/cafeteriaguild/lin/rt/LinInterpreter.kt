@@ -129,7 +129,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         val value = node.value.accept(this, param)
         for (index in properties.indices) {
             val callable = value.component(index) ?: throw LinException("$value.component$index does not exist.")
-            val obj = if (callable is LinDirectCall) callable.call(this) else callable.invoke()
+            val obj = if (callable is LinDirectCall) callable.call(this) else callable()
             properties[index].second.set(obj)
         }
     }
@@ -198,9 +198,15 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         val target = node.target.accept(this, param)
         if (target is LinNativeGet) {
             return target[node.arguments.map { it.accept(this, param) }]
+        } else if (target.canGet("get")) {
+            val getFn = target["get"]
+            if (getFn.canInvoke()) {
+                val getCall = getFn.callable()
+                val args = node.arguments.map { it.accept(this, param) }
+                return if (getCall is LinDirectCall) getCall.call(this, args) else getCall(args)
+            }
         }
-        //TODO implement userland subscript case
-        throw LinException("$target is not subscript")
+        throw LinException("$target does not support subscript get")
     }
 
     override fun visit(node: SubscriptAssignNode, param: Scope) = block {
@@ -208,9 +214,16 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         if (target is LinNativeSet) {
             target[node.arguments.map { it.accept(this, param) }] = node.value.accept(this, param)
             return@block
+        } else if (target.canGet("set")) {
+            val setFn = target["set"]
+            if (setFn.canInvoke()) {
+                val setCall = setFn.callable()
+                val setArgs = node.arguments.map { it.accept(this, param) } + node.value.accept(this, param)
+                if (setCall is LinDirectCall) setCall.call(this, setArgs) else setCall(setArgs)
+                return@block
+            }
         }
-        //TODO implement userland subscript case
-        throw LinException("$target is not subscript")
+        throw LinException("$target does not support subscript set")
     }
 
     override fun visit(node: InvokeExpr, param: Scope): LObj {
@@ -222,7 +235,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         if (callable is LinDirectCall) {
             return callable.call(this, node.arguments.map { it.accept(this, param) })
         }
-        return callable.invoke(node.arguments.map { it.accept(this, param) })
+        return callable(node.arguments.map { it.accept(this, param) })
     }
 
     override fun visit(node: InvokeLocalExpr, param: Scope): LObj {
@@ -236,7 +249,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         if (callable is LinDirectCall) {
             return callable.call(this, node.arguments.map { it.accept(this, param) })
         }
-        return callable.invoke(node.arguments.map { it.accept(this, param) })
+        return callable(node.arguments.map { it.accept(this, param) })
     }
 
     override fun visit(node: InvokeMemberExpr, param: Scope): LObj {
@@ -252,7 +265,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         if (callable is LinDirectCall) {
             return callable.call(this, node.arguments.map { it.accept(this, param) })
         }
-        return callable.invoke(node.arguments.map { it.accept(this, param) })
+        return callable(node.arguments.map { it.accept(this, param) })
     }
 
     override fun visit(node: IfExpr, param: Scope): LObj {
@@ -335,7 +348,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             val iteratorFn = iterable["iterator"]
             if (iteratorFn.canInvoke()) {
                 val iteratorCall = iteratorFn.callable()
-                val iteratorInst = if (iteratorCall is LinDirectCall) iteratorCall.call(this) else iteratorCall.invoke()
+                val iteratorInst = if (iteratorCall is LinDirectCall) iteratorCall.call(this) else iteratorCall()
                 if (iteratorInst.canGet("hasNext") && iteratorInst.canGet("next")) {
                     val hasNextFn = iteratorInst["hasNext"]
                     val nextFn = iteratorInst["next"]
@@ -343,14 +356,14 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         val hasNextCall = hasNextFn.callable()
                         val nextCall = nextFn.callable()
                         while (true) {
-                            val hasNext = if (hasNextCall is LinDirectCall) hasNextCall.call(this) else hasNextCall.invoke()
+                            val hasNext = if (hasNextCall is LinDirectCall) hasNextCall.call(this) else hasNextCall()
                             if (hasNext !is LBoolean) {
                                 throw LinTypeException("$hasNext is not a Boolean")
                             }
                             if (!hasNext.value) {
                                 break
                             }
-                            val next = if (nextCall is LinDirectCall) nextCall.call(this) else nextCall.invoke()
+                            val next = if (nextCall is LinDirectCall) nextCall.call(this) else nextCall()
                             try {
                                 val child = UserScope(param)
                                 child[node.variableName] = next
@@ -381,6 +394,13 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     return box(plus(left.value, right.value))
                 }
                 if (left is LString) {
+                    if (right.canGet("toString")) {
+                        val toStringFn = right["toString"]
+                        if (toStringFn.canInvoke()) {
+                            val toStringCall = toStringFn.callable()
+                            return if (toStringCall is LinDirectCall) toStringCall.call(this) else toStringCall()
+                        }
+                    }
                     return LString(left.value + right)
                 }
                 //if (right is LString) {
@@ -589,8 +609,19 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 AssignOperationType.ADD_ASSIGN -> {
                     when {
                         left is LNumber && right is LNumber -> box(plus(left.value, right.value))
-                        left is LString -> LString(left.value + right)
-                        //right is LString -> LString(left.toString() + right.value)
+                        left is LString -> {
+                            if (right.canGet("toString")) {
+                                val toStringFn = right["toString"]
+                                if (toStringFn.canInvoke()) {
+                                    val call = toStringFn.callable()
+                                    if (call is LinDirectCall) call.call(this) else call()
+                                } else {
+                                    LString(left.value + right)
+                                }
+                            } else {
+                                LString(left.value + right)
+                            }
+                        }
                         left is LChar && right is LNumber -> LChar(left.value + right.value.toInt())
                         //right is LChar -> LString(left.toString() + right.value)
                         //TODO implement userland operator case
@@ -652,7 +683,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun resolve(node: ThisExpr, param: Scope): Property {
         return param.findProperty("this")
-            ?: throw LinException("There isn't an object associated in this context.")
+            ?: throw LinException("There isn't a `this` object associated in this context.")
     }
 
     override fun resolve(node: IdentifierExpr, param: Scope): Property {
@@ -692,7 +723,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         val getFn = target["get"]
                         if (getFn.canInvoke()) {
                             val getCall = getFn.callable()
-                            return if (getCall is LinDirectCall) getCall.call(interpreter, args) else getCall.invoke(args)
+                            return if (getCall is LinDirectCall) getCall.call(interpreter, args) else getCall(args)
                         }
                     }
                     throw LinException("$node does not support subscript get")
@@ -706,7 +737,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         if (setFn.canInvoke()) {
                             val setCall = setFn.callable()
                             val setArgs = args + value
-                            if (setCall is LinDirectCall) setCall.call(interpreter, setArgs) else setCall.invoke(setArgs)
+                            if (setCall is LinDirectCall) setCall.call(interpreter, setArgs) else setCall(setArgs)
                         }
                     } else {
                         throw LinException("$node does not accept subscript set")
