@@ -11,7 +11,7 @@ enum class LBoolean(val value: Boolean) : LObj {
     };
 
     override fun toString() = value.toString()
-    abstract fun not(): LBoolean
+    abstract operator fun not(): LBoolean
 
     companion object {
         fun of(value: Boolean) = if (value) TRUE else FALSE

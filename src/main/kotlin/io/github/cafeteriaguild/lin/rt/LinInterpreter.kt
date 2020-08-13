@@ -397,22 +397,28 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     if (right.canGet("toString")) {
                         val toStringFn = right["toString"]
                         if (toStringFn.canInvoke()) {
-                            val toStringCall = toStringFn.callable()
-                            return if (toStringCall is LinDirectCall) toStringCall.call(this) else toStringCall()
+                            val call = toStringFn.callable()
+                            val obj = if (call is LinDirectCall) call.call(this) else call()
+                            if (obj is LString) {
+                                return LString(left.value + obj.value)
+                            }
                         }
                     }
                     return LString(left.value + right)
                 }
-                //if (right is LString) {
-                //    return LString(left.toString() + right.value)
-                //}
                 if (left is LChar) {
                     if (right is LNumber) {
                         return LChar(left.value + right.value.toInt())
                     }
                     return LString(left.value.toString() + right)
                 }
-                //TODO implement userland operator case
+                if (left.canGet("plus")) {
+                    val opFn = left["plus"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left + $right")
             }
             BinaryOperationType.SUBTRACT -> {
@@ -420,7 +426,13 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return box(minus(left.value, right.value))
                 }
-                //TODO implement userland operator case
+                if (left.canGet("minus")) {
+                    val opFn = left["minus"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left - $right")
             }
             BinaryOperationType.MULTIPLY -> {
@@ -428,7 +440,13 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return box(times(left.value, right.value))
                 }
-                //TODO implement userland operator case
+                if (left.canGet("times")) {
+                    val opFn = left["times"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left * $right")
             }
             BinaryOperationType.DIVIDE -> {
@@ -436,7 +454,13 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return box(div(left.value, right.value))
                 }
-                //TODO implement userland operator case
+                if (left.canGet("div")) {
+                    val opFn = left["div"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left / $right")
             }
             BinaryOperationType.REMAINING -> {
@@ -444,17 +468,49 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return box(rem(left.value, right.value))
                 }
-                //TODO implement userland operator case
+                if (left.canGet("rem")) {
+                    val opFn = left["rem"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left % $right")
             }
             BinaryOperationType.EQUALS -> {
                 val right = node.right.accept(this, param)
-                //TODO implement userland equals case
+                if (left == LNull) {
+                    return LBoolean.of(right == LNull)
+                }
+                if (left.canGet("equals")) {
+                    val equalsFn = left["equals"]
+                    if (equalsFn.canInvoke()) {
+                        val call = equalsFn.callable()
+                        val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                        if (obj !is LBoolean) {
+                            throw LinTypeException("$obj is not a Boolean")
+                        }
+                        return obj
+                    }
+                }
                 return LBoolean.of(left == right)
             }
             BinaryOperationType.NOT_EQUALS -> {
                 val right = node.right.accept(this, param)
-                //TODO implement userland equals case
+                if (left == LNull) {
+                    return LBoolean.of(right != LNull)
+                }
+                if (left.canGet("equals")) {
+                    val equalsFn = left["equals"]
+                    if (equalsFn.canInvoke()) {
+                        val call = equalsFn.callable()
+                        val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                        if (obj !is LBoolean) {
+                            throw LinTypeException("$obj is not a Boolean")
+                        }
+                        return !obj
+                    }
+                }
                 return LBoolean.of(left != right)
             }
             BinaryOperationType.AND -> {
@@ -488,12 +544,34 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return LBoolean.of(left < right)
                 }
+                if (left.canGet("compareTo")) {
+                    val compareToFn = left["compareTo"]
+                    if (compareToFn.canInvoke()) {
+                        val call = compareToFn.callable()
+                        val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                        if (obj !is LNumber) {
+                            throw LinTypeException("$obj is not a Number")
+                        }
+                        return LBoolean.of(obj.value.toDouble() < 0)
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left < $right")
             }
             BinaryOperationType.LTE -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
                     return LBoolean.of(left <= right)
+                }
+                if (left.canGet("compareTo")) {
+                    val compareToFn = left["compareTo"]
+                    if (compareToFn.canInvoke()) {
+                        val call = compareToFn.callable()
+                        val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                        if (obj !is LNumber) {
+                            throw LinTypeException("$obj is not a Number")
+                        }
+                        return LBoolean.of(obj.value.toDouble() <= 0)
+                    }
                 }
                 throw LinTypeException("Unsupported operation $left <= $right")
             }
@@ -502,7 +580,17 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return LBoolean.of(left > right)
                 }
-                //TODO implement userland compareTo case
+                if (left.canGet("compareTo")) {
+                    val compareToFn = left["compareTo"]
+                    if (compareToFn.canInvoke()) {
+                        val call = compareToFn.callable()
+                        val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                        if (obj !is LNumber) {
+                            throw LinTypeException("$obj is not a Number")
+                        }
+                        return LBoolean.of(obj.value.toDouble() > 0)
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left > $right")
             }
             BinaryOperationType.GTE -> {
@@ -510,7 +598,17 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return LBoolean.of(left >= right)
                 }
-                //TODO implement userland compareTo case
+                if (left.canGet("compareTo")) {
+                    val compareToFn = left["compareTo"]
+                    if (compareToFn.canInvoke()) {
+                        val call = compareToFn.callable()
+                        val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                        if (obj !is LNumber) {
+                            throw LinTypeException("$obj is not a Number")
+                        }
+                        return LBoolean.of(obj.value.toDouble() >= 0)
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left >= $right")
             }
             BinaryOperationType.ELVIS -> {
@@ -525,7 +623,13 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LinNativeRangeTo) {
                     return left.rangeTo(right)
                 }
-                //TODO implement userland rangeTo case
+                if (left.canGet("rangeTo")) {
+                    val opFn = left["rangeTo"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                    }
+                }
                 throw LinTypeException("Unsupported operation $left..$right")
             }
         }
@@ -538,21 +642,39 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (target is LNumber) {
                     return box(unaryPlus(target.value))
                 }
-                //TODO implement userland operator case
+                if (target.canGet("unaryPlus")) {
+                    val opFn = target["unaryPlus"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this) else call()
+                    }
+                }
                 throw LinTypeException("Unsupported operation +$target")
             }
             UnaryOperationType.NEGATIVE -> {
                 if (target is LNumber) {
                     return box(unaryMinus(target.value))
                 }
-                //TODO implement userland operator case
+                if (target.canGet("unaryMinus")) {
+                    val opFn = target["unaryMinus"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this) else call()
+                    }
+                }
                 throw LinTypeException("Unsupported operation -$target")
             }
             UnaryOperationType.NOT -> {
                 if (target is LBoolean) {
                     return target.not()
                 }
-                //TODO implement userland operator case
+                if (target.canGet("not")) {
+                    val opFn = target["not"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this) else call()
+                    }
+                }
                 throw LinTypeException("Unsupported operation !$target")
             }
         }
@@ -564,14 +686,26 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (target is LNumber) {
                     return target.inc()
                 }
-                //TODO implement userland operator case
+                if (target.canGet("inc")) {
+                    val opFn = target["inc"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this) else call()
+                    }
+                }
                 throw LinTypeException("Increment is unsupported on $target")
             }
             UnaryAssignOperationType.DECREMENT -> {
                 if (target is LNumber) {
                     return target.dec()
                 }
-                //TODO implement userland operator case
+                if (target.canGet("dec")) {
+                    val opFn = target["dec"]
+                    if (opFn.canInvoke()) {
+                        val call = opFn.callable()
+                        return if (call is LinDirectCall) call.call(this) else call()
+                    }
+                }
                 throw LinTypeException("Decrement is unsupported on $target")
             }
         }
@@ -604,60 +738,147 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         val left = property.get()
         val right = node.right.accept(this, param)
 
-        property.set(
-            when (node.operator) {
-                AssignOperationType.ADD_ASSIGN -> {
-                    when {
-                        left is LNumber && right is LNumber -> box(plus(left.value, right.value))
-                        left is LString -> {
-                            if (right.canGet("toString")) {
-                                val toStringFn = right["toString"]
-                                if (toStringFn.canInvoke()) {
-                                    val call = toStringFn.callable()
-                                    if (call is LinDirectCall) call.call(this) else call()
-                                } else {
-                                    LString(left.value + right)
+        when (node.operator) {
+            AssignOperationType.ADD_ASSIGN -> {
+                when {
+                    left is LNumber && right is LNumber -> property.set(box(plus(left.value, right.value)))
+                    left is LString -> {
+                        if (right.canGet("toString")) {
+                            val toStringFn = right["toString"]
+                            if (toStringFn.canInvoke()) {
+                                val call = toStringFn.callable()
+                                val obj = if (call is LinDirectCall) call.call(this) else call()
+                                if (obj is LString) {
+                                    property.set(LString(left.value + obj.value))
                                 }
-                            } else {
-                                LString(left.value + right)
                             }
                         }
-                        left is LChar && right is LNumber -> LChar(left.value + right.value.toInt())
-                        //right is LChar -> LString(left.toString() + right.value)
-                        //TODO implement userland operator case
-                        else -> throw LinTypeException("Unsupported operation $left + $right")
+                        property.set(LString(left.value + right))
                     }
-                }
-                AssignOperationType.SUBTRACT_ASSIGN -> {
-                    when {
-                        left is LNumber && right is LNumber -> box(minus(left.value, right.value))
-                        //TODO implement userland operator case
-                        else -> throw LinTypeException("Unsupported operation $left - $right")
-                    }
-                }
-                AssignOperationType.MULTIPLY_ASSIGN -> {
-                    when {
-                        left is LNumber && right is LNumber -> box(times(left.value, right.value))
-                        //TODO implement userland operator case
-                        else -> throw LinTypeException("Unsupported operation $left * $right")
-                    }
-                }
-                AssignOperationType.DIVIDE_ASSIGN -> {
-                    when {
-                        left is LNumber && right is LNumber -> box(div(left.value, right.value))
-                        //TODO implement userland operator case
-                        else -> throw LinTypeException("Unsupported operation $left / $right")
-                    }
-                }
-                AssignOperationType.REMAINING_ASSIGN -> {
-                    when {
-                        left is LNumber && right is LNumber -> box(rem(left.value, right.value))
-                        //TODO implement userland operator case
-                        else -> throw LinTypeException("Unsupported operation $left % $right")
+                    left is LChar && right is LNumber -> property.set(LChar(left.value + right.value.toInt()))
+                    else -> {
+                        if (left.canGet("plusAssign")) {
+                            val assignFn = left["plusAssign"]
+                            if (assignFn.canInvoke()) {
+                                val call = assignFn.callable()
+                                if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                return@block
+                            }
+                        }
+                        if (left.canGet("plus")) {
+                            val opFn = left["plus"]
+                            if (opFn.canInvoke()) {
+                                val call = opFn.callable()
+                                val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                property.set(obj)
+                                return@block
+                            }
+                        }
+                        throw LinTypeException("Unsupported operation $left + $right")
                     }
                 }
             }
-        )
+            AssignOperationType.SUBTRACT_ASSIGN -> {
+                when {
+                    left is LNumber && right is LNumber -> property.set(box(minus(left.value, right.value)))
+                    else -> {
+                        if (left.canGet("minusAssign")) {
+                            val assignFn = left["minusAssign"]
+                            if (assignFn.canInvoke()) {
+                                val call = assignFn.callable()
+                                if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                return@block
+                            }
+                        }
+                        if (left.canGet("minus")) {
+                            val opFn = left["minus"]
+                            if (opFn.canInvoke()) {
+                                val call = opFn.callable()
+                                val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                property.set(obj)
+                                return@block
+                            }
+                        }
+                        throw LinTypeException("Unsupported operation $left + $right")
+                    }
+                }
+            }
+            AssignOperationType.MULTIPLY_ASSIGN -> {
+                when {
+                    left is LNumber && right is LNumber -> property.set(box(times(left.value, right.value)))
+                    else -> {
+                        if (left.canGet("timesAssign")) {
+                            val assignFn = left["timesAssign"]
+                            if (assignFn.canInvoke()) {
+                                val call = assignFn.callable()
+                                if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                return@block
+                            }
+                        }
+                        if (left.canGet("times")) {
+                            val opFn = left["times"]
+                            if (opFn.canInvoke()) {
+                                val call = opFn.callable()
+                                val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                property.set(obj)
+                                return@block
+                            }
+                        }
+                        throw LinTypeException("Unsupported operation $left + $right")
+                    }
+                }
+            }
+            AssignOperationType.DIVIDE_ASSIGN -> {
+                when {
+                    left is LNumber && right is LNumber -> property.set(box(div(left.value, right.value)))
+                    else -> {
+                        if (left.canGet("divAssign")) {
+                            val opFn = left["divAssign"]
+                            if (opFn.canInvoke()) {
+                                val call = opFn.callable()
+                                if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                return@block
+                            }
+                        }
+                        if (left.canGet("div")) {
+                            val opFn = left["div"]
+                            if (opFn.canInvoke()) {
+                                val call = opFn.callable()
+                                val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                property.set(obj)
+                                return@block
+                            }
+                        }
+                        throw LinTypeException("Unsupported operation $left + $right")
+                    }
+                }
+            }
+            AssignOperationType.REMAINING_ASSIGN -> {
+                when {
+                    left is LNumber && right is LNumber -> property.set(box(rem(left.value, right.value)))
+                    else -> {
+                        if (left.canGet("remAssign")) {
+                            val assignFn = left["remAssign"]
+                            if (assignFn.canInvoke()) {
+                                val call = assignFn.callable()
+                                if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                return@block
+                            }
+                        }
+                        if (left.canGet("rem")) {
+                            val opFn = left["rem"]
+                            if (opFn.canInvoke()) {
+                                val call = opFn.callable()
+                                val obj = if (call is LinDirectCall) call.call(this, listOf(right)) else call(listOf(right))
+                                property.set(obj)
+                                return@block
+                            }
+                        }
+                        throw LinTypeException("Unsupported operation $left + $right")
+                    }
+                }
+            }
+        }
     }
 
     override fun visit(node: ObjectExpr, param: Scope): LObj {
