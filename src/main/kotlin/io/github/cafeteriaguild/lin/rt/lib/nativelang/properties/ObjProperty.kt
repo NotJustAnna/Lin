@@ -9,10 +9,10 @@ class ObjProperty(private val obj: LObj, private val name: String) : Property {
         get() = obj.canSet(name)
 
     override fun get(): LObj {
-        return obj.get(name)
+        return obj[name]
     }
 
     override fun set(value: LObj) {
-        obj.set(name, value)
+        obj[name] = value
     }
 }

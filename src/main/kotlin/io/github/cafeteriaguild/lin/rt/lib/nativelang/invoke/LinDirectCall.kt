@@ -1,4 +1,4 @@
-package io.github.cafeteriaguild.lin.rt.lib.nativelang.routes
+package io.github.cafeteriaguild.lin.rt.lib.nativelang.invoke
 
 import io.github.cafeteriaguild.lin.rt.LinInterpreter
 import io.github.cafeteriaguild.lin.rt.lib.LObj

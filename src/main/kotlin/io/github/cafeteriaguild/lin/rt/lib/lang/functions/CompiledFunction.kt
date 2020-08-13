@@ -10,7 +10,7 @@ import io.github.cafeteriaguild.lin.rt.exceptions.LinException
 import io.github.cafeteriaguild.lin.rt.exceptions.ReturnException
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 import io.github.cafeteriaguild.lin.rt.lib.lang.collections.LList
-import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinDirectCall
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.invoke.LinDirectCall
 import io.github.cafeteriaguild.lin.rt.scope.BasicScope
 import io.github.cafeteriaguild.lin.rt.scope.Scope
 import io.github.cafeteriaguild.lin.rt.scope.UserScope

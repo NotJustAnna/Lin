@@ -1,9 +1,9 @@
 package io.github.cafeteriaguild.lin.rt.lib
 
 import io.github.cafeteriaguild.lin.rt.exceptions.LinException
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.invoke.LinCall
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.ObjProperty
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
-import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinCall
 
 interface LObj {
     fun properties(): Set<String> {

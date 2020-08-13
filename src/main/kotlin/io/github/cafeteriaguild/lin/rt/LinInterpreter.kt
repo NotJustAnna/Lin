@@ -24,8 +24,11 @@ import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.rem
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.times
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.unaryMinus
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.unaryPlus
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.invoke.LinDirectCall
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.DelegatedProperty
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.SimpleProperty
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.SubscriptEmulatedProperty
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.*
 import io.github.cafeteriaguild.lin.rt.scope.BasicScope
 import io.github.cafeteriaguild.lin.rt.scope.Scope
@@ -119,7 +122,12 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: DelegatingVariableNode, param: Scope) = block {
-        TODO("Not yet implemented")
+        val target = node.delegate.accept(this, param)
+        if (target is LinNativeDelegate || target.canGet("getValue") && target["getValue"].canInvoke()) {
+            val p = DelegatedProperty(target, node.name, node.mutable, this)
+            param.declareProperty(node.name, p)
+        }
+        throw LinException("$target does not accept property delegation")
     }
 
     override fun visit(node: DestructuringVariableNode, param: Scope) = block {
@@ -930,42 +938,9 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             || (target.canGet("get") && target["get"].canInvoke())
             || (target.canGet("set") && target["set"].canInvoke())) {
             val args = node.arguments.map { it.accept(this, param) }
-            return object : Property {
-                private val interpreter = this@LinInterpreter
-                override val getAllowed: Boolean
-                    get() = target is LinNativeGet || (target.canGet("get") && target["get"].canInvoke())
-                override val setAllowed: Boolean
-                    get() = target is LinNativeSet || (target.canGet("set") && target["set"].canInvoke())
-
-                override fun get(): LObj {
-                    if (target is LinNativeGet) {
-                        return target[args]
-                    } else if (target.canGet("get")) {
-                        val getFn = target["get"]
-                        if (getFn.canInvoke()) {
-                            val getCall = getFn.callable()
-                            return if (getCall is LinDirectCall) getCall.call(interpreter, args) else getCall(args)
-                        }
-                    }
-                    throw LinException("$node does not support subscript get")
-                }
-
-                override fun set(value: LObj) {
-                    if (target is LinNativeSet) {
-                        target[args] = value
-                    } else if (target.canGet("set")) {
-                        val setFn = target["set"]
-                        if (setFn.canInvoke()) {
-                            val setCall = setFn.callable()
-                            val setArgs = args + value
-                            if (setCall is LinDirectCall) setCall.call(interpreter, setArgs) else setCall(setArgs)
-                        }
-                    } else {
-                        throw LinException("$node does not accept subscript set")
-                    }
-                }
-            }
+            return SubscriptEmulatedProperty(target, args, this)
         }
-        throw LinException("$node does not accept subscript operations")
+        throw LinException("$target does not accept subscript operations")
     }
 }
+

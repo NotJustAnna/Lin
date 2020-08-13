@@ -13,8 +13,6 @@ import io.github.cafeteriaguild.lin.rt.scope.UserScope
 val code = """
         fun listOf(vararg values) = values
         
-        
-        
         println(nanos())
         var i = 0
         val a = listOf(1)
