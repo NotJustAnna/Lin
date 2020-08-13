@@ -26,7 +26,7 @@ abstract class AbstractObj : LObj {
         if (canGet("toString")) {
             val toStringFn = get("toString")
             if (toStringFn.canInvoke()) {
-                val result = toStringFn.invoke()
+                val result = toStringFn.callable().invoke()
                 if (result is LString) {
                     return result.value
                 }
@@ -39,7 +39,7 @@ abstract class AbstractObj : LObj {
         if (canGet("hashCode")) {
             val hashCodeFn = get("hashCode")
             if (hashCodeFn.canInvoke()) {
-                val result = hashCodeFn.invoke()
+                val result = hashCodeFn.callable().invoke()
                 if (result is LInt) {
                     return result.value
                 }
@@ -53,7 +53,7 @@ abstract class AbstractObj : LObj {
         if (canGet("equals")) {
             val equalsFn = get("equals")
             if (equalsFn.canInvoke()) {
-                val result = equalsFn.invoke(listOf(other))
+                val result = equalsFn.callable().invoke(listOf(other))
                 if (result is LBoolean) {
                     return result.value
                 }

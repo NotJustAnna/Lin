@@ -16,6 +16,14 @@ import io.github.cafeteriaguild.lin.rt.lib.lang.*
 import io.github.cafeteriaguild.lin.rt.lib.lang.functions.CompiledFunction
 import io.github.cafeteriaguild.lin.rt.lib.lang.functions.CompiledLambda
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.*
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.box
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.div
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.minus
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.plus
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.rem
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.times
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.unaryMinus
+import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.unaryPlus
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.SimpleProperty
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.*
@@ -24,6 +32,10 @@ import io.github.cafeteriaguild.lin.rt.scope.Scope
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Property?> {
+    /*
+     * TODO toString(), equals(), hashCode() should be replaced with LinDirectCall checks.
+     */
+
     fun execute(node: Node, scope: Scope = BasicScope()): LObj {
         if (node.accept(NodeValidator)) {
             return try {
@@ -116,7 +128,8 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             .onEach { (s, p) -> param.declareProperty(s, p) }
         val value = node.value.accept(this, param)
         for (index in properties.indices) {
-            val obj = value.component(index) ?: throw LinException("$value.component$index does not exist.")
+            val callable = value.component(index) ?: throw LinException("$value.component$index does not exist.")
+            val obj = if (callable is LinDirectCall) callable.call(this) else callable.invoke()
             properties[index].second.set(obj)
         }
     }
@@ -183,18 +196,21 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: SubscriptAccessExpr, param: Scope): LObj {
         val target = node.target.accept(this, param)
-        if (target !is LinNativeGet) {
-            throw LinException("$target is not subscript")
+        if (target is LinNativeGet) {
+            return target[node.arguments.map { it.accept(this, param) }]
         }
-        return target[node.arguments.map { it.accept(this, param) }]
+        //TODO implement userland subscript case
+        throw LinException("$target is not subscript")
     }
 
     override fun visit(node: SubscriptAssignNode, param: Scope) = block {
         val target = node.target.accept(this, param)
-        if (target !is LinNativeSet) {
-            throw LinException("$target is not subscript")
+        if (target is LinNativeSet) {
+            target[node.arguments.map { it.accept(this, param) }] = node.value.accept(this, param)
+            return@block
         }
-        target[node.arguments.map { it.accept(this, param) }] = node.value.accept(this, param)
+        //TODO implement userland subscript case
+        throw LinException("$target is not subscript")
     }
 
     override fun visit(node: InvokeExpr, param: Scope): LObj {
@@ -202,41 +218,41 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         if (!target.canInvoke()) {
             throw LinException("$target is not callable")
         }
-        if (target is LinDirectCall) {
-            return target.call(this, node.arguments.map { it.accept(this, param) })
+        val callable = target.callable()
+        if (callable is LinDirectCall) {
+            return callable.call(this, node.arguments.map { it.accept(this, param) })
         }
-        val args = node.arguments.map { it.accept(this, param) }
-        return target.invoke(args)
+        return callable.invoke(node.arguments.map { it.accept(this, param) })
     }
 
     override fun visit(node: InvokeLocalExpr, param: Scope): LObj {
         val property = param.findProperty(node.name) ?: throw LinException("${node.name} does not exist.")
         if (!property.getAllowed) throw LinException("Property ${node.name} does not allow access.")
-        val callable = property.get()
-        if (!callable.canInvoke()) {
-            throw LinException("$callable is not callable")
+        val target = property.get()
+        if (!target.canInvoke()) {
+            throw LinException("$target is not callable")
         }
+        val callable = target.callable()
         if (callable is LinDirectCall) {
             return callable.call(this, node.arguments.map { it.accept(this, param) })
         }
-        val args = node.arguments.map { it.accept(this, param) }
-        return callable.invoke(args)
+        return callable.invoke(node.arguments.map { it.accept(this, param) })
     }
 
     override fun visit(node: InvokeMemberExpr, param: Scope): LObj {
-        val target = node.target.accept(this, param)
-        if (node.nullSafe && target == LNull) return LNull
-        val property = target.propertyOf(node.name) ?: throw LinException("$target.${node.name} does not exist.")
-        if (!property.getAllowed) throw LinException("Property $target.${node.name} does not allow access.")
-        val callable = property.get()
-        if (!callable.canInvoke()) {
-            throw LinException("$callable is not callable")
+        val parent = node.target.accept(this, param)
+        if (node.nullSafe && parent == LNull) return LNull
+        val property = parent.propertyOf(node.name) ?: throw LinException("$parent.${node.name} does not exist.")
+        if (!property.getAllowed) throw LinException("Property $parent.${node.name} does not allow access.")
+        val target = property.get()
+        if (!target.canInvoke()) {
+            throw LinException("$target is not callable")
         }
+        val callable = target.callable()
         if (callable is LinDirectCall) {
             return callable.call(this, node.arguments.map { it.accept(this, param) })
         }
-        val args = node.arguments.map { it.accept(this, param) }
-        return callable.invoke(args)
+        return callable.invoke(node.arguments.map { it.accept(this, param) })
     }
 
     override fun visit(node: IfExpr, param: Scope): LObj {
@@ -318,20 +334,23 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         } else if (iterable.canGet("iterator")) {
             val iteratorFn = iterable["iterator"]
             if (iteratorFn.canInvoke()) {
-                val iteratorInst = if (iteratorFn is LinDirectCall) iteratorFn.call(this) else iteratorFn.invoke()
+                val iteratorCall = iteratorFn.callable()
+                val iteratorInst = if (iteratorCall is LinDirectCall) iteratorCall.call(this) else iteratorCall.invoke()
                 if (iteratorInst.canGet("hasNext") && iteratorInst.canGet("next")) {
                     val hasNextFn = iteratorInst["hasNext"]
                     val nextFn = iteratorInst["next"]
                     if (hasNextFn.canInvoke() && nextFn.canInvoke()) {
+                        val hasNextCall = hasNextFn.callable()
+                        val nextCall = nextFn.callable()
                         while (true) {
-                            val hasNext = if (hasNextFn is LinDirectCall) hasNextFn.call(this) else hasNextFn.invoke()
+                            val hasNext = if (hasNextCall is LinDirectCall) hasNextCall.call(this) else hasNextCall.invoke()
                             if (hasNext !is LBoolean) {
                                 throw LinTypeException("$hasNext is not a Boolean")
                             }
                             if (!hasNext.value) {
                                 break
                             }
-                            val next = if (nextFn is LinDirectCall) nextFn.call(this) else nextFn.invoke()
+                            val next = if (nextCall is LinDirectCall) nextCall.call(this) else nextCall.invoke()
                             try {
                                 val child = UserScope(param)
                                 child[node.variableName] = next
@@ -359,56 +378,63 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             BinaryOperationType.ADD -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return left + right
+                    return box(plus(left.value, right.value))
                 }
                 if (left is LString) {
-                    return left + right
+                    return LString(left.value + right)
                 }
-                if (right is LString) {
-                    return LString(left.toString() + right.value)
-                }
+                //if (right is LString) {
+                //    return LString(left.toString() + right.value)
+                //}
                 if (left is LChar) {
-                    return left + right
+                    if (right is LNumber) {
+                        return LChar(left.value + right.value.toInt())
+                    }
+                    return LString(left.value.toString() + right)
                 }
-                if (right is LChar) {
-                    return LString(left.toString() + right.value)
-                }
+                //TODO implement userland operator case
                 throw LinTypeException("Unsupported operation $left + $right")
             }
             BinaryOperationType.SUBTRACT -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return left - right
+                    return box(minus(left.value, right.value))
                 }
+                //TODO implement userland operator case
                 throw LinTypeException("Unsupported operation $left - $right")
             }
             BinaryOperationType.MULTIPLY -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return left * right
+                    return box(times(left.value, right.value))
                 }
+                //TODO implement userland operator case
                 throw LinTypeException("Unsupported operation $left * $right")
             }
             BinaryOperationType.DIVIDE -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return left / right
+                    return box(div(left.value, right.value))
                 }
+                //TODO implement userland operator case
                 throw LinTypeException("Unsupported operation $left / $right")
             }
             BinaryOperationType.REMAINING -> {
                 val right = node.right.accept(this, param)
                 if (left is LNumber && right is LNumber) {
-                    return left % right
+                    return box(rem(left.value, right.value))
                 }
+                //TODO implement userland operator case
                 throw LinTypeException("Unsupported operation $left % $right")
             }
             BinaryOperationType.EQUALS -> {
                 val right = node.right.accept(this, param)
+                //TODO implement userland equals case
                 return LBoolean.of(left == right)
             }
             BinaryOperationType.NOT_EQUALS -> {
                 val right = node.right.accept(this, param)
+                //TODO implement userland equals case
                 return LBoolean.of(left != right)
             }
             BinaryOperationType.AND -> {
@@ -456,6 +482,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return LBoolean.of(left > right)
                 }
+                //TODO implement userland compareTo case
                 throw LinTypeException("Unsupported operation $left > $right")
             }
             BinaryOperationType.GTE -> {
@@ -463,6 +490,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LNumber && right is LNumber) {
                     return LBoolean.of(left >= right)
                 }
+                //TODO implement userland compareTo case
                 throw LinTypeException("Unsupported operation $left >= $right")
             }
             BinaryOperationType.ELVIS -> {
@@ -477,6 +505,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 if (left is LinNativeRangeTo) {
                     return left.rangeTo(right)
                 }
+                //TODO implement userland rangeTo case
                 throw LinTypeException("Unsupported operation $left..$right")
             }
         }
@@ -487,40 +516,43 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         when (node.operator) {
             UnaryOperationType.POSITIVE -> {
                 if (target is LNumber) {
-                    return +target
+                    return box(unaryPlus(target.value))
                 }
+                //TODO implement userland operator case
                 throw LinTypeException("Unsupported operation +$target")
             }
             UnaryOperationType.NEGATIVE -> {
                 if (target is LNumber) {
-                    return -target
+                    return box(unaryMinus(target.value))
                 }
+                //TODO implement userland operator case
                 throw LinTypeException("Unsupported operation -$target")
             }
             UnaryOperationType.NOT -> {
                 if (target is LBoolean) {
                     return target.not()
                 }
+                //TODO implement userland operator case
                 throw LinTypeException("Unsupported operation !$target")
             }
         }
     }
 
     private fun applyUnaryAssignOperation(target: LObj, operator: UnaryAssignOperationType): LObj {
-        return when (operator) {
+        when (operator) {
             UnaryAssignOperationType.INCREMENT -> {
                 if (target is LNumber) {
-                    target.inc()
-                } else {
-                    throw LinTypeException("Increment is unsupported on $target")
+                    return target.inc()
                 }
+                //TODO implement userland operator case
+                throw LinTypeException("Increment is unsupported on $target")
             }
             UnaryAssignOperationType.DECREMENT -> {
                 if (target is LNumber) {
-                    target.dec()
-                } else {
-                    throw LinTypeException("Decrement is unsupported on $target")
+                    return target.dec()
                 }
+                //TODO implement userland operator case
+                throw LinTypeException("Decrement is unsupported on $target")
             }
         }
     }
@@ -556,35 +588,40 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             when (node.operator) {
                 AssignOperationType.ADD_ASSIGN -> {
                     when {
-                        left is LNumber && right is LNumber -> left + right
-                        left is LString -> left + right
-                        right is LString -> LString(left.toString() + right.value)
-                        left is LChar -> left + right
-                        right is LChar -> LString(left.toString() + right.value)
+                        left is LNumber && right is LNumber -> box(plus(left.value, right.value))
+                        left is LString -> LString(left.value + right)
+                        //right is LString -> LString(left.toString() + right.value)
+                        left is LChar && right is LNumber -> LChar(left.value + right.value.toInt())
+                        //right is LChar -> LString(left.toString() + right.value)
+                        //TODO implement userland operator case
                         else -> throw LinTypeException("Unsupported operation $left + $right")
                     }
                 }
                 AssignOperationType.SUBTRACT_ASSIGN -> {
                     when {
-                        left is LNumber && right is LNumber -> left - right
+                        left is LNumber && right is LNumber -> box(minus(left.value, right.value))
+                        //TODO implement userland operator case
                         else -> throw LinTypeException("Unsupported operation $left - $right")
                     }
                 }
                 AssignOperationType.MULTIPLY_ASSIGN -> {
                     when {
-                        left is LNumber && right is LNumber -> left * right
+                        left is LNumber && right is LNumber -> box(times(left.value, right.value))
+                        //TODO implement userland operator case
                         else -> throw LinTypeException("Unsupported operation $left * $right")
                     }
                 }
                 AssignOperationType.DIVIDE_ASSIGN -> {
                     when {
-                        left is LNumber && right is LNumber -> left / right
+                        left is LNumber && right is LNumber -> box(div(left.value, right.value))
+                        //TODO implement userland operator case
                         else -> throw LinTypeException("Unsupported operation $left / $right")
                     }
                 }
                 AssignOperationType.REMAINING_ASSIGN -> {
                     when {
-                        left is LNumber && right is LNumber -> left % right
+                        left is LNumber && right is LNumber -> box(rem(left.value, right.value))
+                        //TODO implement userland operator case
                         else -> throw LinTypeException("Unsupported operation $left % $right")
                     }
                 }
@@ -637,22 +674,46 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun resolve(node: SubscriptAccessExpr, param: Scope): Property {
         val target = node.target.accept(this, param)
-        if (target !is LinNativeGet || target !is LinNativeSet) {
-            throw LinException("$node does not accept subscript operations")
-        }
-        val args = node.arguments.map { it.accept(this, param) }
-        return object : Property {
-            override val getAllowed: Boolean
-                get() = true
-            override val setAllowed: Boolean
-                get() = true
+        if (target is LinNativeGet || target is LinNativeSet
+            || (target.canGet("get") && target["get"].canInvoke())
+            || (target.canGet("set") && target["set"].canInvoke())) {
+            val args = node.arguments.map { it.accept(this, param) }
+            return object : Property {
+                private val interpreter = this@LinInterpreter
+                override val getAllowed: Boolean
+                    get() = target is LinNativeGet || (target.canGet("get") && target["get"].canInvoke())
+                override val setAllowed: Boolean
+                    get() = target is LinNativeSet || (target.canGet("set") && target["set"].canInvoke())
 
-            override fun get(): LObj = target[args]
+                override fun get(): LObj {
+                    if (target is LinNativeGet) {
+                        return target[args]
+                    } else if (target.canGet("get")) {
+                        val getFn = target["get"]
+                        if (getFn.canInvoke()) {
+                            val getCall = getFn.callable()
+                            return if (getCall is LinDirectCall) getCall.call(interpreter, args) else getCall.invoke(args)
+                        }
+                    }
+                    throw LinException("$node does not support subscript get")
+                }
 
-            override fun set(value: LObj) {
-                target[args] = value
+                override fun set(value: LObj) {
+                    if (target is LinNativeSet) {
+                        target[args] = value
+                    } else if (target.canGet("set")) {
+                        val setFn = target["set"]
+                        if (setFn.canInvoke()) {
+                            val setCall = setFn.callable()
+                            val setArgs = args + value
+                            if (setCall is LinDirectCall) setCall.call(interpreter, setArgs) else setCall.invoke(setArgs)
+                        }
+                    } else {
+                        throw LinException("$node does not accept subscript set")
+                    }
+                }
             }
-
         }
+        throw LinException("$node does not accept subscript operations")
     }
 }

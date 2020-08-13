@@ -23,12 +23,13 @@ class CompiledLambda(
     }
 
     override fun invoke(args: List<LObj>): LObj {
-        val params = prepareParameters(args)
-        return LinInterpreter().execute(body, BasicScope(params))
+        val interpreter = LinInterpreter()
+        val params = prepareParameters(interpreter, args)
+        return interpreter.execute(body, BasicScope(params))
     }
 
     override fun call(interpreter: LinInterpreter, args: List<LObj>): LObj {
-        val params = prepareParameters(args)
+        val params = prepareParameters(interpreter, args)
         return try {
             body.accept(interpreter, params)
         } catch (r: ReturnException) {
@@ -40,7 +41,7 @@ class CompiledLambda(
         }
     }
 
-    private fun prepareParameters(args: List<LObj>): UserScope {
+    private fun prepareParameters(interpreter: LinInterpreter, args: List<LObj>): UserScope {
         val params = UserScope(parentScope)
         if (parameters.isEmpty()) {
             if (args.size == 1) {
@@ -53,7 +54,8 @@ class CompiledLambda(
                 when (param) {
                     is LambdaExpr.Parameter.Destructured -> {
                         for ((i, name) in param.names.withIndex()) {
-                            params[name] = arg.component(i) ?: throw LinException("$arg.component$i does not exist.")
+                            val callable = arg.component(i) ?: throw LinException("$arg.component$i does not exist.")
+                            params[name] = if (callable is LinDirectCall) callable.call(interpreter) else callable.invoke()
                         }
                     }
                     is LambdaExpr.Parameter.Named -> {

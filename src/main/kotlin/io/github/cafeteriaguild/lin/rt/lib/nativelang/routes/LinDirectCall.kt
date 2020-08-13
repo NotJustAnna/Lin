@@ -6,6 +6,6 @@ import io.github.cafeteriaguild.lin.rt.lib.LObj
 /**
  * Allows a direct route to be able to reuse the interpreter.
  */
-interface LinDirectCall {
+interface LinDirectCall : LinCall {
     fun call(interpreter: LinInterpreter, args: List<LObj> = emptyList()): LObj
 }
