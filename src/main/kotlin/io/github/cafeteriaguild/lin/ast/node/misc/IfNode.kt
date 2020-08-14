@@ -1,15 +1,12 @@
 package io.github.cafeteriaguild.lin.ast.node.misc
 
 import net.notjustanna.tartar.api.lexer.Section
-import io.github.cafeteriaguild.lin.ast.node.AbstractNode
-import io.github.cafeteriaguild.lin.ast.node.Expr
-import io.github.cafeteriaguild.lin.ast.node.NodeParamVisitor
-import io.github.cafeteriaguild.lin.ast.node.NodeVisitor
+import io.github.cafeteriaguild.lin.ast.node.*
 
 class IfNode(
     val condition: Expr,
-    val thenBranch: Expr,
-    val elseBranch: Expr,
+    val thenBranch: Node,
+    val elseBranch: Node?,
     section: Section
 ) : AbstractNode(section) {
     override fun <R> accept(visitor: NodeVisitor<R>) = visitor.visit(this)

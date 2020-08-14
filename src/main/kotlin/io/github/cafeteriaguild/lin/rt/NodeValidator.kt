@@ -117,16 +117,16 @@ object NodeValidator : NodeVisitor<Boolean> {
         return node.target.accept(this) && node.arguments.all { it.accept(this) }
     }
 
-    override fun visit(node: IfExpr): Boolean {
-        return node.condition.accept(this)
-                && node.thenBranch.accept(this)
-                && node.elseBranch?.accept(this) ?: true
-    }
-
     override fun visit(node: IfNode): Boolean {
         return node.condition.accept(this)
-                && node.thenBranch.accept(this)
-                && node.elseBranch.accept(this)
+            && node.thenBranch.accept(this)
+            && node.elseBranch?.accept(this) ?: true
+    }
+
+    override fun visit(node: IfExpr): Boolean {
+        return node.condition.accept(this)
+            && node.thenBranch.accept(this)
+            && node.elseBranch.accept(this)
     }
 
     override fun visit(node: NotNullExpr): Boolean {

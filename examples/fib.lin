@@ -11,4 +11,4 @@ fun fib_impl(n, eax, ebx) {
     fib_impl(n - 1,ebx,eax+ebx)
 }
 
-fib(6)
+fib(12)

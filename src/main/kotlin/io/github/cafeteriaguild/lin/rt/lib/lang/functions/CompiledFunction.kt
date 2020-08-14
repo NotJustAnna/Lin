@@ -26,7 +26,7 @@ class CompiledFunction(
     private val paramsAfterVarargs: List<FunctionExpr.Parameter>
 
     init {
-        if (body?.accept(NodeValidator) == true) {
+        if (body?.accept(NodeValidator) == false) {
             throw LinException("Body is invalid or contains invalid children nodes")
         }
         if (parameters.count { it.varargs } > 1) {

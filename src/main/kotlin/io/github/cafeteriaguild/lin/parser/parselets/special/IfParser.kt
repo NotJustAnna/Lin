@@ -44,8 +44,8 @@ object IfParser : PrefixParser<TokenType, Node> {
         }
 
         if (thenBranch is Expr && elseBranch is Expr) {
-            return IfNode(condition, thenBranch, elseBranch, token.section)
+            return IfExpr(condition, thenBranch, elseBranch, token.section)
         }
-        return IfExpr(condition, thenBranch, elseBranch, token.section)
+        return IfNode(condition, thenBranch, elseBranch, token.section)
     }
 }

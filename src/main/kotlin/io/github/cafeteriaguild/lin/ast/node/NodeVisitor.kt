@@ -42,8 +42,8 @@ interface NodeVisitor<R> {
     fun visit(node: InvokeExpr): R
     fun visit(node: InvokeLocalExpr): R
     fun visit(node: InvokeMemberExpr): R
-    fun visit(node: IfExpr): R
     fun visit(node: IfNode): R
+    fun visit(node: IfExpr): R
     fun visit(node: NotNullExpr): R
     fun visit(node: DoWhileNode): R
     fun visit(node: WhileNode): R

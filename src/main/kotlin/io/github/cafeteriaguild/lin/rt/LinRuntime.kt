@@ -20,7 +20,7 @@ object LinRuntime {
         returningUnit {
             val callable = it.single()
             if (!callable.canInvoke()) throw LinException("$it is not callable.")
-            thread { callable(emptyList()) }
+            thread { callable.callable()(emptyList()) }
         }
     }
 }

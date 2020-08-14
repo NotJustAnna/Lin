@@ -421,7 +421,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         node.value.ast(tail = true)
     }
 
-    override fun visit(node: IfExpr) {
+    override fun visit(node: IfNode) {
         base("if expr")
 
         node.condition.astLabel("condition", tail = false)
@@ -432,7 +432,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         }
     }
 
-    override fun visit(node: IfNode) {
+    override fun visit(node: IfExpr) {
         base("if node")
 
         node.condition.astLabel("condition", tail = false)

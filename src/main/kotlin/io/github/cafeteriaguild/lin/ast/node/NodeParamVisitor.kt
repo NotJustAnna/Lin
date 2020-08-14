@@ -42,8 +42,8 @@ interface NodeParamVisitor<T, R> {
     fun visit(node: InvokeExpr, param: T): R
     fun visit(node: InvokeLocalExpr, param: T): R
     fun visit(node: InvokeMemberExpr, param: T): R
-    fun visit(node: IfExpr, param: T): R
     fun visit(node: IfNode, param: T): R
+    fun visit(node: IfExpr, param: T): R
     fun visit(node: NotNullExpr, param: T): R
     fun visit(node: DoWhileNode, param: T): R
     fun visit(node: WhileNode, param: T): R

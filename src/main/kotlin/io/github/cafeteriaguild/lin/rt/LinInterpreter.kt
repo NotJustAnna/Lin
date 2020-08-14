@@ -24,6 +24,7 @@ import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.rem
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.times
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.unaryMinus
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber.Companion.unaryPlus
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.invoke.LinCall
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.invoke.LinDirectCall
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.DelegatedProperty
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.properties.Property
@@ -35,10 +36,6 @@ import io.github.cafeteriaguild.lin.rt.scope.Scope
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
 
 class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Property?> {
-    /*
-     * TODO toString(), equals(), hashCode() should be replaced with LinDirectCall checks.
-     */
-
     fun execute(node: Node, scope: Scope = BasicScope()): LObj {
         if (node.accept(NodeValidator)) {
             return try {
@@ -235,29 +232,17 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: InvokeExpr, param: Scope): LObj {
-        val target = node.target.accept(this, param)
-        if (!target.canInvoke()) {
-            throw LinException("$target is not callable")
-        }
-        val callable = target.callable()
-        if (callable is LinDirectCall) {
-            return callable.call(this, node.arguments.map { it.accept(this, param) })
-        }
-        return callable(node.arguments.map { it.accept(this, param) })
+        return node.target.accept(this, param)
+            .canInvokeOrThrow()
+            .doCall { node.arguments.map { it.accept(this, param) } }
     }
 
     override fun visit(node: InvokeLocalExpr, param: Scope): LObj {
         val property = param.findProperty(node.name) ?: throw LinException("${node.name} does not exist.")
         if (!property.getAllowed) throw LinException("Property ${node.name} does not allow access.")
-        val target = property.get()
-        if (!target.canInvoke()) {
-            throw LinException("$target is not callable")
-        }
-        val callable = target.callable()
-        if (callable is LinDirectCall) {
-            return callable.call(this, node.arguments.map { it.accept(this, param) })
-        }
-        return callable(node.arguments.map { it.accept(this, param) })
+        return property.get()
+            .canInvokeOrThrow()
+            .doCall { node.arguments.map { it.accept(this, param) } }
     }
 
     override fun visit(node: InvokeMemberExpr, param: Scope): LObj {
@@ -265,30 +250,24 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         if (node.nullSafe && parent == LNull) return LNull
         val property = parent.propertyOf(node.name) ?: throw LinException("$parent.${node.name} does not exist.")
         if (!property.getAllowed) throw LinException("Property $parent.${node.name} does not allow access.")
-        val target = property.get()
-        if (!target.canInvoke()) {
-            throw LinException("$target is not callable")
-        }
-        val callable = target.callable()
-        if (callable is LinDirectCall) {
-            return callable.call(this, node.arguments.map { it.accept(this, param) })
-        }
-        return callable(node.arguments.map { it.accept(this, param) })
+        return property.get()
+            .canInvokeOrThrow()
+            .doCall { node.arguments.map { it.accept(this, param) } }
     }
 
-    override fun visit(node: IfExpr, param: Scope): LObj {
+    override fun visit(node: IfNode, param: Scope) = block {
         val condition = node.condition.accept(this, BasicScope(param))
         if (condition !is LBoolean) {
             throw LinTypeException("$condition is not a Boolean")
         }
-        return if (condition.value) {
+        if (condition.value) {
             node.thenBranch.accept(this, BasicScope(param))
         } else {
-            node.elseBranch?.accept(this, BasicScope(param)) ?: LUnit
+            node.elseBranch?.accept(this, BasicScope(param))
         }
     }
 
-    override fun visit(node: IfNode, param: Scope): LObj {
+    override fun visit(node: IfExpr, param: Scope): LObj {
         val condition = node.condition.accept(this, BasicScope(param))
         if (condition !is LBoolean) {
             throw LinTypeException("$condition is not a Boolean")
@@ -905,11 +884,6 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         node.body.accept(this, param)
     }
 
-    private inline fun block(block: () -> Unit): LObj {
-        block()
-        return LUnit
-    }
-
     override fun resolve(node: ThisExpr, param: Scope): Property {
         return param.findProperty("this")
             ?: throw LinException("There isn't a `this` object associated in this context.")
@@ -941,6 +915,28 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             return SubscriptEmulatedProperty(target, args, this)
         }
         throw LinException("$target does not accept subscript operations")
+    }
+
+    // Inline methods below
+
+    private inline fun block(block: () -> Unit): LObj {
+        block()
+        return LUnit
+    }
+
+    private inline fun LObj.canInvokeOrThrow() = apply {
+        if (!canInvoke()) throw LinException("$this is not callable")
+    }
+
+    private inline fun LObj.doCall(args: () -> List<LObj> = { emptyList() }): LObj {
+        return callable().doCall(args)
+    }
+
+    private inline fun LinCall.doCall(args: () -> List<LObj> = { emptyList() }): LObj {
+        if (this is LinDirectCall) {
+            return call(this@LinInterpreter, args())
+        }
+        return this(args())
     }
 }
 
