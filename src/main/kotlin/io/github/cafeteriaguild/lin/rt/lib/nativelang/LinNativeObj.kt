@@ -30,15 +30,9 @@ abstract class LinNativeObj : AbstractObj() {
     }
 
     protected fun declareMutableProperty(name: String): SimpleProperty {
-        val p = SimpleProperty(false)
+        val p = SimpleProperty(true)
         properties[name] = p
         return p
-    }
-
-    protected fun setImmutableProperty(name: String, value: LObj) {
-        val p = SimpleProperty(false)
-        p.set(value)
-        properties[name] = p
     }
 
     protected fun lazyImmutableProperty(name: String, value: () -> LObj) {
@@ -49,6 +43,14 @@ abstract class LinNativeObj : AbstractObj() {
     protected fun getterImmutableProperty(name: String, value: () -> LObj) {
         val p = GetterProperty(value)
         properties[name] = p
+    }
+
+    protected fun setImmutableProperty(name: String, value: LObj) {
+        declareImmutableProperty(name).set(value)
+    }
+
+    protected fun setMutableProperty(name: String, value: LObj) {
+        declareMutableProperty(name).set(value)
     }
 
     protected fun declareFunction(name: String, value: (List<LObj>) -> LObj) {
