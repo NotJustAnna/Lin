@@ -257,6 +257,15 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
         node.body.astLabel("body", tail = true)
     }
 
+    override fun visit(node: TryExpr) {
+        base("try")
+        val catchBranch = node.catchBranch
+        val finallyBranch = node.finallyBranch
+        node.tryBranch.astLabel("try branch", tail = catchBranch == null && finallyBranch == null)
+        catchBranch?.branch?.astLabel("catch (${catchBranch.caughtName}) branch", tail = finallyBranch == null)
+        finallyBranch?.astLabel("finally branch", tail = true)
+    }
+
 //    override fun visit(node: TypeAliasExpr) {
 //        base("typealias")
 //

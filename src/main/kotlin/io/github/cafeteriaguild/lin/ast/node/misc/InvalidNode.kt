@@ -19,9 +19,10 @@ class InvalidNode(section: Section, val children: List<Node>, val errors: List<E
             section = value
         }
 
-        fun child(vararg values: Node) = apply {
-            children += values
-            if (section == null && values.isNotEmpty()) section = values.first().section
+        fun child(vararg values: Node?) = apply {
+            val list = values.filterNotNull()
+            children += list
+            if (section == null && list.isNotEmpty()) section = list.first().section
         }
 
         fun error(vararg values: Exception) = apply {

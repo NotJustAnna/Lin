@@ -144,7 +144,27 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: ThrowExpr, param: Scope): LObj {
-        throw ThrowException(node.value.accept(this, param))
+        throw LinThrownException(node.value.accept(this, param))
+    }
+
+    override fun visit(node: TryExpr, param: Scope): LObj {
+        return try {
+            node.tryBranch.accept(this, BasicScope(param))
+        } catch (t: Throwable) {
+            val catchBranch = node.catchBranch
+            if (catchBranch == null || t !is LinCatchable) {
+                throw t
+            }
+            val scope = BasicScope(param)
+            if (catchBranch.caughtName != "_") {
+                val p = SimpleProperty(false)
+                p.set(t.thrown)
+                scope.declareProperty(catchBranch.caughtName, p)
+            }
+            catchBranch.branch.accept(this, scope)
+        } finally {
+            node.finallyBranch?.accept(this, BasicScope(param))
+        }
     }
 
     override fun visit(node: CharExpr, param: Scope) = LChar(node.value)

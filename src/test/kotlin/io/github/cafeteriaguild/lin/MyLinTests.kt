@@ -39,9 +39,7 @@ val code = """
 """.trimIndent()
 
 fun main() {
-    val source = Source(
-        code.trimIndent()
-    )
+    val source = Source(code)
     val expr = linStdParser.parse(source, linStdLexer)
     println(expr is Expr)
     println(buildString {

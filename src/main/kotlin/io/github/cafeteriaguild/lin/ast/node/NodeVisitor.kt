@@ -50,6 +50,7 @@ interface NodeVisitor<R> {
     fun visit(node: ForNode): R
     fun visit(node: BreakExpr): R
     fun visit(node: ContinueExpr): R
+    fun visit(node: TryExpr): R
     fun visit(node: BinaryOperation): R
     fun visit(node: UnaryOperation): R
     fun visit(node: PrefixAssignUnaryOperation): R

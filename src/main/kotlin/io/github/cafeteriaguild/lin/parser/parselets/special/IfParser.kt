@@ -16,7 +16,7 @@ import io.github.cafeteriaguild.lin.parser.utils.skipOnlyUntil
 
 object IfParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
-        ctx.matchAll(TokenType.NL)
+        ctx.skipOnlyUntil(TokenType.L_PAREN)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)
         val condition = ctx.parseExpression().let {

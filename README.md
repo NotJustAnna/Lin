@@ -31,6 +31,8 @@ Lin will never fully parse Kotlin, but hit really closes to home.
 - Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
 - Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
 - Objects
+- Try, Catch and Throw
+    - **CAVEAT**: There are no types. Anything can be thrown.
 
 ## Parsing
 

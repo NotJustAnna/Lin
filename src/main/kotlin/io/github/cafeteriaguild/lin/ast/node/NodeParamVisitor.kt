@@ -50,6 +50,7 @@ interface NodeParamVisitor<T, R> {
     fun visit(node: ForNode, param: T): R
     fun visit(node: BreakExpr, param: T): R
     fun visit(node: ContinueExpr, param: T): R
+    fun visit(node: TryExpr, param: T): R
     fun visit(node: BinaryOperation, param: T): R
     fun visit(node: UnaryOperation, param: T): R
     fun visit(node: PrefixAssignUnaryOperation, param: T): R

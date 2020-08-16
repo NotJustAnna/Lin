@@ -1,0 +1,8 @@
+try {
+    throw "Hello World"
+} catch (string) {
+    println(string)
+    throw 0
+} finally {
+    println("Finally some fucking good syntax")
+}

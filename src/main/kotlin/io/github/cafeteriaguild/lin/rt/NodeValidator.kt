@@ -101,8 +101,8 @@ object NodeValidator : NodeVisitor<Boolean> {
 
     override fun visit(node: SubscriptAssignNode): Boolean {
         return node.target.accept(this)
-                && node.arguments.all { it.accept(this) }
-                && node.value.accept(this)
+            && node.arguments.all { it.accept(this) }
+            && node.value.accept(this)
     }
 
     override fun visit(node: InvokeExpr): Boolean {
@@ -175,7 +175,7 @@ object NodeValidator : NodeVisitor<Boolean> {
 
     override fun visit(node: FunctionExpr): Boolean {
         return node.parameters.all { it.value?.accept(this) ?: true }
-                && node.body?.accept(this) ?: true
+            && node.body?.accept(this) ?: true
     }
 
     override fun visit(node: LambdaExpr): Boolean {
@@ -184,5 +184,11 @@ object NodeValidator : NodeVisitor<Boolean> {
 
     override fun visit(node: InitializerNode): Boolean {
         return node.body.accept(this)
+    }
+
+    override fun visit(node: TryExpr): Boolean {
+        return node.tryBranch.accept(this) &&
+            node.catchBranch?.branch?.accept(this) != false &&
+            node.finallyBranch?.accept(this) != false
     }
 }
