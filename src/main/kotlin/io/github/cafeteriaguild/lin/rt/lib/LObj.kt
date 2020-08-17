@@ -47,9 +47,14 @@ interface LObj {
     fun propertyOf(name: String): Property? = if (properties().contains(name)) ObjProperty(this, name) else null
 
     fun component(value: Int): LinCall? {
-        val property = propertyOf("component$value") ?: return null
-        val componentFn = property.get()
-        if (!componentFn.canInvoke()) return null
-        return componentFn.callable()
+        val property = propertyOf("component$value")
+        return if (property == null) {
+            null
+        } else {
+            val componentFn = property.get()
+            if (!componentFn.canInvoke()) null
+            else componentFn.callable()
+
+        }
     }
 }

@@ -13,6 +13,7 @@ Lin will never fully parse Kotlin, but hit really closes to home.
     - Vals, Vars, Destructuring variables
 - Access/assignments of variables
 - Function invocation
+- Objects
 - Infix function invocation
 - Property access/assignment
 - While/Do-While loops
@@ -36,7 +37,7 @@ Lin will never fully parse Kotlin, but hit really closes to home.
 
 ## Parsing
 
-- Objects, Classes and Interfaces
+- Classes and Interfaces
     - Support for Companion Objects, Enum classes, Functional Interfaces (Kotlin 1.4+)
     - Support for Class Constructors and Interface delegation
     - **CAVEATS**:
