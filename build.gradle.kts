@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "io.github.cafeteriaguild"
-version = "0.3"
+version = "0.3.1"
 
 repositories {
     jcenter()
