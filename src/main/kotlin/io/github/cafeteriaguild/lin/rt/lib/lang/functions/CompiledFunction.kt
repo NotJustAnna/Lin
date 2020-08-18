@@ -14,7 +14,6 @@ import io.github.cafeteriaguild.lin.rt.lib.nativelang.invoke.LinDirectCall
 import io.github.cafeteriaguild.lin.rt.scope.BasicScope
 import io.github.cafeteriaguild.lin.rt.scope.Scope
 import io.github.cafeteriaguild.lin.rt.scope.UserScope
-import java.util.*
 
 class CompiledFunction(
     private val parentScope: Scope,
@@ -110,28 +109,13 @@ class CompiledFunction(
     override fun toString(): String {
         return buildString {
             append("fun(")
-            val j = StringJoiner(", ")
-            for (p in paramsBeforeVarargs) {
-                j.add(buildString {
-                    append(p.name)
-                    if (p.value != null) append(" = ...")
-                })
-            }
-            if (varargsParam != null) {
-                j.add(buildString {
-                    append("vararg ")
-                    append(varargsParam.name)
-                    if (varargsParam.value != null) append(" = ...")
-                })
-            }
-            for (p in paramsAfterVarargs) {
-                j.add(buildString {
-                    append(p.name)
-                    if (p.value != null) append(" = ...")
-                })
-            }
-            append(j)
-            append(")")
+            append(
+                listOf(
+                    paramsBeforeVarargs.map { if (it.value != null) it.name else "${it.name} = ..." },
+                    listOfNotNull(varargsParam).map { "vararg ${if (it.value != null) it.name else "${it.name} = ..."}" },
+                    paramsAfterVarargs.map { if (it.value != null) it.name else "${it.name} = ..." }
+                ).flatten().joinToString(", ")
+            )
             if (body != null) {
                 append(" { ... }")
             }

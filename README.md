@@ -18,6 +18,8 @@ Lin will never fully parse Kotlin, but hit really closes to home.
 - Property access/assignment
 - While/Do-While loops
 - For Loops
+    - **CAVEATS**:
+        - For loops doesn't support destructuring variables
 - If/else (both as statement and expression)
 - Return/Throw
 - Null-safe operator (`?.`)
