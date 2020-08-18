@@ -74,6 +74,6 @@ abstract class LinNativeObj : AbstractObj() {
     }
 
     protected inline fun declareIterator(crossinline value: () -> Iterator<LObj>) {
-        declareFunction("iterator") { LinNativeIterator(value()) }
+        declareFunction("iterator") { LinIteratorWrapper(value()) }
     }
 }

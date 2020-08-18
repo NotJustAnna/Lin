@@ -38,4 +38,12 @@ class LList(list: List<LObj>) : LinNativeObj(), LinNativeGet, LinNativeSet, LinN
     override fun toString(): String {
         return list.toString()
     }
+
+    override fun hashCode(): Int {
+        return list.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return list == (other as? LList ?: return false).list
+    }
 }
