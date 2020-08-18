@@ -17,7 +17,20 @@ object ForParser : PrefixParser<TokenType, Node> {
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)
-        val identifier = ctx.eat(TokenType.IDENTIFIER)
+        val variable = if (ctx.match(TokenType.IDENTIFIER)) {
+            ForNode.Variable.Named(ctx.last.value)
+        } else {
+            ctx.eat(TokenType.L_PAREN)
+            val names = mutableListOf<String>()
+            do {
+                ctx.matchAll(TokenType.NL)
+                val paramIdent = ctx.eat(TokenType.IDENTIFIER)
+                ctx.matchAll(TokenType.NL)
+                names += paramIdent.value
+            } while (ctx.match(TokenType.COMMA))
+            ctx.eat(TokenType.R_PAREN)
+            ForNode.Variable.Destructured(names)
+        }
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.IN)
         ctx.matchAll(TokenType.NL)
@@ -33,6 +46,6 @@ object ForParser : PrefixParser<TokenType, Node> {
         ctx.matchAll(TokenType.NL)
         val expr = ctx.parseBlock() ?: ctx.parseExpression()
 
-        return ForNode(identifier.value, iterable, expr, token.section)
+        return ForNode(variable, iterable, expr, token.section)
     }
 }

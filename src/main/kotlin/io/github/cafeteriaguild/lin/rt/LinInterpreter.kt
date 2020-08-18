@@ -168,18 +168,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: DestructuringVariableNode, param: Scope) = block {
-        val properties = node.names
-            .map { it to SimpleProperty(node.mutable) }
-            .onEach { (s, p) -> param.declareProperty(s, p) }
-        val value = node.value.accept(this, param)
-        for (index in properties.indices) {
-            val property = value.propertyOf("component$index")
-                .orNullPointer(value, "component$index")
-                .getAllowedOrThrow(value, "component$index")
-
-            val componentFn = property.get().canInvokeOrThrow()
-            properties[index].second.set(componentFn.doCall())
-        }
+        destructure(node.mutable, node.names, node.value.accept(this, param), param)
     }
 
     override fun visit(node: DeclareClassNode, param: Scope) = block {
@@ -273,17 +262,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     override fun visit(node: ForNode, param: Scope) = block {
         val iterable = node.iterable.accept(this, param)
         if (iterable is LinNativeIterable) {
-            for (each in iterable) {
-                try {
-                    val child = UserScope(param)
-                    child[node.variableName] = each
-                    node.body.accept(this, child)
-                } catch (_: BreakException) {
-                    break
-                } catch (_: ContinueException) {
-                    continue
-                }
-            }
+            nativeIterate(node, iterable.iterator(), param)
         } else if (iterable.canGet("iterator")) {
             val iteratorFn = iterable["iterator"]
             if (iteratorFn.canInvoke()) {
@@ -293,46 +272,10 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 } else throw LinThrownException("illegal_argument", "'$iterator' does not implement 'next' and 'hasNext' functions")
             } else throw LinThrownException("illegal_argument", "'$iterable' does not implement a 'iterator' function")
         } else if (iterable is LinNativeIterator) {
-            for (each in iterable) {
-                try {
-                    val child = UserScope(param)
-                    child[node.variableName] = each
-                    node.body.accept(this, child)
-                } catch (_: BreakException) {
-                    break
-                } catch (_: ContinueException) {
-                    continue
-                }
-            }
+            nativeIterate(node, iterable, param)
         } else if (iterable.canGet("hasNext") && iterable.canGet("next")) {
             iterate(node, iterable, param)
         } else throw LinThrownException("illegal_argument", "'$iterable' does not implement 'hasNext' and 'next' functions, or a 'iterator' function")
-    }
-
-    private inline fun iterate(node: ForNode, iterator: LObj, param: Scope) {
-        val hasNextFn = iterator["hasNext"]
-        val nextFn = iterator["next"]
-        if (hasNextFn.canInvoke() && nextFn.canInvoke()) {
-            val hasNextCall = hasNextFn.callable()
-            val nextCall = nextFn.callable()
-            while (true) {
-                val hasNext = hasNextCall.doCall()
-                if (hasNext !is LBoolean) throw LinThrownException("illegal_argument", "'hasNext' returned '$hasNext', which is not a Boolean")
-                if (!hasNext.value) {
-                    break
-                }
-                val next = nextCall.doCall()
-                try {
-                    val child = UserScope(param)
-                    child[node.variableName] = next
-                    node.body.accept(this, child)
-                } catch (_: BreakException) {
-                    break
-                } catch (_: ContinueException) {
-                    continue
-                }
-            }
-        } else throw LinThrownException("illegal_argument", "'$iterator' does not implement 'next' and 'hasNext' functions")
     }
 
     //endregion
@@ -919,6 +862,72 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     private inline fun LinCall.doCall(args: () -> List<LObj> = { emptyList() }): LObj {
         if (this is LinDirectCall) return call(this@LinInterpreter, args())
         return this(args())
+    }
+
+    private inline fun destructure(mutable: Boolean, names: List<String>, target: LObj, param: Scope) {
+        val properties = names.map { it to SimpleProperty(mutable) }.onEach { (s, p) -> param.declareProperty(s, p) }
+        for (index in properties.indices) {
+            val property = target.propertyOf("component$index")
+                .orNullPointer(target, "component$index")
+                .getAllowedOrThrow(target, "component$index")
+
+            val componentFn = property.get().canInvokeOrThrow()
+            properties[index].second.set(componentFn.doCall())
+        }
+    }
+
+    private inline fun nativeIterate(node: ForNode, iterator: Iterator<LObj>, param: Scope) {
+        for (each in iterator) {
+            try {
+                val child = UserScope(param)
+                when (val v = node.variable) {
+                    is ForNode.Variable.Destructured -> {
+                        destructure(false, v.names, each, child)
+                    }
+                    is ForNode.Variable.Named -> {
+                        child[v.name] = each
+                    }
+                }
+                node.body.accept(this, child)
+            } catch (_: BreakException) {
+                break
+            } catch (_: ContinueException) {
+                continue
+            }
+        }
+    }
+
+    private inline fun iterate(node: ForNode, iterator: LObj, param: Scope) {
+        val hasNextFn = iterator["hasNext"]
+        val nextFn = iterator["next"]
+        if (hasNextFn.canInvoke() && nextFn.canInvoke()) {
+            val hasNextCall = hasNextFn.callable()
+            val nextCall = nextFn.callable()
+            while (true) {
+                val hasNext = hasNextCall.doCall()
+                if (hasNext !is LBoolean) throw LinThrownException("illegal_argument", "'hasNext' returned '$hasNext', which is not a Boolean")
+                if (!hasNext.value) {
+                    break
+                }
+                val next = nextCall.doCall()
+                try {
+                    val child = UserScope(param)
+                    when (val v = node.variable) {
+                        is ForNode.Variable.Destructured -> {
+                            destructure(false, v.names, next, child)
+                        }
+                        is ForNode.Variable.Named -> {
+                            child[v.name] = next
+                        }
+                    }
+                    node.body.accept(this, child)
+                } catch (_: BreakException) {
+                    break
+                } catch (_: ContinueException) {
+                    continue
+                }
+            }
+        } else throw LinThrownException("illegal_argument", "'$iterator' does not implement 'next' and 'hasNext' functions")
     }
 
     //endregion

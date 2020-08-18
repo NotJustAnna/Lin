@@ -52,7 +52,6 @@ class DeclareVariableParser(val mutable: Boolean) : PrefixParser<TokenType, Node
     }
 
     fun parseDestructuring(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
-        ctx.matchAll(TokenType.NL)
         val names = mutableListOf<String>()
         do {
             ctx.matchAll(TokenType.NL)

@@ -470,7 +470,7 @@ class ASTViewer(val buf: StringBuilder, val indent: String = "", val isTail: Boo
     override fun visit(node: ForNode) {
         base("for")
 
-        label("variable name: ${node.variableName}", tail = false)
+        label("variable: ${node.variable}", tail = false)
         node.iterable.astLabel("iterable", tail = false)
         node.body.astLabel("body", tail = true)
     }
