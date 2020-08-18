@@ -5,22 +5,27 @@ import io.github.cafeteriaguild.lin.rt.lib.lang.LNull
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LInt
 import io.github.cafeteriaguild.lin.rt.lib.lang.number.LNumber
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.LinNativeObj
+import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeContains
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeGet
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeIterable
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeSet
-import io.github.cafeteriaguild.lin.rt.utils.returningUnit
 
-class LList(list: List<LObj>) : LinNativeObj(), LinNativeGet, LinNativeSet, LinNativeIterable {
+class LList(list: List<LObj>) : LinNativeObj(), LinNativeGet, LinNativeSet, LinNativeIterable, LinNativeContains {
     val list: MutableList<LObj> = list.toMutableList()
 
     init {
         getterImmutableProperty("size") { LInt(list.size) }
-        declareFunction("get") { get(it) }
-        declareFunction("set") { returningUnit { set(it.take(1), it.last()) } }
-        declareIterator(this::iterator)
+        declareGetFromNative()
+        declareSetFromNative()
+        declareIterableFromNative()
+        declareContainsFromNative()
         declareToString(list::toString)
         declareHashCode(list::hashCode)
         declareEquals<LList> { list == it.list }
+    }
+
+    override fun contains(obj: LObj): Boolean {
+        return obj in list
     }
 
     override fun get(args: List<LObj>): LObj {

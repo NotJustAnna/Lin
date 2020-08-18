@@ -1,13 +1,11 @@
 package io.github.cafeteriaguild.lin.rt.lib.nativelang
 
 import io.github.cafeteriaguild.lin.rt.lib.LObj
-import io.github.cafeteriaguild.lin.rt.lib.lang.LBoolean
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinNativeIterator
 
 class LinIteratorWrapper(val iterator: Iterator<LObj>) : LinNativeObj(), LinNativeIterator {
     init {
-        lazyImmutableProperty("next") { LinNativeFunction("next") { iterator.next() } }
-        lazyImmutableProperty("hasNext") { LinNativeFunction("hasNext") { LBoolean.of(iterator.hasNext()) } }
+        declareIteratorFromNative()
         declareToString(this::toString)
         declareHashCode(this::hashCode)
         declareEquals<LinIteratorWrapper> { iterator == it.iterator }

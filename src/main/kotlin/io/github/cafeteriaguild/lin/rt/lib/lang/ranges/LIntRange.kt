@@ -13,8 +13,8 @@ data class LIntRange(val range: IntProgression) : LinNativeObj(), LinNativeItera
         lazyImmutableProperty("first") { LInt(range.first) }
         lazyImmutableProperty("last") { LInt(range.last) }
         lazyImmutableProperty("step") { LInt(range.step) }
-        declareFunction("rangeTo") { rangeTo(it.single()) }
-        declareIterator(this::iterator)
+        declareRangeToFromNative()
+        declareIterableFromNative()
         declareToString(range::toString)
         declareHashCode(range::hashCode)
         declareEquals<LIntRange> { range == it.range }

@@ -13,8 +13,8 @@ data class LLongRange(val range: LongProgression) : LinNativeObj(), LinNativeIte
         lazyImmutableProperty("first") { LLong(range.first) }
         lazyImmutableProperty("last") { LLong(range.last) }
         lazyImmutableProperty("step") { LLong(range.step) }
-        declareFunction("rangeTo") { rangeTo(it.single()) }
-        declareIterator(this::iterator)
+        declareRangeToFromNative()
+        declareIterableFromNative()
         declareToString(range::toString)
         declareHashCode(range::hashCode)
         declareEquals<LLongRange> { range == it.range }
