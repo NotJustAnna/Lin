@@ -13,6 +13,9 @@ import io.github.cafeteriaguild.lin.ast.node.misc.*
 import io.github.cafeteriaguild.lin.ast.node.nodes.*
 import io.github.cafeteriaguild.lin.ast.node.ops.*
 import io.github.cafeteriaguild.lin.rt.exceptions.*
+import io.github.cafeteriaguild.lin.rt.exceptions.internal.BreakException
+import io.github.cafeteriaguild.lin.rt.exceptions.internal.ContinueException
+import io.github.cafeteriaguild.lin.rt.exceptions.internal.ReturnException
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 import io.github.cafeteriaguild.lin.rt.lib.lang.*
 import io.github.cafeteriaguild.lin.rt.lib.lang.functions.CompiledFunction
@@ -47,12 +50,12 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             } catch (r: ReturnException) {
                 r.value
             } catch (b: BreakException) {
-                throw LinException("Unbound break signal", b)
+                throw LinUnboundSignalException("Unbound break signal", b)
             } catch (c: ContinueException) {
-                throw LinException("Unbound continue signal", c)
+                throw LinUnboundSignalException("Unbound continue signal", c)
             }
         }
-        throw LinException("Node is invalid or contains invalid children nodes")
+        throw LinInvalidNodeException("Node is invalid or contains invalid children nodes")
     }
 
     //region primitive nodes Null, Int, Long, Float, Double, Boolean, Char, String, Unit
@@ -76,7 +79,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     override fun visit(node: UnitExpr, param: Scope) = LUnit
 
     override fun visit(node: InvalidNode, param: Scope): LObj {
-        throw LinThrownException("invalid_node", "Interpreter reached a invalid node")
+        throw LinInvalidNodeException("Interpreter reached a invalid node")
     }
 
     //endregion
@@ -120,7 +123,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
         val property = target.propertyOf(node.name)
         if (property == null) {
             if (node.nullSafe) return null
-            throw LinThrownException("null_pointer", "'$target.${node.name}' does not exist.")
+            throw LinNullPointerException("'$target.${node.name}' does not exist.")
         }
         return property
     }
@@ -142,7 +145,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             val args = node.arguments.map { it.accept(this, param) }
             return SubscriptEmulatedProperty(target, args, this)
         }
-        throw LinThrownException("unsupported_operation", "'$target' does not accept subscript operations")
+        throw LinUnsupportedOperationException("'$target' does not accept subscript operations")
     }
 
     //endregion
@@ -164,7 +167,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             val p = DelegatedProperty(target, node.name, node.mutable, this)
             param.declareProperty(node.name, p)
         }
-        throw LinThrownException("unsupported_operation", "`$target` is not a valid property delegation target")
+        throw LinUnsupportedOperationException("`$target` is not a valid property delegation target")
     }
 
     override fun visit(node: DestructuringVariableNode, param: Scope) = block {
@@ -172,15 +175,15 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     override fun visit(node: DeclareClassNode, param: Scope) = block {
-        throw LinThrownException("unsupported_feature", "Class declarations are unsupported.")
+        throw LinUnsupportedFeatureException("Class declarations are unsupported.")
     }
 
     override fun visit(node: DeclareEnumClassNode, param: Scope) = block {
-        throw LinThrownException("unsupported_feature", "Enum class declarations are unsupported.")
+        throw LinUnsupportedFeatureException("Enum class declarations are unsupported.")
     }
 
     override fun visit(node: DeclareInterfaceNode, param: Scope) = block {
-        throw LinThrownException("unsupported_feature", "Interface declarations are unsupported.")
+        throw LinUnsupportedFeatureException("Interface declarations are unsupported.")
     }
 
     override fun visit(node: DeclareObjectNode, param: Scope) = block {
@@ -218,14 +221,14 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: IfNode, param: Scope) = block {
         val condition = node.condition.accept(this, BasicScope(param))
-        if (condition !is LBoolean) throw LinThrownException("illegal_argument", "'$condition' is not a Boolean")
+        if (condition !is LBoolean) throw LinIllegalArgumentException("'$condition' is not a Boolean")
         if (condition.value) node.thenBranch.accept(this, BasicScope(param))
         else node.elseBranch?.accept(this, BasicScope(param))
     }
 
     override fun visit(node: IfExpr, param: Scope): LObj {
         val condition = node.condition.accept(this, BasicScope(param))
-        if (condition !is LBoolean) throw LinThrownException("illegal_argument", "'$condition' is not a Boolean")
+        if (condition !is LBoolean) throw LinIllegalArgumentException("'$condition' is not a Boolean")
         return (if (condition.value) node.thenBranch else node.thenBranch).accept(this, BasicScope(param))
     }
 
@@ -239,7 +242,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 continue
             }
             val condition = node.condition.accept(this, BasicScope(param))
-            if (condition !is LBoolean) throw LinThrownException("illegal_argument", "'$condition' is not a Boolean")
+            if (condition !is LBoolean) throw LinIllegalArgumentException("'$condition' is not a Boolean")
             if (!condition.value) break
         }
     }
@@ -247,7 +250,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     override fun visit(node: WhileNode, param: Scope) = block {
         while (true) {
             val condition = node.condition.accept(this, BasicScope(param))
-            if (condition !is LBoolean) throw LinThrownException("illegal_argument", "'$condition' is not a Boolean")
+            if (condition !is LBoolean) throw LinIllegalArgumentException("'$condition' is not a Boolean")
             if (!condition.value) break
             try {
                 node.body.accept(this, BasicScope(param))
@@ -269,13 +272,13 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 val iterator = iteratorFn.doCall()
                 if (iterator.canGet("hasNext") && iterator.canGet("next")) {
                     iterate(node, iterator, param)
-                } else throw LinThrownException("illegal_argument", "'$iterator' does not implement 'next' and 'hasNext' functions")
-            } else throw LinThrownException("illegal_argument", "'$iterable' does not implement a 'iterator' function")
+                } else throw LinIllegalArgumentException("'$iterator' does not implement 'next' and 'hasNext' functions")
+            } else throw LinIllegalArgumentException("'$iterable' does not implement a 'iterator' function")
         } else if (iterable is LinNativeIterator) {
             nativeIterate(node, iterable, param)
         } else if (iterable.canGet("hasNext") && iterable.canGet("next")) {
             iterate(node, iterable, param)
-        } else throw LinThrownException("illegal_argument", "'$iterable' does not implement 'hasNext' and 'next' functions, or a 'iterator' function")
+        } else throw LinIllegalArgumentException("'$iterable' does not implement 'hasNext' and 'next' functions, or a 'iterator' function")
     }
 
     //endregion
@@ -318,7 +321,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: NotNullExpr, param: Scope): LObj {
         val value = node.value.accept(this, param)
-        if (value == LNull) throw LinThrownException("assertion_failed", "value is null")
+        if (value == LNull) throw LinAssertionFailedException("value is null")
         return value
     }
 
@@ -376,7 +379,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 return getFn.doCall { node.arguments.map { it.accept(this, param) } }
             }
         }
-        throw LinThrownException("unsupported_operation", "'$target' does not support subscript get")
+        throw LinUnsupportedOperationException("'$target' does not support subscript get")
     }
 
     override fun visit(node: SubscriptAssignNode, param: Scope) = block {
@@ -391,7 +394,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                 return@block
             }
         }
-        throw LinThrownException("unsupported_operation", "'$target' does not support subscript set")
+        throw LinUnsupportedOperationException("'$target' does not support subscript set")
     }
 
     //endregion
@@ -409,7 +412,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         val toStringFn = right["toString"]
                         if (toStringFn.canInvoke()) {
                             val str = toStringFn.doCall()
-                            if (str !is LString) throw LinThrownException("illegal_argument", "'$str' is not a String")
+                            if (str !is LString) throw LinIllegalArgumentException("'$str' is not a String")
                             return LString(left.value + str.value)
                         }
                     }
@@ -425,7 +428,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         return opFn.doCall { listOf(right) }
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left + $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left + $right'")
             }
             BinaryOperationType.SUBTRACT -> {
                 val right = node.right.accept(this, param)
@@ -436,7 +439,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         return opFn.doCall { listOf(right) }
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left - $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left - $right'")
             }
             BinaryOperationType.MULTIPLY -> {
                 val right = node.right.accept(this, param)
@@ -447,7 +450,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         return opFn.doCall { listOf(right) }
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left * $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left * $right'")
             }
             BinaryOperationType.DIVIDE -> {
                 val right = node.right.accept(this, param)
@@ -458,7 +461,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         return opFn.doCall { listOf(right) }
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left / $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left / $right'")
             }
             BinaryOperationType.REMAINING -> {
                 val right = node.right.accept(this, param)
@@ -469,7 +472,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         return opFn.doCall { listOf(right) }
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left % $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left % $right'")
             }
             BinaryOperationType.EQUALS -> {
                 val right = node.right.accept(this, param)
@@ -480,7 +483,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val equalsFn = left["equals"]
                     if (equalsFn.canInvoke()) {
                         val bool = equalsFn.doCall { listOf(right) }
-                        if (bool !is LBoolean) throw LinThrownException("illegal_argument", "'$bool' is not a Boolean")
+                        if (bool !is LBoolean) throw LinIllegalArgumentException("'$bool' is not a Boolean")
                         return bool
                     }
                 }
@@ -495,7 +498,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val equalsFn = left["equals"]
                     if (equalsFn.canInvoke()) {
                         val bool = equalsFn.doCall { listOf(right) }
-                        if (bool !is LBoolean) throw LinThrownException("illegal_argument", "'$bool' is not a Boolean")
+                        if (bool !is LBoolean) throw LinIllegalArgumentException("'$bool' is not a Boolean")
                         return !bool
                     }
                 }
@@ -506,18 +509,18 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     if (!left.value) return left
                     val right = node.right.accept(this, param)
                     if (right is LBoolean) return right
-                    throw LinThrownException("unsupported_operation", "Unsupported operation '$left && $right'")
+                    throw LinUnsupportedOperationException("Unsupported operation '$left && $right'")
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left && ...'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left && ...'")
             }
             BinaryOperationType.OR -> {
                 if (left is LBoolean) {
                     if (left.value) return left
                     val right = node.right.accept(this, param)
                     if (right is LBoolean) return right
-                    throw LinThrownException("unsupported_operation", "Unsupported operation '$left || $right'")
+                    throw LinUnsupportedOperationException("Unsupported operation '$left || $right'")
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left || ...'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left || ...'")
             }
             BinaryOperationType.LT -> {
                 val right = node.right.accept(this, param)
@@ -526,11 +529,11 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val compareToFn = left["compareTo"]
                     if (compareToFn.canInvoke()) {
                         val number = compareToFn.doCall { listOf(right) }
-                        if (number !is LNumber) throw LinThrownException("illegal_argument", "'$number' is not a Number")
+                        if (number !is LNumber) throw LinIllegalArgumentException("'$number' is not a Number")
                         return LBoolean.of(number.value.toDouble() < 0)
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left < $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left < $right'")
             }
             BinaryOperationType.LTE -> {
                 val right = node.right.accept(this, param)
@@ -541,11 +544,11 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val compareToFn = left["compareTo"]
                     if (compareToFn.canInvoke()) {
                         val number = compareToFn.doCall { listOf(right) }
-                        if (number !is LNumber) throw LinThrownException("illegal_argument", "'$number' is not a Number")
+                        if (number !is LNumber) throw LinIllegalArgumentException("'$number' is not a Number")
                         return LBoolean.of(number.value.toDouble() <= 0)
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left <= $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left <= $right'")
             }
             BinaryOperationType.GT -> {
                 val right = node.right.accept(this, param)
@@ -556,11 +559,11 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val compareToFn = left["compareTo"]
                     if (compareToFn.canInvoke()) {
                         val number = compareToFn.doCall { listOf(right) }
-                        if (number !is LNumber) throw LinThrownException("illegal_argument", "'$number' is not a Number")
+                        if (number !is LNumber) throw LinIllegalArgumentException("'$number' is not a Number")
                         return LBoolean.of(number.value.toDouble() > 0)
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left > $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left > $right'")
             }
             BinaryOperationType.GTE -> {
                 val right = node.right.accept(this, param)
@@ -571,11 +574,11 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val compareToFn = left["compareTo"]
                     if (compareToFn.canInvoke()) {
                         val number = compareToFn.doCall { listOf(right) }
-                        if (number !is LNumber) throw LinThrownException("illegal_argument", "'$number' is not a Number")
+                        if (number !is LNumber) throw LinIllegalArgumentException("'$number' is not a Number")
                         return LBoolean.of(number.value.toDouble() >= 0)
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left >= $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left >= $right'")
             }
             BinaryOperationType.ELVIS -> {
                 return if (left != LNull) left else node.right.accept(this, param)
@@ -589,11 +592,11 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val containsFn = left["contains"]
                     if (containsFn.canInvoke()) {
                         val bool = containsFn.doCall { listOf(right) }
-                        if (bool !is LBoolean) throw LinThrownException("illegal_argument", "'$bool' is not a Boolean")
+                        if (bool !is LBoolean) throw LinIllegalArgumentException("'$bool' is not a Boolean")
                         return bool
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left in $right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left in $right'")
             }
             BinaryOperationType.RANGE -> {
                 val right = node.right.accept(this, param)
@@ -606,7 +609,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                         return rangeToFn.doCall { listOf(right) }
                     }
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$left..$right'")
+                throw LinUnsupportedOperationException("Unsupported operation '$left..$right'")
             }
         }
     }
@@ -620,7 +623,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val opFn = target["unaryPlus"]
                     if (opFn.canInvoke()) return opFn.doCall()
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '+$target'")
+                throw LinUnsupportedOperationException("Unsupported operation '+$target'")
             }
             UnaryOperationType.NEGATIVE -> {
                 if (target is LNumber) return box(unaryMinus(target.value))
@@ -628,7 +631,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val opFn = target["unaryMinus"]
                     if (opFn.canInvoke()) return opFn.doCall()
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '-$target'")
+                throw LinUnsupportedOperationException("Unsupported operation '-$target'")
             }
             UnaryOperationType.NOT -> {
                 if (target is LBoolean) return target.not()
@@ -636,7 +639,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val opFn = target["not"]
                     if (opFn.canInvoke()) return opFn.doCall()
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '!$target'")
+                throw LinUnsupportedOperationException("Unsupported operation '!$target'")
             }
         }
     }
@@ -649,7 +652,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val opFn = target["inc"]
                     if (opFn.canInvoke()) return opFn.doCall()
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$target++'")
+                throw LinUnsupportedOperationException("Unsupported operation '$target++'")
             }
             UnaryAssignOperationType.DECREMENT -> {
                 if (target is LNumber) return box(dec(target.value))
@@ -657,15 +660,15 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     val opFn = target["dec"]
                     if (opFn.canInvoke()) return opFn.doCall()
                 }
-                throw LinThrownException("unsupported_operation", "Unsupported operation '$target--'")
+                throw LinUnsupportedOperationException("Unsupported operation '$target--'")
             }
         }
     }
 
     override fun visit(node: PrefixAssignUnaryOperation, param: Scope): LObj {
         val property = node.target.resolve(this, param) ?: return LNull
-        if (!property.getAllowed) throw LinThrownException("illegal_access", "Property does not allow access.")
-        if (!property.getAllowed) throw LinThrownException("illegal_access", "Property does not allow assignment.")
+        if (!property.getAllowed) throw LinIllegalAccessException("Property does not allow access.")
+        if (!property.getAllowed) throw LinIllegalAccessException("Property does not allow assignment.")
         val target = property.get()
         val result = applyUnaryAssignOperation(target, node.operator)
         property.set(result)
@@ -674,8 +677,8 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: PostfixAssignUnaryOperation, param: Scope): LObj {
         val property = node.target.resolve(this, param) ?: return LNull
-        if (!property.getAllowed) throw LinThrownException("illegal_access", "Property does not allow access.")
-        if (!property.getAllowed) throw LinThrownException("illegal_access", "Property does not allow assignment.")
+        if (!property.getAllowed) throw LinIllegalAccessException("Property does not allow access.")
+        if (!property.getAllowed) throw LinIllegalAccessException("Property does not allow assignment.")
         val target = property.get()
         val result = applyUnaryAssignOperation(target, node.operator)
         property.set(result)
@@ -684,8 +687,8 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
 
     override fun visit(node: AssignOperation, param: Scope) = block {
         val property = node.left.resolve(this, param) ?: return LNull
-        if (!property.getAllowed) throw LinThrownException("illegal_access", "Property does not allow access.")
-        if (!property.getAllowed) throw LinThrownException("illegal_access", "Property does not allow assignment.")
+        if (!property.getAllowed) throw LinIllegalAccessException("Property does not allow access.")
+        if (!property.getAllowed) throw LinIllegalAccessException("Property does not allow assignment.")
         val left = property.get()
         val right = node.right.accept(this, param)
 
@@ -698,7 +701,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                             val toStringFn = right["toString"]
                             if (toStringFn.canInvoke()) {
                                 val str = toStringFn.doCall()
-                                if (str !is LString) throw LinThrownException("illegal_argument", "'$str' is not a String")
+                                if (str !is LString) throw LinIllegalArgumentException("'$str' is not a String")
                                 property.set(LString(left.value + str.value))
                                 return@block
                             }
@@ -721,7 +724,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                                 return@block
                             }
                         }
-                        throw LinThrownException("unsupported_operation", "Unsupported operation '$left += $right'")
+                        throw LinUnsupportedOperationException("Unsupported operation '$left += $right'")
                     }
                 }
             }
@@ -743,7 +746,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                                 return@block
                             }
                         }
-                        throw LinThrownException("unsupported_operation", "Unsupported operation '$left -= $right'")
+                        throw LinUnsupportedOperationException("Unsupported operation '$left -= $right'")
                     }
                 }
             }
@@ -765,7 +768,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                                 return@block
                             }
                         }
-                        throw LinThrownException("unsupported_operation", "Unsupported operation '$left *= $right'")
+                        throw LinUnsupportedOperationException("Unsupported operation '$left *= $right'")
                     }
                 }
             }
@@ -787,7 +790,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                                 return@block
                             }
                         }
-                        throw LinThrownException("unsupported_operation", "Unsupported operation '$left /= $right'")
+                        throw LinUnsupportedOperationException("Unsupported operation '$left /= $right'")
                     }
                 }
             }
@@ -809,7 +812,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                                 return@block
                             }
                         }
-                        throw LinThrownException("unsupported_operation", "Unsupported operation '$left %= $right'")
+                        throw LinUnsupportedOperationException("Unsupported operation '$left %= $right'")
                     }
                 }
             }
@@ -826,33 +829,31 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     }
 
     private inline fun LObj.canInvokeOrThrow() = apply {
-        if (!canInvoke()) throw LinThrownException("unsupported_operation", "'$this' is not callable")
+        if (!canInvoke()) throw LinUnsupportedOperationException("'$this' is not callable")
     }
 
     private inline fun Property.getAllowedOrThrow(parent: LObj, name: String) = apply {
-        if (!getAllowed) throw LinThrownException("illegal_access", "Property '$parent.$name' does not allow access.")
+        if (!getAllowed) throw LinIllegalAccessException("Property '$parent.$name' does not allow access.")
     }
 
     private inline fun Property.getAllowedOrThrow(name: String) = apply {
-        if (!getAllowed) throw LinThrownException("illegal_access", "Property '$name' does not allow access.")
+        if (!getAllowed) throw LinIllegalAccessException("Property '$name' does not allow access.")
     }
 
     private inline fun Property.setAllowedOrThrow(parent: LObj, name: String) = apply {
-        if (!setAllowed) throw LinThrownException("illegal_access", "Property '$parent.$name' does not allow assignments.")
+        if (!setAllowed) throw LinIllegalAccessException("Property '$parent.$name' does not allow assignments.")
     }
 
     private inline fun Property.setAllowedOrThrow(name: String) = apply {
-        if (!setAllowed) throw LinThrownException("illegal_access", "Property '$name' does not allow assignments.")
+        if (!setAllowed) throw LinIllegalAccessException("Property '$name' does not allow assignments.")
     }
 
     private inline fun Property?.orNullPointer(name: String): Property {
-        return this
-            ?: throw LinThrownException("null_pointer", "There isn't a '$name' object associated in this context.")
+        return this ?: throw LinNullPointerException("There isn't a '$name' object associated in this context.")
     }
 
     private inline fun Property?.orNullPointer(parent: LObj, name: String): Property {
-        return this
-            ?: throw LinThrownException("null_pointer", "There isn't a '$parent.$name' object associated in this context.")
+        return this ?: throw LinNullPointerException("There isn't a '$parent.$name' object associated in this context.")
     }
 
     private inline fun LObj.doCall(args: () -> List<LObj> = { emptyList() }): LObj {
@@ -905,7 +906,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
             val nextCall = nextFn.callable()
             while (true) {
                 val hasNext = hasNextCall.doCall()
-                if (hasNext !is LBoolean) throw LinThrownException("illegal_argument", "'hasNext' returned '$hasNext', which is not a Boolean")
+                if (hasNext !is LBoolean) throw LinIllegalArgumentException("'hasNext' returned '$hasNext', which is not a Boolean")
                 if (!hasNext.value) {
                     break
                 }
@@ -927,7 +928,7 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
                     continue
                 }
             }
-        } else throw LinThrownException("illegal_argument", "'$iterator' does not implement 'next' and 'hasNext' functions")
+        } else throw LinIllegalArgumentException("'$iterator' does not implement 'next' and 'hasNext' functions")
     }
 
     //endregion

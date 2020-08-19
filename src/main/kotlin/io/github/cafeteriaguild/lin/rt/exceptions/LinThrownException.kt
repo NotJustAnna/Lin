@@ -8,5 +8,5 @@ import io.github.cafeteriaguild.lin.rt.lib.nativelang.routes.LinCatchable
 class LinThrownException(override val thrown: LObj) : LinException(thrown.toString()), LinCatchable {
     constructor(type: LObj, message: LObj) : this(LinNativeError(type, message))
     constructor(type: String, message: String) : this(LString(type), LString(message))
-    constructor(throwable: Throwable) : this(throwable.javaClass.simpleName, throwable.localizedMessage)
+    constructor(throwable: Throwable) : this("java/" + throwable.javaClass.simpleName, throwable.localizedMessage)
 }

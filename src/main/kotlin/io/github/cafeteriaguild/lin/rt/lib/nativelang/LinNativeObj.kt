@@ -1,6 +1,6 @@
 package io.github.cafeteriaguild.lin.rt.lib.nativelang
 
-import io.github.cafeteriaguild.lin.rt.exceptions.LinThrownException
+import io.github.cafeteriaguild.lin.rt.exceptions.LinIllegalArgumentException
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 import io.github.cafeteriaguild.lin.rt.lib.lang.LBoolean
 import io.github.cafeteriaguild.lin.rt.lib.lang.LString
@@ -102,13 +102,13 @@ abstract class LinNativeObj : AbstractObj() {
 
     protected fun LinNativeDelegate.declareDelegateFromNative() {
         declareFunction("getValue") {
-            val str = it.first() as? LString ?: throw LinThrownException("illegal_argument", "'name' is not a String")
+            val str = it.first() as? LString ?: throw LinIllegalArgumentException("'name' is not a String")
             getValue(str.value)
         }
         if (this is LinNativeMutableDelegate) {
             declareFunction("setValue") {
                 val str = it.first() as? LString
-                    ?: throw LinThrownException("illegal_argument", "'name' is not a String")
+                    ?: throw LinIllegalArgumentException("'name' is not a String")
                 returningUnit { setValue(str.value, it[1]) }
             }
         }
@@ -119,7 +119,7 @@ abstract class LinNativeObj : AbstractObj() {
             LBoolean.of(
                 contains(
                     it.singleOrNull()
-                        ?: throw LinThrownException("illegal_argument", "'contains' only receives a single argument")
+                        ?: throw LinIllegalArgumentException("'contains' only receives a single argument")
                 )
             )
         }
@@ -129,7 +129,7 @@ abstract class LinNativeObj : AbstractObj() {
         declareFunction("rangeTo") {
             this.rangeTo(
                 it.singleOrNull()
-                    ?: throw LinThrownException("illegal_argument", "'rangeTo' only receives a single argument")
+                    ?: throw LinIllegalArgumentException("'rangeTo' only receives a single argument")
             )
         }
     }

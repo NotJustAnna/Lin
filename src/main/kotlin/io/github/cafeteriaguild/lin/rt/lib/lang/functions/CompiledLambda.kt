@@ -3,10 +3,11 @@ package io.github.cafeteriaguild.lin.rt.lib.lang.functions
 import io.github.cafeteriaguild.lin.ast.node.Node
 import io.github.cafeteriaguild.lin.ast.node.nodes.LambdaExpr
 import io.github.cafeteriaguild.lin.rt.LinInterpreter
-import io.github.cafeteriaguild.lin.rt.exceptions.BreakException
-import io.github.cafeteriaguild.lin.rt.exceptions.ContinueException
 import io.github.cafeteriaguild.lin.rt.exceptions.LinException
-import io.github.cafeteriaguild.lin.rt.exceptions.ReturnException
+import io.github.cafeteriaguild.lin.rt.exceptions.LinUnboundSignalException
+import io.github.cafeteriaguild.lin.rt.exceptions.internal.BreakException
+import io.github.cafeteriaguild.lin.rt.exceptions.internal.ContinueException
+import io.github.cafeteriaguild.lin.rt.exceptions.internal.ReturnException
 import io.github.cafeteriaguild.lin.rt.lib.LObj
 import io.github.cafeteriaguild.lin.rt.lib.nativelang.invoke.LinDirectCall
 import io.github.cafeteriaguild.lin.rt.scope.BasicScope
@@ -35,9 +36,9 @@ class CompiledLambda(
         } catch (r: ReturnException) {
             r.value
         } catch (b: BreakException) {
-            throw LinException("Unbound break signal", b)
+            throw LinUnboundSignalException("Unbound break signal", b)
         } catch (c: ContinueException) {
-            throw LinException("Unbound continue signal", c)
+            throw LinUnboundSignalException("Unbound continue signal", c)
         }
     }
 
