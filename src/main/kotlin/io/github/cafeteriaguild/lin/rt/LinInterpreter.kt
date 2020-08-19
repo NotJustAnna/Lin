@@ -868,9 +868,10 @@ class LinInterpreter : NodeParamVisitor<Scope, LObj>, AccessResolver<Scope, Prop
     private inline fun destructure(mutable: Boolean, names: List<String>, target: LObj, param: Scope) {
         val properties = names.map { it to SimpleProperty(mutable) }.onEach { (s, p) -> param.declareProperty(s, p) }
         for (index in properties.indices) {
-            val property = target.propertyOf("component$index")
-                .orNullPointer(target, "component$index")
-                .getAllowedOrThrow(target, "component$index")
+            val componentName = "component${index + 1}"
+            val property = target.propertyOf(componentName)
+                .orNullPointer(target, componentName)
+                .getAllowedOrThrow(target, componentName)
 
             val componentFn = property.get().canInvokeOrThrow()
             properties[index].second.set(componentFn.doCall())
