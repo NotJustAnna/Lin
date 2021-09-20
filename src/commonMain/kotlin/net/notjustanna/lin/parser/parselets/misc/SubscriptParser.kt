@@ -8,9 +8,8 @@ import net.notjustanna.tartar.api.parser.InfixParser
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.parser.utils.matchAll
 
-class DotParser(private val nullSafe: Boolean) : InfixParser<TokenType, Node> {
+object SubscriptParser : InfixParser<TokenType, Node> {
     override val precedence: Int = Precedence.POSTFIX
 
     override fun parse(ctx: ParserContext<TokenType, Node>, left: Node, token: Token<TokenType>): Node {
@@ -21,31 +20,37 @@ class DotParser(private val nullSafe: Boolean) : InfixParser<TokenType, Node> {
                 error(SyntaxException("Expected an expression", left.section))
             }
         }
+        val arguments = mutableListOf<Expr>()
 
-        ctx.matchAll(TokenType.NL)
-        val identifier = ctx.eat()
-        if (identifier.type == TokenType.IDENTIFIER) {
-            val name = identifier.value
-
-            return if (ctx.match(TokenType.ASSIGN)) {
-                val value = ctx.parseExpression().let {
+        if (!ctx.match(TokenType.R_BRACKET)) {
+            do {
+                //TODO Implement Spread Operator
+                arguments += ctx.parseExpression().let {
                     it as? Expr ?: return InvalidNode {
                         section(token.section)
                         child(it)
                         error(SyntaxException("Expected an expression", it.section))
                     }
                 }
-                ctx.maybeIgnoreNL()
-                PropertyAssignNode(left, nullSafe, name, value, token.section)
-            } else {
-                ctx.maybeIgnoreNL()
-                PropertyAccessExpr(left, nullSafe, name, token.section)
-            }
+            } while (ctx.match(TokenType.COMMA))
+            ctx.eat(TokenType.R_BRACKET)
         }
-        return InvalidNode {
-            section(token.section)
-            child(left)
-            error(SyntaxException("Expected an indentifier, but found ${token.type}", identifier.section))
+
+        val rBracket = ctx.last
+
+        return if (ctx.match(TokenType.ASSIGN)) {
+            val value = ctx.parseExpression().let {
+                it as? Expr ?: return InvalidNode {
+                    section(token.section)
+                    child(it)
+                    error(SyntaxException("Expected an expression", it.section))
+                }
+            }
+            ctx.maybeIgnoreNL()
+            SubscriptAssignNode(left, arguments, value, left.span(value))
+        } else {
+            ctx.maybeIgnoreNL()
+            SubscriptAccessExpr(left, arguments, left.span(rBracket))
         }
     }
 }

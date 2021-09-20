@@ -6,9 +6,7 @@ import net.notjustanna.lin.ast.UnaryOperationType
 import net.notjustanna.lin.lexer.TokenType
 import net.notjustanna.lin.lexer.TokenType.*
 import net.notjustanna.lin.parser.parselets.control.*
-import net.notjustanna.lin.parser.parselets.misc.DotParser
-import net.notjustanna.lin.parser.parselets.misc.DoubleBangParser
-import net.notjustanna.lin.parser.parselets.misc.IdentifierParser
+import net.notjustanna.lin.parser.parselets.misc.*
 import net.notjustanna.lin.parser.parselets.operations.BinaryOperatorParser
 import net.notjustanna.lin.parser.parselets.operations.UnaryOperatorParser
 import net.notjustanna.lin.parser.parselets.value.*
@@ -28,8 +26,10 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     prefix(TRUE, BooleanParser(true))
     prefix(FALSE, BooleanParser(false))
 
-    //TODO Objects, Arrays and Functions
-
+    // Objects, Arrays and Functions
+    prefix(L_BRACE, ObjectParser)
+    prefix(L_BRACKET, ArrayParser)
+    prefix(FUN, FunctionParser)
 
     // Control expressions
     prefix(RETURN, ReturnParser)
@@ -37,13 +37,15 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     prefix(BREAK, BreakParser)
     prefix(CONTINUE, ContinueParser)
 
-    //Conditional and Loop nodes
+    // Conditional and Loop nodes
     prefix(IF, IfParser)
     prefix(DO, DoParser)
     prefix(WHILE, WhileParser)
+    prefix(FOR, ForParser)
 
     // Unary operations
     prefix(BANG, UnaryOperatorParser(UnaryOperationType.NOT))
+    prefix(DOUBLE_BANG, UnaryOperatorParser(UnaryOperationType.TRUTH))
     prefix(PLUS, UnaryOperatorParser(UnaryOperationType.POSITIVE))
     prefix(MINUS, UnaryOperatorParser(UnaryOperationType.NEGATIVE))
 
@@ -67,17 +69,21 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     infix(IS, BinaryOperatorParser(Precedence.NAMED_CHECKS, BinaryOperationType.IS))
 
     //TODO Assign operations
-    prefix(L_BRACE, ObjectParser)
-    prefix(L_BRACKET, ArrayParser)
 
     //TODO Prefix Increment/decrement
 
-    //TODO Miscellaneous parsers
+    // Miscellaneous parsers
+    prefix(VAL, DeclareVariableParser(false))
+    prefix(VAR, DeclareVariableParser(true))
     prefix(IDENTIFIER, IdentifierParser)
     prefix(L_PAREN, ParenthesisParser)
     prefix(TRY, TryParser)
+    prefix(TYPEOF, TypeofParser)
 
     infix(DOT, DotParser(false))
     infix(QUESTION_DOT, DotParser(true))
+    infix(BANG, InfixBangParser)
     infix(DOUBLE_BANG, DoubleBangParser)
+    infix(L_PAREN, InvocationParser)
+    infix(L_BRACKET, SubscriptParser)
 }

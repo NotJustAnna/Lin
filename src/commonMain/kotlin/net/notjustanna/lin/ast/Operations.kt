@@ -13,5 +13,5 @@ enum class BinaryOperationType {
 class UnaryOperation(val target: Expr, val operator: UnaryOperationType, override val section: Section) : Expr
 
 enum class UnaryOperationType {
-    POSITIVE, NEGATIVE, NOT,
+    POSITIVE, NEGATIVE, NOT, TRUTH
 }

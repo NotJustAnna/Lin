@@ -17,4 +17,7 @@ data class IfNode(
 ) : Node
 
 data class DoWhileNode(val body: Node?, val condition: Expr, override val section: Section) : Node
+
 data class WhileNode(val condition: Expr, val body: Node?, override val section: Section) : Node
+
+data class ForNode(val variableName: String, val iterable: Expr, val body: Node, override val section: Section) : Node

@@ -1,10 +1,8 @@
 package net.notjustanna.lin.parser.utils
 
-import net.notjustanna.lin.ast.Expr
-import net.notjustanna.lin.ast.MultiExpr
-import net.notjustanna.lin.ast.MultiNode
-import net.notjustanna.lin.ast.Node
+import net.notjustanna.lin.ast.*
 import net.notjustanna.lin.lexer.TokenType
+import net.notjustanna.lin.parser.parselets.value.FunctionParser
 import net.notjustanna.tartar.api.parser.ParserContext
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 
@@ -37,7 +35,12 @@ fun ParserContext<TokenType, Node>.parseBlock(smartToExpr: Boolean = true, brace
             skipOnlyUntil(TokenType.R_BRACE)
             if (match(TokenType.R_BRACE)) break
             matchAll(TokenType.NL)
-            list += parseExpression()
+            val expr = parseExpression()
+
+            list += when {
+                expr is FunctionExpr && expr.name != null -> DeclareFunctionExpr(expr.name, expr, expr.section)
+                else -> expr
+            }
         }
         if (smartToExpr && list.isNotEmpty() && list.last() is Expr) {
             val last = list.removeLast() as Expr
