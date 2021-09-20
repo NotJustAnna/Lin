@@ -7,7 +7,7 @@ class BinaryOperation(
 ) : Expr
 
 enum class BinaryOperationType {
-    ADD, SUBTRACT, MULTIPLY, DIVIDE, REMAINING, EQUALS, NOT_EQUALS, AND, OR, LT, LTE, GT, GTE, ELVIS, IN, RANGE
+    ADD, SUBTRACT, MULTIPLY, DIVIDE, REMAINING, EQUALS, NOT_EQUALS, AND, OR, LT, LTE, GT, GTE, ELVIS, IN, IS, RANGE
 }
 
 class UnaryOperation(val target: Expr, val operator: UnaryOperationType, override val section: Section) : Expr

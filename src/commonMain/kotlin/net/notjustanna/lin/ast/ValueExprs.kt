@@ -19,3 +19,9 @@ data class DoubleExpr(val value: Double, override val section: Section) : Expr
 data class CharExpr(val value: Char, override val section: Section) : Expr
 
 data class StringExpr(val value: String, override val section: Section) : Expr
+
+data class ArrayExpr(val value: List<Expr>, override val section: Section) : Expr
+
+data class ObjectExpr(val value: List<Pair<Expr, Expr>>, override val section: Section) : Expr
+
+data class ThisExpr(override val section: Section) : Expr

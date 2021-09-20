@@ -7,19 +7,15 @@ Stuff from JavaScript:
 
 - Arrays and Objects
 - Function binding to `this`
-- Destructuring
-- [from TC39/proposal-extensions] `::` operator (as in `{}::functionFromScope()` )
 - `typeof`
 
 Stuff from Kotlin:
 
 - `if`/`else` (both as statement and expression)
 - `for`
-    - Support for Iterables and Iterators
-    - Support for Destructuring For Loops
 - `while`
 - `do`/`while`
-    - `do` without `while` works, works like kotlin's `run {}`
+    - `do` without `while` is valid, works like kotlin's `run {}`
 - `try`/`catch`/`finally`
     - no type restrictions, like JS.
 - `break`/`continue`
@@ -38,29 +34,14 @@ Stuff from Kotlin:
     - `a ?: b`, `a in b`, `a !in b`, `a..b`
 - Function declaration (named, anonymous)
 - Subscript access/assignment (`a[...]`, `a[...] = b`)
-- Increment (`++a`, `a++`) and Decrement (`--a`, `a--`) operations
-- Assign operations: `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`
 - Equality rules
 
 Custom stuff:
 
 - `unit` looks like Kotlin's `kotlin.Unit` but works more like `undefined`.
     - NOT implementing `{}.anything == unit`. Ever.
-- `is` syntactically de-sugars from `A is B` to `typeof A == B`
+- `is` runtimely de-sugars from `A is B` to `typeof A == B`
 - `return`/`throw` will work more like JS and less like Kotlin.
 - `when` will be like Kotlin as much as pratt-parsing allow us to.
 - `break` on `while` works like a loop `return`. Otherwise `while` returns `unit`.
-- Infix functions functions map as extensions
 - Use symbols (like JS). `operator fun` are shortcuts to underlying symbols
-
-Not currently defined:
-
-- Enums (go TS?)
-- Lambdas (go JS? or go Lin-style?)
-   - Maybe go Python-style and use a `lambda` keyword
-
-Not interested in defining currently:
-
-- Static typing, Classes, Interfaces ...
-- Multi-level breaking/continuing, Labels, etc
-- Labels

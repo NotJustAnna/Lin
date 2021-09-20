@@ -11,7 +11,7 @@ import net.notjustanna.tartar.extensions.readString
 typealias LinToken = Token<TokenType>
 
 val linStdLexer = createLexer<LinToken> {
-    ' '()
+    ' ' { while (hasNext()) if (!match(' ')) break }
     '\r' {
         match('\n')
         process(makeToken(NL))
