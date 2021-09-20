@@ -3,7 +3,7 @@ package com.github.adriantodt.lin.ast
 import com.github.adriantodt.tartar.api.lexer.Section
 
 /*
- * NOTE: TryExpr is one one of those dynamic expressions which may explicitly return `unit`
+ * NOTE: TryExpr is one of those dynamic expressions which may explicitly return `unit`
  * and be an expression, even though the branch had an regular node.
  */
 

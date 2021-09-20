@@ -9,8 +9,7 @@ import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
-
-class DotParser(private val nullSafe: Boolean) : InfixParser<TokenType, Node> {
+object InvocationParser : InfixParser<TokenType, Node> {
     override val precedence: Int = Precedence.POSTFIX
 
     override fun parse(ctx: ParserContext<TokenType, Node>, left: Node, token: Token<TokenType>): Node {
@@ -21,31 +20,34 @@ class DotParser(private val nullSafe: Boolean) : InfixParser<TokenType, Node> {
                 error(SyntaxException("Expected an expression", left.section))
             }
         }
+        val arguments = mutableListOf<Expr>()
 
         ctx.matchAll(TokenType.NL)
-        val identifier = ctx.eat()
-        if (identifier.type == TokenType.IDENTIFIER) {
-            val name = identifier.value
-
-            return if (ctx.match(TokenType.ASSIGN)) {
-                val value = ctx.parseExpression().let {
+        if (!ctx.match(TokenType.R_PAREN)) {
+            do {
+                //TODO Implement Spread Operator
+                ctx.matchAll(TokenType.NL)
+                arguments += ctx.parseExpression().let {
                     it as? Expr ?: return InvalidNode {
                         section(token.section)
                         child(it)
                         error(SyntaxException("Expected an expression", it.section))
                     }
                 }
-                ctx.maybeIgnoreNL()
-                PropertyAssignNode(left, nullSafe, name, value, token.section)
-            } else {
-                ctx.maybeIgnoreNL()
-                PropertyAccessExpr(left, nullSafe, name, token.section)
-            }
+                ctx.matchAll(TokenType.NL)
+            } while (ctx.match(TokenType.COMMA))
+            ctx.eat(TokenType.R_PAREN)
         }
-        return InvalidNode {
-            section(token.section)
-            child(left)
-            error(SyntaxException("Expected an indentifier, but found ${token.type}", identifier.section))
+        // Last-parameter Lambda goes here (Check Lin/old)
+
+        ctx.maybeIgnoreNL()
+
+        if (left is PropertyAccessExpr) {
+            return InvokeMemberExpr(left.target, left.nullSafe, left.name, arguments, token.section)
+        } else if (left is IdentifierExpr) {
+            return InvokeLocalExpr(left.name, arguments, token.section)
         }
+
+        return InvokeExpr(left, arguments, token.section)
     }
 }

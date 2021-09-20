@@ -1,10 +1,8 @@
 package com.github.adriantodt.lin.parser.utils
 
-import com.github.adriantodt.lin.ast.Expr
-import com.github.adriantodt.lin.ast.MultiExpr
-import com.github.adriantodt.lin.ast.MultiNode
-import com.github.adriantodt.lin.ast.Node
+import com.github.adriantodt.lin.ast.*
 import com.github.adriantodt.lin.lexer.TokenType
+import com.github.adriantodt.lin.parser.parselets.value.FunctionParser
 import com.github.adriantodt.tartar.api.parser.ParserContext
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 
@@ -37,7 +35,12 @@ fun ParserContext<TokenType, Node>.parseBlock(smartToExpr: Boolean = true, brace
             skipOnlyUntil(TokenType.R_BRACE)
             if (match(TokenType.R_BRACE)) break
             matchAll(TokenType.NL)
-            list += parseExpression()
+            val expr = parseExpression()
+
+            list += when {
+                expr is FunctionExpr && expr.name != null -> DeclareFunctionExpr(expr.name, expr, expr.section)
+                else -> expr
+            }
         }
         if (smartToExpr && list.isNotEmpty() && list.last() is Expr) {
             val last = list.removeLast() as Expr

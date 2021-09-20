@@ -23,10 +23,24 @@ object ObjectParser : PrefixParser<TokenType, Node> {
                 if (ctx.nextIsAny(STRING, IDENTIFIER)) {
                     val (type, value, section) = ctx.eat()
                     key = StringExpr(value, section)
+                    // TODO Implement `operator` modifier for functions (Yes it is implemented here)
                     if (type == IDENTIFIER && ctx.skipOnlyUntil(COMMA)) {
                         contents += key to IdentifierExpr(value, section)
                         continue
                     }
+                } else if (ctx.nextIs(FUN)) {
+                    val func = ctx.parseExpression()
+
+                    contents += when {
+                        func is DeclareFunctionExpr -> StringExpr(func.name, func.section) to func.value
+                        func is FunctionExpr && func.name != null -> StringExpr(func.name, func.section) to func
+                        else -> return InvalidNode {
+                            section(token.section)
+                            child(func)
+                            error(SyntaxException("Expected a named function", func.section))
+                        }
+                    }
+                    continue
                 } else if (ctx.nextIsAny(INT, LONG, FLOAT, DOUBLE, TRUE, FALSE)) {
                     val (type, value, section) = ctx.eat()
                     key = when (type) {
@@ -40,7 +54,7 @@ object ObjectParser : PrefixParser<TokenType, Node> {
                     }
                 } else if (ctx.match(L_BRACKET)) {
                     key = ctx.parseExpression().let {
-                        it as? Expr ?: return InvalidNode {
+                        it as? Expr ?: InvalidNode {
                             section(token.section)
                             child(it)
                             error(SyntaxException("Expected an expression", it.section))

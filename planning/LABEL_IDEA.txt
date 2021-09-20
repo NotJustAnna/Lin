@@ -1,0 +1,20 @@
+Syntax:
+- `label@for` / `label@while` / `label@do`
+    - control block with a label
+
+- `break@label` / `continue@label`
+    - break/continue a block with a specific label
+- `break@1` / `continue@1`
+    - break/continue block at N+1 depth
+    - `break@0` === `break`
+- `this@1`
+    - get `this` at N+1 depth
+    - `this@0` === `this`
+
+Lexing:
+
+- `label@for` -> FOR "@label"
+    (Same for `while`, `do`)
+- `this@1` -> THIS "@1"
+    (Same for `break`, `continue`)
+

@@ -25,3 +25,12 @@ data class ArrayExpr(val value: List<Expr>, override val section: Section) : Exp
 data class ObjectExpr(val value: List<Pair<Expr, Expr>>, override val section: Section) : Expr
 
 data class ThisExpr(override val section: Section) : Expr
+
+data class FunctionExpr(
+    val parameters: List<Parameter>,
+    val name: String?,
+    val body: Node?,
+    override val section: Section
+): Expr {
+    data class Parameter(val name: String, val varargs: Boolean, val defaultValue: Expr?)
+}

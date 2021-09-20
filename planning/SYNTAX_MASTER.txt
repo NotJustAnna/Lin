@@ -52,6 +52,7 @@ Custom stuff:
 - `break` on `while` works like a loop `return`. Otherwise `while` returns `unit`.
 - Infix functions functions map as extensions
 - Use symbols (like JS). `operator fun` are shortcuts to underlying symbols
+- Labels (see LABEL_IDEA.txt)
 
 Not currently defined:
 
@@ -63,4 +64,4 @@ Not interested in defining currently:
 
 - Static typing, Classes, Interfaces ...
 - Multi-level breaking/continuing, Labels, etc
-- Labels
+- Property delegation
