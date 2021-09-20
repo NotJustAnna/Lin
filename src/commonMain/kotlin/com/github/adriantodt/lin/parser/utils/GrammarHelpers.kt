@@ -9,17 +9,23 @@ import com.github.adriantodt.tartar.api.parser.ParserContext
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 
 /**
- * Hacky method to ignore newlines in case of method chains
+ * This method consumes [TokenType.NL] tokens to allow some multiline neatness.
+ *
+ * This method usually is called at the end of expressions to allow some neat chaining.
  */
 fun ParserContext<TokenType, Node>.maybeIgnoreNL() {
-    skipOnlyUntil(TokenType.DOT, TokenType.QUESTION_DOT, TokenType.AND, TokenType.OR)
+    skipOnlyUntil(
+        TokenType.DOT, TokenType.QUESTION_DOT, TokenType.AND, TokenType.OR
+    )
 }
 
-fun ParserContext<TokenType, Node>.skipOnlyUntil(vararg type: TokenType) {
+fun ParserContext<TokenType, Node>.skipOnlyUntil(vararg type: TokenType): Boolean {
     check(TokenType.NL !in type) { "[INTERNAL] NL was supplied as a token" }
     if (peekAheadUntil(*type).all { it.type == TokenType.NL }) {
         skipUntil(*type)
+        return true
     }
+    return false
 }
 
 fun ParserContext<TokenType, Node>.parseBlock(smartToExpr: Boolean = true, braceConsumed: Boolean = false): Node? {
