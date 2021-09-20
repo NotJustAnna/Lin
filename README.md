@@ -1,6 +1,9 @@
-# Lin
+# Lin (Archived)
 
-An attempt to create a parser and interpreter for a language which resembles a lot Kotlin but borrow elements from JavaScript... and Rust.
+**This project is currently archived.**
+
+An attempt to create a parser and interpreter for a language which resembles a lot Kotlin but borrow elements from
+JavaScript... and Rust.
 
 Lin will never fully parse Kotlin, but hit really closes to home.
 

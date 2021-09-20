@@ -1,15 +1,13 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.0"
-    maven
-    `maven-publish`
+    kotlin("jvm") version "1.5.21"
+    //maven
+    //`maven-publish`
     //application
     //id("com.github.johnrengelman.shadow") version "6.0.0"
-    id("com.jfrog.bintray") version "1.8.5"
+    //id("com.jfrog.bintray") version "1.8.5"
     id("org.jetbrains.dokka") version "0.10.1"
 }
 
@@ -60,32 +58,32 @@ val javadocJar by tasks.creating(Jar::class) {
     from(dokka.outputDirectory)
 }
 
-publishing {
-    publications.create("mavenJava", MavenPublication::class.java) {
-        groupId = project.group.toString()
-        artifactId = project.name
-        version = project.version.toString()
-
-        from(components["kotlin"])
-        artifact(sourceJar)
-        artifact(javadocJar)
-    }
-}
-
-fun findProperty(s: String) = project.findProperty(s) as String?
-bintray {
-    user = findProperty("bintrayUsername")
-    key = findProperty("bintrayApiKey")
-    publish = true
-    setPublications("mavenJava")
-    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = project.name
-        setLicenses("MIT")
-        vcsUrl = "https://github.com/CafeteriaGuild/Lin.git"
-    })
-}
-
-tasks.withType<BintrayUploadTask> {
-    dependsOn("build", "publishToMavenLocal")
-}
+//publishing {
+//    publications.create("mavenJava", MavenPublication::class.java) {
+//        groupId = project.group.toString()
+//        artifactId = project.name
+//        version = project.version.toString()
+//
+//        from(components["kotlin"])
+//        artifact(sourceJar)
+//        artifact(javadocJar)
+//    }
+//}
+//
+//fun findProperty(s: String) = project.findProperty(s) as String?
+//bintray {
+//    user = findProperty("bintrayUsername")
+//    key = findProperty("bintrayApiKey")
+//    publish = true
+//    setPublications("mavenJava")
+//    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
+//        repo = "maven"
+//        name = project.name
+//        setLicenses("MIT")
+//        vcsUrl = "https://github.com/CafeteriaGuild/Lin.git"
+//    })
+//}
+//
+//tasks.withType<BintrayUploadTask> {
+//    dependsOn("build", "publishToMavenLocal")
+//}
