@@ -125,7 +125,7 @@ object GenerateVisitorTask {
             appendLine("package ${VisitorConfig.packageName()}")
             appendLine()
 
-            val (names, fqcns) = implementationsFound.unzip()
+            val (names, fqcns) = implementationsFound.sortedBy { it.first }.unzip()
             for (fqcn in fqcns) {
                 appendLine("import $fqcn")
             }
