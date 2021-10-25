@@ -65,3 +65,11 @@ Not interested in defining currently:
 - Static typing, Classes, Interfaces ...
 - Multi-level breaking/continuing, Labels, etc
 - Property delegation
+
+/*
+ * NOTE: `return`, `throw`, `break` and `continue` are expressions, since you can:
+ * - `val a = maybeNull ?: return b`
+ * - `val a = maybeNull ?: throw b`
+ * - `val a = maybeNull ?: break`
+ * - `val a = maybeNull ?: continue`
+ */
