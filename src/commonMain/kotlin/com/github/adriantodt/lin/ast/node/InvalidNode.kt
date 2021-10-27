@@ -1,8 +1,9 @@
 package com.github.adriantodt.lin.ast.node
 
-import com.github.adriantodt.lin.ast.visitor.NodeVisitor0
-import com.github.adriantodt.lin.ast.visitor.NodeVisitor0R
+import com.github.adriantodt.lin.ast.visitor.NodeMapVisitor
+import com.github.adriantodt.lin.ast.visitor.NodeVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
+import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
 data class InvalidNode(override val section: Section, val children: List<Node>, val errors: List<Exception>) : Expr {
@@ -27,10 +28,12 @@ data class InvalidNode(override val section: Section, val children: List<Node>, 
         }
     }
 
-    /* @automation(ast.impl InvalidNode)-start */
-    override fun accept(visitor: NodeVisitor0) = visitor.visitInvalidNode(this)
+    /* @automation(ast.impl InvalidNode,Expr)-start */
+    override fun accept(visitor: NodeVisitor) = visitor.visitInvalidNode(this)
 
-    override fun <R> accept(visitor: NodeVisitor0R<R>): R = visitor.visitInvalidNode(this)
+    override fun accept(visitor: NodeMapVisitor): Expr = visitor.visitInvalidNode(this)
+
+    override fun <R> accept(visitor: NodeVisitorR<R>): R = visitor.visitInvalidNode(this)
 
     override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) = visitor.visitInvalidNode(this, param0)
     /* @automation-end */

@@ -1,8 +1,9 @@
 package com.github.adriantodt.lin.ast.node
 
-import com.github.adriantodt.lin.ast.visitor.NodeVisitor0
-import com.github.adriantodt.lin.ast.visitor.NodeVisitor0R
+import com.github.adriantodt.lin.ast.visitor.NodeMapVisitor
+import com.github.adriantodt.lin.ast.visitor.NodeVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
+import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Sectional
 
 /**
@@ -11,11 +12,22 @@ import com.github.adriantodt.tartar.api.lexer.Sectional
  * If you have to extract a value from a Node which doesn't extend [Expr], consider it's value `unit`.
  */
 interface Node : Sectional {
-    /* @automation(ast.node)-start */
-    fun accept(visitor: NodeVisitor0)
+    /* @automation(ast.root Node)-start */
+    fun accept(visitor: NodeVisitor)
 
-    fun <R> accept(visitor: NodeVisitor0R<R>): R
+    fun accept(visitor: NodeMapVisitor): Node
+
+    fun <R> accept(visitor: NodeVisitorR<R>): R
 
     fun <T> accept(visitor: NodeVisitor1<T>, param0: T)
     /* @automation-end */
+
+    /**
+     * Interfaces implementing this have multiple nodes inside.
+     */
+    interface Multi : Node {
+        fun nodes(): List<Node>
+
+        fun lastNode() : Node
+    }
 }

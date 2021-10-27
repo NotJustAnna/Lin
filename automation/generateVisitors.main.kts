@@ -3,18 +3,20 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
 object GenerateVisitorTask {
-    val rootSrc = File("src/commonMain/kotlin")
-    val astDir = File(rootSrc, "com/github/adriantodt/lin/ast")
-    val visitorDir = File(astDir, "visitor")
-    val nodeDir = File(astDir, "node")
+    private val rootSrc = File("src/commonMain/kotlin")
+    private val astDir = File(rootSrc, "com/github/adriantodt/lin/ast")
+    private val visitorDir = File(astDir, "visitor")
+    private val nodeDir = File(astDir, "node")
 
-    val visitors = listOf(
-        VisitorConfig(0, false),
-        VisitorConfig(0, true),
-        VisitorConfig(1, false),
+    private val visitors = listOf(
+        VisitorConfig(0, null),
+        VisitorConfig(0, ReturnValue.INTERFACE),
+        VisitorConfig(0, ReturnValue.PARAMETERIZED),
+        VisitorConfig(1, null),
     )
 
-    val implementationsFound = mutableListOf<Pair<String, String>>()
+    private val implementationsFound = mutableListOf<CollectedExprImpl>()
+    private val interfacesFound = mutableListOf<CollectedExprInterface>()
 
     fun run() {
         val start = System.currentTimeMillis()
@@ -43,16 +45,16 @@ object GenerateVisitorTask {
         println("Finished in ${System.currentTimeMillis() - start}ms.")
     }
 
-    data class VisitorConfig(val paramCount: Int, val returnValue: Boolean) {
-        fun className() = "NodeVisitor${paramCount}${if (returnValue) "R" else ""}"
-        fun parameterizedClassName() = if (hasParamsOrReturnValue())
+    data class VisitorConfig(val paramCount: Int, val returnValue: ReturnValue?) {
+        fun className() = "Node${returnValue?.classNamePrefix ?: ""}Visitor${if (paramCount != 0) paramCount else ""}${returnValue?.classNameSuffix ?: ""}"
+        fun parameterizedClassName() = if (hasParamsOrTypedReturnValue())
             "${className()}<${typeParamsWithReturnValue().joinToString(", ")}>"
         else className()
 
         fun fqcn() = "${packageName()}.${className()}"
         fun typeParams() = typeParams.take(paramCount)
-        fun typeParamsWithReturnValue() = if (!returnValue) typeParams() else typeParams() + 'R'
-        fun hasParamsOrReturnValue() = paramCount > 0 || returnValue
+        fun typeParamsWithReturnValue() = if (returnValue == ReturnValue.PARAMETERIZED) typeParams() + 'R' else typeParams()
+        fun hasParamsOrTypedReturnValue() = paramCount > 0 || returnValue == ReturnValue.PARAMETERIZED
         fun fileName() = "${className()}.kt"
 
         companion object {
@@ -62,20 +64,34 @@ object GenerateVisitorTask {
         }
     }
 
+    enum class ReturnValue(val classNamePrefix: String, val classNameSuffix: String) {
+        SELF("Self", ""),
+        INTERFACE("Map", ""),
+        PARAMETERIZED("","R");
+    }
+
+    data class CollectedExprImpl(val name: String, val fqcn: String, val superInterface: String)
+    data class CollectedExprInterface(val name: String, val fqcn: String, val superInterface: String?)
+
     fun StringBuilder.appendIndent(indent: Int) = apply {
         for (ignored in 0 until indent) append(' ')
     }
 
+    fun StringBuilder.tryImportSuperInterface(name: String) {
+        val (_, fqcn, _) = interfacesFound.find { it.name == name } ?: return
+        appendLine("import $fqcn")
+    }
+
     private val automationRegex = Regex(
-        """\/\*\s*\@automation\s*\(([\d\w\s.]+)\)-start\s*\*\/([\s\S]*?)\/\*\s*\@automation-end\s*\*\/"""
+        """\/\*\s*\@automation\s*\(([\d\w\s.,]+)\)-start\s*\*\/([\s\S]*?)\/\*\s*\@automation-end\s*\*\/"""
     )
 
-    private fun StringBuilder.generateExprInterfaceMethods(indentSize: Int) {
+    private fun StringBuilder.generateExprInterfaceMethods(indentSize: Int, name: String) {
         for ((i, v) in visitors.withIndex()) {
             appendLine("import ${v.fqcn()}")
             appendIndent(indentSize)
             append("fun ")
-            if (v.hasParamsOrReturnValue()) {
+            if (v.hasParamsOrTypedReturnValue()) {
                 append('<')
                 append(v.typeParamsWithReturnValue().joinToString(", "))
                 append("> ")
@@ -85,7 +101,11 @@ object GenerateVisitorTask {
                 (listOf("visitor: ${v.parameterizedClassName()}") + v.typeParams()
                     .mapIndexed { index, value -> "param$index: $value" }).joinToString(", ")
             )
-            appendLine(if (v.returnValue) "): R" else ")")
+            appendLine(when (v.returnValue) {
+                ReturnValue.SELF, ReturnValue.INTERFACE -> "): $name"
+                ReturnValue.PARAMETERIZED -> "): R"
+                null -> ")"
+            })
 
             if (visitors.lastIndex != i) {
                 appendLine()
@@ -93,12 +113,13 @@ object GenerateVisitorTask {
         }
     }
 
-    fun StringBuilder.generateExprImplMethods(indentSize: Int, name: String) {
-        for ((i, v) in visitors.withIndex()) {
+    private fun StringBuilder.generateExprOverrideMethods(indentSize: Int, name: String) {
+        val overrides = visitors.filter { it.returnValue == ReturnValue.INTERFACE || it.returnValue == ReturnValue.SELF }
+        for ((i, v) in overrides.withIndex()) {
             appendLine("import ${v.fqcn()}")
             appendIndent(indentSize)
             append("override fun ")
-            if (v.hasParamsOrReturnValue()) {
+            if (v.hasParamsOrTypedReturnValue()) {
                 append('<')
                 append(v.typeParamsWithReturnValue().joinToString(", "))
                 append("> ")
@@ -108,7 +129,41 @@ object GenerateVisitorTask {
                 (listOf("visitor: ${v.parameterizedClassName()}") + v.typeParams()
                     .mapIndexed { index, value -> "param$index: $value" }).joinToString(", ")
             )
-            append(if (v.returnValue) "): R" else ")")
+            appendLine(when (v.returnValue) {
+                ReturnValue.SELF, ReturnValue.INTERFACE -> "): $name"
+                else -> error("Could not happen.")
+            })
+
+            if (overrides.lastIndex != i) {
+                appendLine()
+            }
+        }
+    }
+
+    private fun StringBuilder.generateExprImplMethods(indentSize: Int, name: String, superInterface: String) {
+        for ((i, v) in visitors.withIndex()) {
+            appendLine("import ${v.fqcn()}")
+            if (v.returnValue == ReturnValue.INTERFACE) {
+                tryImportSuperInterface(superInterface)
+            }
+            appendIndent(indentSize)
+            append("override fun ")
+            if (v.hasParamsOrTypedReturnValue()) {
+                append('<')
+                append(v.typeParamsWithReturnValue().joinToString(", "))
+                append("> ")
+            }
+            append("accept(")
+            append(
+                (listOf("visitor: ${v.parameterizedClassName()}") + v.typeParams()
+                    .mapIndexed { index, value -> "param$index: $value" }).joinToString(", ")
+            )
+            append(when (v.returnValue) {
+                ReturnValue.SELF -> "): $name"
+                ReturnValue.INTERFACE -> "): $superInterface"
+                ReturnValue.PARAMETERIZED -> "): R"
+                null -> ")"
+            })
             append(" = visitor.visit$name(")
             append((listOf("this") + List(v.typeParams().size) { "param$it" }).joinToString(", "))
             appendLine(')')
@@ -119,16 +174,10 @@ object GenerateVisitorTask {
         }
     }
 
-    fun generateVisitor(v: VisitorConfig) {
+    private fun generateVisitor(v: VisitorConfig) {
         val text = buildString {
             var indent = 0
             appendLine("package ${VisitorConfig.packageName()}")
-            appendLine()
-
-            val (names, fqcns) = implementationsFound.sortedBy { it.first }.unzip()
-            for (fqcn in fqcns) {
-                appendLine("import $fqcn")
-            }
             appendLine()
             appendLine("/**")
             append(" * A Node Visitor with ")
@@ -139,29 +188,47 @@ object GenerateVisitorTask {
             } else {
                 append("${v.paramCount} parameters")
             }
-            appendLine(if (v.returnValue) " and with a return value." else " and no return value.")
+            appendLine(
+                when(v.returnValue) {
+                    ReturnValue.SELF -> " and with it's own type as return value."
+                    ReturnValue.INTERFACE -> " and with its interface as return value."
+                    ReturnValue.PARAMETERIZED -> " and with a parameterized return value."
+                    null -> " and no return value."
+                }
+            )
             appendLine(" * NOTE: This file is generated!")
             appendLine(" */")
             append("interface ${v.parameterizedClassName()}")
             appendLine(" {")
             indent++
-            for ((i, name) in names.withIndex()) {
+            val impls = implementationsFound.sortedBy { it.name }
+            for ((i, impl) in impls.withIndex()) {
+                appendLine("import ${impl.fqcn}")
+                if (v.returnValue == ReturnValue.INTERFACE) {
+                    tryImportSuperInterface(impl.superInterface)
+                }
+
                 appendIndent(indent * 4)
-                append("fun visit$name(")
+                append("fun visit${impl.name}(")
                 append(
-                    (listOf("node: $name") + v.typeParams()
+                    (listOf("node: ${impl.name}") + v.typeParams()
                         .mapIndexed { index, value -> "param$index: $value" }).joinToString(", ")
                 )
-                appendLine(if (v.returnValue) "): R" else ")")
+                appendLine(when (v.returnValue) {
+                    ReturnValue.SELF -> "): ${impl.name}"
+                    ReturnValue.INTERFACE -> "): ${impl.superInterface}"
+                    ReturnValue.PARAMETERIZED -> "): R"
+                    null -> ")"
+                })
 
-                if (names.lastIndex != i) {
+                if (impls.lastIndex != i) {
                     appendLine()
                 }
             }
             appendLine('}')
         }
 
-        File(visitorDir, v.fileName()).writeText(text)
+        File(visitorDir, v.fileName()).writeText(reOrderImportsOnDemand(text))
     }
 
     fun processFile(file: File) {
@@ -189,21 +256,37 @@ object GenerateVisitorTask {
                 }
                 appendLine("/* @automation($automationStr)-start */")
 
-                when {
-                    automationStr == "ast.node" -> {
-                        generateExprInterfaceMethods(minCommonIndent)
-                    }
-                    automationStr.startsWith("ast.impl") -> {
-                        val name = automationStr.removePrefix("ast.impl ")
-                        val pkg = text.lines()
-                            .firstOrNull { it.trimStart().startsWith("package") }
-                            ?.trim()?.removePrefix("package ")?.plus('.') ?: ""
+                val pkg = text.lines()
+                    .firstOrNull { it.trimStart().startsWith("package") }
+                    ?.trim()?.removePrefix("package ")?.plus('.') ?: ""
 
-                        synchronized(implementationsFound) {
-                            implementationsFound.add(name to (pkg+name))
+                when {
+                    automationStr.startsWith("ast.root ") -> {
+                        val name = automationStr.removePrefix("ast.root ")
+
+                        synchronized(interfacesFound) {
+                            interfacesFound.add(CollectedExprInterface(name, pkg+name, null))
                         }
 
-                        generateExprImplMethods(minCommonIndent, name)
+                        generateExprInterfaceMethods(minCommonIndent, name)
+                    }
+                    automationStr.startsWith("ast.override ") -> {
+                        val (name, superInterface) = automationStr.removePrefix("ast.override ").split(",", limit = 2).map(String::trim)
+
+                        synchronized(interfacesFound) {
+                            interfacesFound.add(CollectedExprInterface(name, pkg+name, superInterface))
+                        }
+
+                        generateExprOverrideMethods(minCommonIndent, name)
+                    }
+                    automationStr.startsWith("ast.impl ") -> {
+                        val (name, superInterface) = automationStr.removePrefix("ast.impl ").split(",", limit = 2).map(String::trim)
+
+                        synchronized(implementationsFound) {
+                            implementationsFound.add(CollectedExprImpl(name, pkg+name, superInterface))
+                        }
+
+                        generateExprImplMethods(minCommonIndent, name, superInterface)
                     }
                 }
 
@@ -216,14 +299,17 @@ object GenerateVisitorTask {
             }
         }
 
-        val fixedNewText = buildString {
-            val (first, code) = newText.lines().partition {
+        file.writeText(reOrderImportsOnDemand(newText))
+    }
+
+    private fun reOrderImportsOnDemand(text: String): String {
+        return buildString {
+            val (first, code) = text.lines().partition {
                 it.trimStart().let { s -> s.startsWith("import") || s.startsWith("package") }
             }
 
             val dejavuSet = mutableSetOf<String>()
             val wildcardSet = mutableSetOf<String>()
-
 
             val (packageDecl, imports) = first.partition { it.trimStart().startsWith("package") }
 
@@ -233,6 +319,7 @@ object GenerateVisitorTask {
             }
 
             for (it in imports) {
+                // TODO Ignore imports if same-package
                 val s = it.trim()
                 if (s !in dejavuSet && s.replaceAfterLast('.', ".*") !in wildcardSet) {
                     if (s.startsWith("import ${VisitorConfig.packageName()}")) {
@@ -252,8 +339,6 @@ object GenerateVisitorTask {
 
             code.dropWhile { it.isBlank() }.forEach { appendLine(it) }
         }
-
-        file.writeText(fixedNewText)
     }
 }
 

@@ -5,6 +5,7 @@ import com.github.adriantodt.lin.ast.node.MultiExpr
 import com.github.adriantodt.lin.ast.node.MultiNode
 import com.github.adriantodt.lin.ast.node.access.*
 import com.github.adriantodt.lin.ast.node.control.*
+import com.github.adriantodt.lin.ast.node.control.optimization.LoopNode
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
@@ -21,7 +22,7 @@ import com.github.adriantodt.lin.ast.node.value.*
  * A Node Visitor with no parameters and no return value.
  * NOTE: This file is generated!
  */
-interface NodeVisitor0 {
+interface NodeVisitor {
     fun visitArrayExpr(node: ArrayExpr)
 
     fun visitAssignNode(node: AssignNode)
@@ -72,6 +73,8 @@ interface NodeVisitor0 {
 
     fun visitLongExpr(node: LongExpr)
 
+    fun visitLoopNode(node: LoopNode)
+
     fun visitMultiExpr(node: MultiExpr)
 
     fun visitMultiNode(node: MultiNode)
@@ -106,3 +109,4 @@ interface NodeVisitor0 {
 
     fun visitWhileNode(node: WhileNode)
 }
+
