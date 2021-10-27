@@ -1,6 +1,6 @@
 import net.notjustanna.lin.ast.viewer.NodeTreePrinter
 import net.notjustanna.lin.lexer.linStdLexer
-import net.notjustanna.lin.parser.linStdParser
+import net.notjustanna.lin.parser.linOptParser
 import net.notjustanna.tartar.api.lexer.Source
 
 fun main() {
@@ -19,9 +19,11 @@ fun main() {
         {
             id, 1: false, false: true, [propertyName]: propertyValue
         }
+        
+        null
     """.trimIndent()
 
-    val node = linStdParser.parse(Source(text), linStdLexer)
+    val node = linOptParser.parse(Source(text), linStdLexer)
 
     println(buildString {
         node.accept(NodeTreePrinter(this))

@@ -5,6 +5,7 @@ import net.notjustanna.lin.ast.node.MultiExpr
 import net.notjustanna.lin.ast.node.MultiNode
 import net.notjustanna.lin.ast.node.access.*
 import net.notjustanna.lin.ast.node.control.*
+import net.notjustanna.lin.ast.node.control.optimization.LoopNode
 import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.declare.DeclareVariableNode
 import net.notjustanna.lin.ast.node.invoke.InvokeExpr
@@ -72,6 +73,8 @@ interface NodeVisitor1<T> {
 
     fun visitLongExpr(node: LongExpr, param0: T)
 
+    fun visitLoopNode(node: LoopNode, param0: T)
+
     fun visitMultiExpr(node: MultiExpr, param0: T)
 
     fun visitMultiNode(node: MultiNode, param0: T)
@@ -106,3 +109,4 @@ interface NodeVisitor1<T> {
 
     fun visitWhileNode(node: WhileNode, param0: T)
 }
+

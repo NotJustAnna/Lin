@@ -5,6 +5,7 @@ import net.notjustanna.lin.ast.node.MultiExpr
 import net.notjustanna.lin.ast.node.MultiNode
 import net.notjustanna.lin.ast.node.access.*
 import net.notjustanna.lin.ast.node.control.*
+import net.notjustanna.lin.ast.node.control.optimization.LoopNode
 import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.declare.DeclareVariableNode
 import net.notjustanna.lin.ast.node.invoke.InvokeExpr
@@ -18,10 +19,10 @@ import net.notjustanna.lin.ast.node.misc.UnaryOperation
 import net.notjustanna.lin.ast.node.value.*
 
 /**
- * A Node Visitor with no parameters and with a return value.
+ * A Node Visitor with no parameters and with a parameterized return value.
  * NOTE: This file is generated!
  */
-interface NodeVisitor0R<R> {
+interface NodeVisitorR<R> {
     fun visitArrayExpr(node: ArrayExpr): R
 
     fun visitAssignNode(node: AssignNode): R
@@ -72,6 +73,8 @@ interface NodeVisitor0R<R> {
 
     fun visitLongExpr(node: LongExpr): R
 
+    fun visitLoopNode(node: LoopNode): R
+
     fun visitMultiExpr(node: MultiExpr): R
 
     fun visitMultiNode(node: MultiNode): R
@@ -106,3 +109,4 @@ interface NodeVisitor0R<R> {
 
     fun visitWhileNode(node: WhileNode): R
 }
+

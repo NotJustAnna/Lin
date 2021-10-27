@@ -3,12 +3,12 @@ package net.notjustanna.lin.parser
 import net.notjustanna.lin.ast.node.*
 import net.notjustanna.lin.grammar.linStdGrammar
 import net.notjustanna.lin.lexer.TokenType
-import net.notjustanna.tartar.api.parser.Grammar
+import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.createParser
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 
-private fun createLinParser(grammar: Grammar<TokenType, Node>) = createParser(grammar) {
+private fun ParserContext<TokenType, Node>.linParserRoutine(): Node {
     val start = peek()
     val list = mutableListOf<Node>()
     matchAll(TokenType.NL, TokenType.SEMICOLON)
@@ -31,10 +31,12 @@ private fun createLinParser(grammar: Grammar<TokenType, Node>) = createParser(gr
         }
     }
 
-    if (!eof) InvalidNode {
+    return if (!eof) InvalidNode {
         child(expr)
         error(SyntaxException("Should've reached end of content", eat().section))
     } else expr
 }
 
-val linStdParser = createLinParser(linStdGrammar)
+val linStdParser = createParser(linStdGrammar) {
+    linParserRoutine()
+}
