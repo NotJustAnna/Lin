@@ -1,6 +1,7 @@
 package net.notjustanna.lin.ast.node.value
 
 import net.notjustanna.lin.ast.node.ConstExpr
+import net.notjustanna.lin.ast.node.Expr
 import net.notjustanna.lin.ast.visitor.NodeMapVisitor
 import net.notjustanna.lin.ast.visitor.NodeVisitor
 import net.notjustanna.lin.ast.visitor.NodeVisitor1

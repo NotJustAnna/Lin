@@ -7,7 +7,7 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-class LoopNode(val body: Node?, override val section: Section) : Node {
+data class LoopNode(val body: Node?, override val section: Section) : Node {
     /* @automation(ast.impl LoopNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitLoopNode(this)
 

@@ -8,9 +8,9 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-class DeclareVariableNode(
+data class DeclareVariableNode(
     val name: String, val mutable: Boolean, val value: Expr?, override val section: Section
-): Node {
+) : Node {
     /* @automation(ast.impl DeclareVariableNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitDeclareVariableNode(this)
 

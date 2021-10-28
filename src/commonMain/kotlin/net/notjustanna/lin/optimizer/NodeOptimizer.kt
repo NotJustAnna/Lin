@@ -4,6 +4,8 @@ import net.notjustanna.lin.ast.node.*
 import net.notjustanna.lin.ast.node.access.*
 import net.notjustanna.lin.ast.node.control.*
 import net.notjustanna.lin.ast.node.control.optimization.LoopNode
+import net.notjustanna.lin.ast.node.control.optimization.ScopeExpr
+import net.notjustanna.lin.ast.node.control.optimization.ScopeNode
 import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.declare.DeclareVariableNode
 import net.notjustanna.lin.ast.node.invoke.InvokeExpr
@@ -59,21 +61,56 @@ object NodeOptimizer : NodeMapVisitor {
     override fun visitContinueExpr(node: ContinueExpr) = node
 
     override fun visitDeclareFunctionExpr(node: DeclareFunctionExpr): Expr {
-        return node
+        val value = node.value.accept(this) as? FunctionExpr ?: return InvalidNode {
+            section(node.section)
+            error(RuntimeException("[INTERNAL] NodeOptimizer#visitFunctionExpr did not return FunctionExpr"))
+        }
+        value.ifInvalidNode()?.let { return it }
+
+        return node.copy(value = value)
     }
 
     override fun visitDeclareVariableNode(node: DeclareVariableNode): Node {
-        return node
+        val value = (node.value ?: return node).accept(this)
+        value.ifInvalidNode()?.let { return it }
+
+        return node.copy(value = value)
     }
 
     override fun visitDoWhileNode(node: DoWhileNode): Node {
-        return node
+        return node // TODO
     }
 
     override fun visitDoubleExpr(node: DoubleExpr) = node
 
     override fun visitEnsureNotNullExpr(node: EnsureNotNullExpr): Expr {
-        return node
+        val value = node.value.accept(this)
+        value.ifInvalidNode()?.let { return it }
+
+        if (value is NullExpr) {
+            // Optimize null nodes into an error.
+
+            val section = node.section
+            return ThrowExpr(
+                ObjectExpr(
+                    listOf(
+                        StringExpr("errorType", section) to StringExpr("nullReference", section),
+                        StringExpr("section", section) to ObjectExpr(
+                            listOf(
+                                StringExpr("sourceName", section) to StringExpr(section.source.name, section),
+                                StringExpr("index", section) to IntExpr(section.index, section),
+                                StringExpr("length", section) to IntExpr(section.length, section)
+                            ),
+                            section
+                        )
+                    ),
+                    section
+                ),
+                section
+            )
+        }
+
+        return node.copy(value = value)
     }
 
     override fun visitFloatExpr(node: FloatExpr) = node
@@ -90,7 +127,7 @@ object NodeOptimizer : NodeMapVisitor {
 
     override fun visitIfExpr(node: IfExpr): Expr {
         // TODO REDO
-        return when(val value = node.condition) {
+        return when (val value = node.condition) {
             is BooleanExpr -> if (value.value) node.thenBranch else node.elseBranch
             is IntExpr -> if (value.value == 0) node.thenBranch else node.elseBranch
             is LongExpr -> if (value.value == 0L) node.thenBranch else node.elseBranch
@@ -104,7 +141,7 @@ object NodeOptimizer : NodeMapVisitor {
 
     override fun visitIfNode(node: IfNode): Node {
         // TODO REDO
-        return when(val value = node.condition) {
+        return when (val value = node.condition) {
             is BooleanExpr -> if (value.value) node.thenBranch else node.elseBranch ?: UnitExpr(node.section)
             is IntExpr -> if (value.value == 0) node.thenBranch else node.elseBranch ?: UnitExpr(node.section)
             is LongExpr -> if (value.value == 0L) node.thenBranch else node.elseBranch ?: UnitExpr(node.section)
@@ -117,23 +154,28 @@ object NodeOptimizer : NodeMapVisitor {
     }
 
     override fun visitLoopNode(node: LoopNode): Node {
-        val body = (node.body ?: return node).accept(this) as Node
+        val body = node.body?.accept(this) ?: return node
         body.ifInvalidNode()?.let { return it }
 
         if (body !is Node.Multi) {
-            return node
+            return node.copy(body = body)
         }
 
         // Unreachable code optimizations are handled at Multi<*>
         val lastNode = body.lastNode()
-        if (lastNode is ReturnExpr) {
-            return body
-        }
-        if (lastNode is BreakExpr) {
-            return MultiNode(body.nodes().dropLast(1), node.section)
+        if (lastNode is ContinueExpr) {
+            return LoopNode(MultiNode(body.nodes().dropLast(1), body.section), node.section)
         }
 
-        return node
+        // TODO This can't be used as-is, and need some flow detection beforehand i.e there can't be a "continue" anywhere inside the optimized scope.
+//        if (lastNode is ReturnExpr) {
+//            return ScopeNode(body, node.section) // probably recurse?
+//        }
+//        if (lastNode is BreakExpr) {
+//            return ScopeNode(MultiNode(body.nodes().dropLast(1), body.section), node.section) // probably recurse?
+//        }
+
+        return node.copy(body = body)
     }
 
     override fun visitIntExpr(node: IntExpr) = node
@@ -195,45 +237,83 @@ object NodeOptimizer : NodeMapVisitor {
     }
 
     override fun visitPropertyAccessExpr(node: PropertyAccessExpr): Expr {
-        return node
+        val target = node.target.accept(this)
+        target.ifInvalidNode()?.let { return it }
+
+        return node.copy(target = target)
     }
 
     override fun visitPropertyAssignNode(node: PropertyAssignNode): Node {
-        return node
+        val target = node.target.accept(this)
+        val value = node.value.accept(this)
+        listOf(target, value).anyInvalidNodes()?.let { return it }
+
+        return node.copy(target = target, value = value)
     }
 
     override fun visitReturnExpr(node: ReturnExpr): Expr {
-        return when(val value = node.value) {
-            is ReturnExpr, is ThrowExpr, is BreakExpr, is ContinueExpr -> value
-            else -> return node
+        val value = node.value.accept(this)
+        value.ifInvalidNode()?.let { return it }
+
+        return when (value) {
+            is ReturnExpr,
+            is ThrowExpr,
+            is BreakExpr,
+            is ContinueExpr -> value
+            else -> node.copy(value = value)
         }
+    }
+
+    override fun visitScopeExpr(node: ScopeExpr): Expr {
+        val body = node.body.accept(this)
+        body.ifInvalidNode()?.let { return it }
+
+        return node.copy(body = body)
+    }
+
+    override fun visitScopeNode(node: ScopeNode): Node {
+        val body = node.body.accept(this)
+        body.ifInvalidNode()?.let { return it }
+
+        return node.copy(body = body)
     }
 
     override fun visitStringExpr(node: StringExpr) = node
 
     override fun visitSubscriptAccessExpr(node: SubscriptAccessExpr): Expr {
-        return node
+        val target = node.target.accept(this)
+        val arguments = node.arguments.map { it.accept(this) }
+        (arguments + target).anyInvalidNodes()?.let { return it }
+
+        return node.copy(target = target, arguments = arguments)
     }
 
     override fun visitSubscriptAssignNode(node: SubscriptAssignNode): Node {
-        return node
+        val target = node.target.accept(this)
+        val arguments = node.arguments.map { it.accept(this) }
+        val value = node.value.accept(this)
+        (arguments + target + value).anyInvalidNodes()?.let { return it }
+
+        return node.copy(target = target, arguments = arguments, value = value)
     }
 
     override fun visitThisExpr(node: ThisExpr) = node
 
     override fun visitThrowExpr(node: ThrowExpr): Expr {
-        return when(val value = node.value) {
+        return when (val value = node.value) {
             is ReturnExpr, is ThrowExpr, is BreakExpr, is ContinueExpr -> value
             else -> return node
         }
     }
 
     override fun visitTryExpr(node: TryExpr): Expr {
+        // TODO REDO
         return if (node.catchBranch == null && node.finallyBranch == null) node.tryBranch.exprify() else node
     }
 
     override fun visitTypeofExpr(node: TypeofExpr): Expr {
-        return when(val value = node.value) {
+        // TODO REDO
+        return when (val value = node.value) {
             is BooleanExpr -> StringExpr("boolean", node.span(value))
             is NullExpr -> StringExpr("null", node.span(value))
             is IntExpr -> StringExpr("int", node.span(value))
@@ -246,6 +326,7 @@ object NodeOptimizer : NodeMapVisitor {
     }
 
     override fun visitUnaryOperation(node: UnaryOperation): Expr {
+        // TODO REDO
         return when (node.operator) {
             UnaryOperationType.POSITIVE -> when (val target = node.target) {
                 is IntExpr -> IntExpr(+target.value, node.span(target))
@@ -287,12 +368,12 @@ object NodeOptimizer : NodeMapVisitor {
     override fun visitUnitExpr(node: UnitExpr) = node
 
     override fun visitWhileNode(node: WhileNode): Node {
-        return when(val condition = node.condition) {
-            is BooleanExpr -> if(condition.value) LoopNode(node.body, node.section) else UnitExpr(node.section)
-            is IntExpr -> if(condition.value != 0) LoopNode(node.body, node.section) else UnitExpr(node.section)
-            is LongExpr -> if(condition.value != 0L) LoopNode(node.body, node.section) else UnitExpr(node.section)
-            is FloatExpr -> if(condition.value != 0f) LoopNode(node.body, node.section) else UnitExpr(node.section)
-            is DoubleExpr -> if(condition.value != 0.0) LoopNode(node.body, node.section) else UnitExpr(node.section)
+        return when (val condition = node.condition) {
+            is BooleanExpr -> if (condition.value) LoopNode(node.body, node.section) else UnitExpr(node.section)
+            is IntExpr -> if (condition.value != 0) LoopNode(node.body, node.section) else UnitExpr(node.section)
+            is LongExpr -> if (condition.value != 0L) LoopNode(node.body, node.section) else UnitExpr(node.section)
+            is FloatExpr -> if (condition.value != 0f) LoopNode(node.body, node.section) else UnitExpr(node.section)
+            is DoubleExpr -> if (condition.value != 0.0) LoopNode(node.body, node.section) else UnitExpr(node.section)
             is ReturnExpr, is ThrowExpr, is BreakExpr, is ContinueExpr -> condition
             is InvalidNode -> if (node.body is InvalidNode) InvalidNode {
                 section = node.section

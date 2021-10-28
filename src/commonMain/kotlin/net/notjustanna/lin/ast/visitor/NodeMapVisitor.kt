@@ -4,6 +4,8 @@ import net.notjustanna.lin.ast.node.*
 import net.notjustanna.lin.ast.node.access.*
 import net.notjustanna.lin.ast.node.control.*
 import net.notjustanna.lin.ast.node.control.optimization.LoopNode
+import net.notjustanna.lin.ast.node.control.optimization.ScopeExpr
+import net.notjustanna.lin.ast.node.control.optimization.ScopeNode
 import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.declare.DeclareVariableNode
 import net.notjustanna.lin.ast.node.invoke.InvokeExpr
@@ -86,6 +88,10 @@ interface NodeMapVisitor {
     fun visitPropertyAssignNode(node: PropertyAssignNode): Node
 
     fun visitReturnExpr(node: ReturnExpr): Expr
+
+    fun visitScopeExpr(node: ScopeExpr): Expr
+
+    fun visitScopeNode(node: ScopeNode): Node
 
     fun visitStringExpr(node: StringExpr): Expr
 

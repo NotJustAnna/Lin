@@ -6,6 +6,8 @@ import net.notjustanna.lin.ast.node.MultiNode
 import net.notjustanna.lin.ast.node.access.*
 import net.notjustanna.lin.ast.node.control.*
 import net.notjustanna.lin.ast.node.control.optimization.LoopNode
+import net.notjustanna.lin.ast.node.control.optimization.ScopeExpr
+import net.notjustanna.lin.ast.node.control.optimization.ScopeNode
 import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.declare.DeclareVariableNode
 import net.notjustanna.lin.ast.node.invoke.InvokeExpr
@@ -211,6 +213,14 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitReturnExpr(node: ReturnExpr) {
+        TODO("Not yet implemented")
+    }
+
+    override fun visitScopeExpr(node: ScopeExpr) {
+        TODO("Not yet implemented")
+    }
+
+    override fun visitScopeNode(node: ScopeNode) {
         TODO("Not yet implemented")
     }
 
