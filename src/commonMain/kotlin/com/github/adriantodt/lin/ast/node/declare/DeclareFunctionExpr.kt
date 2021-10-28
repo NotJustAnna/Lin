@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-class DeclareFunctionExpr(val name: String, val value: FunctionExpr, override val section: Section): Expr {
+data class DeclareFunctionExpr(val name: String, val value: FunctionExpr, override val section: Section) : Expr {
     /* @automation(ast.impl DeclareFunctionExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitDeclareFunctionExpr(this)
 

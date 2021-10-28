@@ -6,6 +6,8 @@ import com.github.adriantodt.lin.ast.node.MultiNode
 import com.github.adriantodt.lin.ast.node.access.*
 import com.github.adriantodt.lin.ast.node.control.*
 import com.github.adriantodt.lin.ast.node.control.optimization.LoopNode
+import com.github.adriantodt.lin.ast.node.control.optimization.ScopeExpr
+import com.github.adriantodt.lin.ast.node.control.optimization.ScopeNode
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
@@ -88,6 +90,10 @@ interface NodeVisitor1<T> {
     fun visitPropertyAssignNode(node: PropertyAssignNode, param0: T)
 
     fun visitReturnExpr(node: ReturnExpr, param0: T)
+
+    fun visitScopeExpr(node: ScopeExpr, param0: T)
+
+    fun visitScopeNode(node: ScopeNode, param0: T)
 
     fun visitStringExpr(node: StringExpr, param0: T)
 

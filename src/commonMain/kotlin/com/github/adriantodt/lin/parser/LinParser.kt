@@ -3,12 +3,11 @@ package com.github.adriantodt.lin.parser
 import com.github.adriantodt.lin.ast.node.*
 import com.github.adriantodt.lin.grammar.linStdGrammar
 import com.github.adriantodt.lin.lexer.TokenType
-import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.createParser
 import io.github.cafeteriaguild.lin.parser.utils.matchAll
 
-private fun ParserContext<TokenType, Node>.linParserRoutine(): Node {
+val linStdParser = createParser(linStdGrammar) {
     val start = peek()
     val list = mutableListOf<Node>()
     matchAll(TokenType.NL, TokenType.SEMICOLON)
@@ -30,13 +29,8 @@ private fun ParserContext<TokenType, Node>.linParserRoutine(): Node {
             error(e)
         }
     }
-
-    return if (!eof) InvalidNode {
+    if (!eof) InvalidNode {
         child(expr)
         error(SyntaxException("Should've reached end of content", eat().section))
     } else expr
-}
-
-val linStdParser = createParser(linStdGrammar) {
-    linParserRoutine()
 }

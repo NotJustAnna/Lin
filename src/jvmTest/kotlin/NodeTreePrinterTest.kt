@@ -1,6 +1,6 @@
 import com.github.adriantodt.lin.ast.viewer.NodeTreePrinter
 import com.github.adriantodt.lin.lexer.linStdLexer
-import com.github.adriantodt.lin.parser.linOptParser
+import com.github.adriantodt.lin.parser.linStdParser
 import com.github.adriantodt.tartar.api.lexer.Source
 
 fun main() {
@@ -23,7 +23,7 @@ fun main() {
         null
     """.trimIndent()
 
-    val node = linOptParser.parse(Source(text), linStdLexer)
+    val node = linStdParser.parse(Source(text), linStdLexer)
 
     println(buildString {
         node.accept(NodeTreePrinter(this))

@@ -1,6 +1,7 @@
 package com.github.adriantodt.lin.ast.node.value
 
 import com.github.adriantodt.lin.ast.node.ConstExpr
+import com.github.adriantodt.lin.ast.node.Expr
 import com.github.adriantodt.lin.ast.visitor.NodeMapVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
