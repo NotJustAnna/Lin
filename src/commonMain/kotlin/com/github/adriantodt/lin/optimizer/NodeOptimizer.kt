@@ -9,7 +9,6 @@ import com.github.adriantodt.lin.ast.node.control.optimization.ScopeNode
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
-import com.github.adriantodt.lin.ast.node.invoke.InvokeExtensionExpr
 import com.github.adriantodt.lin.ast.node.invoke.InvokeLocalExpr
 import com.github.adriantodt.lin.ast.node.invoke.InvokeMemberExpr
 import com.github.adriantodt.lin.ast.node.misc.*
@@ -187,10 +186,6 @@ object NodeOptimizer : NodeMapVisitor {
         val arguments = node.arguments.map { it.accept(this) }
         (arguments + target).anyInvalidNodes()?.let { return it }
         return node.copy(target = target, arguments = arguments)
-    }
-
-    override fun visitInvokeExtensionExpr(node: InvokeExtensionExpr): Expr {
-        return node
     }
 
     override fun visitInvokeLocalExpr(node: InvokeLocalExpr): Expr {

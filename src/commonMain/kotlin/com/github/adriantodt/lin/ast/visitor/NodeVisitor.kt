@@ -11,7 +11,6 @@ import com.github.adriantodt.lin.ast.node.control.optimization.ScopeNode
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
-import com.github.adriantodt.lin.ast.node.invoke.InvokeExtensionExpr
 import com.github.adriantodt.lin.ast.node.invoke.InvokeLocalExpr
 import com.github.adriantodt.lin.ast.node.invoke.InvokeMemberExpr
 import com.github.adriantodt.lin.ast.node.misc.BinaryOperation
@@ -66,8 +65,6 @@ interface NodeVisitor {
     fun visitInvalidNode(node: InvalidNode)
 
     fun visitInvokeExpr(node: InvokeExpr)
-
-    fun visitInvokeExtensionExpr(node: InvokeExtensionExpr)
 
     fun visitInvokeLocalExpr(node: InvokeLocalExpr)
 
