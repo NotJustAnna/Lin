@@ -11,7 +11,6 @@ import net.notjustanna.lin.ast.node.control.optimization.ScopeNode
 import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.declare.DeclareVariableNode
 import net.notjustanna.lin.ast.node.invoke.InvokeExpr
-import net.notjustanna.lin.ast.node.invoke.InvokeExtensionExpr
 import net.notjustanna.lin.ast.node.invoke.InvokeLocalExpr
 import net.notjustanna.lin.ast.node.invoke.InvokeMemberExpr
 import net.notjustanna.lin.ast.node.misc.BinaryOperation
@@ -66,8 +65,6 @@ interface NodeVisitor {
     fun visitInvalidNode(node: InvalidNode)
 
     fun visitInvokeExpr(node: InvokeExpr)
-
-    fun visitInvokeExtensionExpr(node: InvokeExtensionExpr)
 
     fun visitInvokeLocalExpr(node: InvokeLocalExpr)
 

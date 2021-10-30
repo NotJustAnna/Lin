@@ -1,4 +1,4 @@
-package net.notjustanna.lin.ast.viewer
+package net.notjustanna.lin.compiler
 
 import net.notjustanna.lin.ast.node.InvalidNode
 import net.notjustanna.lin.ast.node.MultiExpr
@@ -19,28 +19,26 @@ import net.notjustanna.lin.ast.node.misc.TypeofExpr
 import net.notjustanna.lin.ast.node.misc.UnaryOperation
 import net.notjustanna.lin.ast.node.value.*
 import net.notjustanna.lin.ast.visitor.NodeVisitor
+import net.notjustanna.lin.insn.InsnBuilder
 
-class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : NodeVisitor, Appendable by builder {
-    private var indent = 0
-    private var name: String? = null
+class NodeCompiler : NodeVisitor {
+    /*
+     * Check out this code:
+     * https://github.com/Avarel/Kaiper/blob/master/Kaiper-Compiler/src/main/java/xyz/avarel/kaiper/compiler/ExprCompiler.java
+     */
+    private val builder = InsnBuilder()
 
     override fun visitArrayExpr(node: ArrayExpr) {
-        appendIndent()
-        appendName()
-        appendLine("ArrayExpr ${node.section} {")
-        indenting {
-            var i = 0
-            for (each in node.value) {
-                name = "entry ${i++}"
-                each.accept(this)
-            }
+        builder.makeArrayInsn()
+        for (expr in node.value) {
+            expr.accept(this)
+            builder.arrayInsertInsn()
         }
-        appendIndent()
-        appendLine('}')
     }
 
     override fun visitAssignNode(node: AssignNode) {
-        TODO("Not yet implemented")
+        node.value.accept(this)
+        builder.assignInsn(node.name)
     }
 
     override fun visitBinaryOperation(node: BinaryOperation) {
@@ -48,9 +46,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitBooleanExpr(node: BooleanExpr) {
-        appendIndent()
-        appendName()
-        appendLine("BooleanExpr ${node.section} = ${node.value}")
+        builder.pushBooleanInsn(node.value)
     }
 
     override fun visitBreakExpr(node: BreakExpr) {
@@ -58,9 +54,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitCharExpr(node: CharExpr) {
-        appendIndent()
-        appendName()
-        appendLine("CharExpr ${node.section} = '${node.value}'")
+        builder.pushCharInsn(node.value)
     }
 
     override fun visitContinueExpr(node: ContinueExpr) {
@@ -80,9 +74,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitDoubleExpr(node: DoubleExpr) {
-        appendIndent()
-        appendName()
-        appendLine("DoubleExpr ${node.section} = ${node.value}")
+        builder.pushDoubleInsn(node.value)
     }
 
     override fun visitEnsureNotNullExpr(node: EnsureNotNullExpr) {
@@ -90,9 +82,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitFloatExpr(node: FloatExpr) {
-        appendIndent()
-        appendName()
-        appendLine("FloatExpr ${node.section} = ${node.value}")
+        builder.pushFloatInsn(node.value)
     }
 
     override fun visitForNode(node: ForNode) {
@@ -104,9 +94,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitIdentifierExpr(node: IdentifierExpr) {
-        appendIndent()
-        appendName()
-        appendLine("IdentifierExpr ${node.section} = ${node.name}")
+        builder.loadIdentifierInsn(node.name)
     }
 
     override fun visitIfExpr(node: IfExpr) {
@@ -118,9 +106,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitIntExpr(node: IntExpr) {
-        appendIndent()
-        appendName()
-        appendLine("IntExpr ${node.section} = ${node.value}")
+        builder.pushIntInsn(node.value)
     }
 
     override fun visitInvalidNode(node: InvalidNode) {
@@ -128,21 +114,30 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitInvokeExpr(node: InvokeExpr) {
-        TODO("Not yet implemented")
+        node.target.accept(this)
+        for (argument in node.arguments) {
+            argument.accept(this)
+        }
+        builder.invokeInsn(node.arguments.size)
     }
 
     override fun visitInvokeLocalExpr(node: InvokeLocalExpr) {
-        TODO("Not yet implemented")
+        for (argument in node.arguments) {
+            argument.accept(this)
+        }
+        builder.invokeLocalInsn(node.name, node.arguments.size)
     }
 
     override fun visitInvokeMemberExpr(node: InvokeMemberExpr) {
-        TODO("Not yet implemented")
+        node.target.accept(this)
+        for (argument in node.arguments) {
+            argument.accept(this)
+        }
+        builder.invokeMemberInsn(node.name, node.arguments.size)
     }
 
     override fun visitLongExpr(node: LongExpr) {
-        appendIndent()
-        appendName()
-        appendLine("LongExpr ${node.section} = ${node.value}")
+        builder.pushLongInsn(node.value)
     }
 
     override fun visitLoopNode(node: LoopNode) {
@@ -150,19 +145,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitMultiExpr(node: MultiExpr) {
-        appendIndent()
-        appendName()
-        appendLine("MultiExpr ${node.section} {")
-        indenting {
-            var i = 0
-            for (each in node.list) {
-                name = "node ${i++}"
-                each.accept(this)
-            }
-            name = "node $i"
-            node.last.accept(this)
-        }
-        appendLine('}')
+        TODO("Not yet implemented")
     }
 
     override fun visitMultiNode(node: MultiNode) {
@@ -170,33 +153,11 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitNullExpr(node: NullExpr) {
-        appendIndent()
-        appendName()
-        appendLine("NullExpr ${node.section}")
+        TODO("Not yet implemented")
     }
 
     override fun visitObjectExpr(node: ObjectExpr) {
-        appendIndent()
-        appendName()
-        appendLine("ObjectExpr ${node.section} {")
-        indenting {
-            var i = 0
-            for ((key, value) in node.value) {
-                name = (i++).toString()
-                appendIndent()
-                appendLine("entry $i: {")
-                indenting {
-                    name = "key"
-                    key.accept(this)
-                    name = "value"
-                    value.accept(this)
-                }
-                appendIndent()
-                appendLine('}')
-            }
-        }
-        appendIndent()
-        appendLine('}')
+        TODO("Not yet implemented")
     }
 
     override fun visitPropertyAccessExpr(node: PropertyAccessExpr) {
@@ -220,9 +181,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitStringExpr(node: StringExpr) {
-        appendIndent()
-        appendName()
-        appendLine("StringExpr ${node.section} = \"${node.value}\"")
+        builder.pushStringInsn(node.value)
     }
 
     override fun visitSubscriptAccessExpr(node: SubscriptAccessExpr) {
@@ -234,9 +193,7 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitThisExpr(node: ThisExpr) {
-        appendIndent()
-        appendName()
-        appendLine("ThisExpr ${node.section}")
+        TODO("Not yet implemented")
     }
 
     override fun visitThrowExpr(node: ThrowExpr) {
@@ -248,53 +205,18 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
     }
 
     override fun visitTypeofExpr(node: TypeofExpr) {
-        appendIndent()
-        appendName()
-        appendLine("TypeofExpr ${node.section} {")
-        indenting {
-            name = "value"
-            node.value.accept(this)
-        }
-        appendLine('}')
+        TODO("Not yet implemented")
     }
 
     override fun visitUnaryOperation(node: UnaryOperation) {
-        appendIndent()
-        appendName()
-        appendLine("UnaryOperation ${node.operator} ${node.section} {")
-        indenting {
-            name = "target"
-            node.target.accept(this)
-        }
-        appendLine('}')
+        TODO("Not yet implemented")
     }
 
     override fun visitUnitExpr(node: UnitExpr) {
-        appendIndent()
-        appendName()
-        appendLine("UnitExpr ${node.section}")
+        TODO("Not yet implemented")
     }
 
     override fun visitWhileNode(node: WhileNode) {
         TODO("Not yet implemented")
-    }
-
-    private fun appendIndent() {
-        for (ignored in 0 until indent) {
-            append(' ')
-        }
-    }
-
-    private fun appendName() {
-        if (name != null) {
-            append(name)
-            append(": ")
-        }
-    }
-
-    private inline fun indenting(block: () -> Unit) {
-        indent += 2
-        block()
-        indent -= 2
     }
 }
