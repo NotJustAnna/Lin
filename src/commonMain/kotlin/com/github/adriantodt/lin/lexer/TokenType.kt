@@ -100,7 +100,7 @@ enum class TokenType {
     WHEN,
     WHILE,
 
-    UNIT,
+    //UNIT,
     //IMPORT,
 
     INVALID,

@@ -4,7 +4,7 @@ import com.github.adriantodt.lin.ast.node.Expr
 import com.github.adriantodt.lin.ast.node.InvalidNode
 import com.github.adriantodt.lin.ast.node.Node
 import com.github.adriantodt.lin.ast.node.control.ReturnExpr
-import com.github.adriantodt.lin.ast.node.value.UnitExpr
+import com.github.adriantodt.lin.ast.node.value.NullExpr
 import com.github.adriantodt.lin.lexer.TokenType
 import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.PrefixParser
@@ -14,7 +14,7 @@ import com.github.adriantodt.tartar.api.parser.Token
 object ReturnParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
         val node = if (ctx.nextIsAny(TokenType.SEMICOLON, TokenType.NL)) {
-            UnitExpr(token.section)
+            NullExpr(token.section)
         } else {
             ctx.parseExpression().let {
                 it as? Expr ?: return InvalidNode {

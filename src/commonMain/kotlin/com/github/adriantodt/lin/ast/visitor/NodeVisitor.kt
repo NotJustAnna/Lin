@@ -5,9 +5,6 @@ import com.github.adriantodt.lin.ast.node.MultiExpr
 import com.github.adriantodt.lin.ast.node.MultiNode
 import com.github.adriantodt.lin.ast.node.access.*
 import com.github.adriantodt.lin.ast.node.control.*
-import com.github.adriantodt.lin.ast.node.control.optimization.LoopNode
-import com.github.adriantodt.lin.ast.node.control.optimization.ScopeExpr
-import com.github.adriantodt.lin.ast.node.control.optimization.ScopeNode
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
@@ -72,8 +69,6 @@ interface NodeVisitor {
 
     fun visitLongExpr(node: LongExpr)
 
-    fun visitLoopNode(node: LoopNode)
-
     fun visitMultiExpr(node: MultiExpr)
 
     fun visitMultiNode(node: MultiNode)
@@ -87,10 +82,6 @@ interface NodeVisitor {
     fun visitPropertyAssignNode(node: PropertyAssignNode)
 
     fun visitReturnExpr(node: ReturnExpr)
-
-    fun visitScopeExpr(node: ScopeExpr)
-
-    fun visitScopeNode(node: ScopeNode)
 
     fun visitStringExpr(node: StringExpr)
 
@@ -107,8 +98,6 @@ interface NodeVisitor {
     fun visitTypeofExpr(node: TypeofExpr)
 
     fun visitUnaryOperation(node: UnaryOperation)
-
-    fun visitUnitExpr(node: UnitExpr)
 
     fun visitWhileNode(node: WhileNode)
 }

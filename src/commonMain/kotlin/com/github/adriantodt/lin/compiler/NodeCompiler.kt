@@ -1,13 +1,11 @@
 package com.github.adriantodt.lin.compiler
 
+import com.github.adriantodt.lin.ast.node.Expr
 import com.github.adriantodt.lin.ast.node.InvalidNode
 import com.github.adriantodt.lin.ast.node.MultiExpr
 import com.github.adriantodt.lin.ast.node.MultiNode
 import com.github.adriantodt.lin.ast.node.access.*
 import com.github.adriantodt.lin.ast.node.control.*
-import com.github.adriantodt.lin.ast.node.control.optimization.LoopNode
-import com.github.adriantodt.lin.ast.node.control.optimization.ScopeExpr
-import com.github.adriantodt.lin.ast.node.control.optimization.ScopeNode
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
@@ -19,17 +17,20 @@ import com.github.adriantodt.lin.ast.node.misc.TypeofExpr
 import com.github.adriantodt.lin.ast.node.misc.UnaryOperation
 import com.github.adriantodt.lin.ast.node.value.*
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor
-import com.github.adriantodt.lin.insn.InsnBuilder
+import com.github.adriantodt.lin.bytecode.InsnBuilder
+import com.github.adriantodt.lin.utils.BinaryOperationType
+import com.github.adriantodt.tartar.api.parser.SyntaxException
 
 class NodeCompiler : NodeVisitor {
     /*
      * Check out this code:
      * https://github.com/Avarel/Kaiper/blob/master/Kaiper-Compiler/src/main/java/xyz/avarel/kaiper/compiler/ExprCompiler.java
      */
-    private val builder = InsnBuilder()
+    val builder = InsnBuilder()
 
     override fun visitArrayExpr(node: ArrayExpr) {
-        builder.makeArrayInsn()
+        builder.markSection(node)
+        builder.newArrayInsn()
         for (expr in node.value) {
             expr.accept(this)
             builder.arrayInsertInsn()
@@ -37,83 +38,207 @@ class NodeCompiler : NodeVisitor {
     }
 
     override fun visitAssignNode(node: AssignNode) {
+        builder.markSection(node)
         node.value.accept(this)
         builder.assignInsn(node.name)
     }
 
     override fun visitBinaryOperation(node: BinaryOperation) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.left.accept(this)
+        if (node.operator == BinaryOperationType.AND || node.operator == BinaryOperationType.OR) {
+            val skip = builder.nextLabel()
+            builder.dupInsn()
+            if (node.operator == BinaryOperationType.AND) {
+                builder.branchIfFalseInsn(skip)
+            } else {
+                builder.branchIfTrueInsn(skip)
+            }
+            node.right.accept(this)
+            builder.binaryOperationInsn(node.operator)
+            builder.markLabel(skip)
+        }
+        node.right.accept(this)
+        builder.binaryOperationInsn(node.operator)
     }
 
     override fun visitBooleanExpr(node: BooleanExpr) {
+        builder.markSection(node)
         builder.pushBooleanInsn(node.value)
     }
 
     override fun visitBreakExpr(node: BreakExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        builder.breakInsn()
     }
 
     override fun visitCharExpr(node: CharExpr) {
+        builder.markSection(node)
         builder.pushCharInsn(node.value)
     }
 
     override fun visitContinueExpr(node: ContinueExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        builder.continueInsn()
     }
 
     override fun visitDeclareFunctionExpr(node: DeclareFunctionExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        builder.declareVariableInsn(node.name, false)
+        node.accept(this)
+        builder.dupInsn()
+        builder.setVariableInsn(node.name)
     }
 
     override fun visitDeclareVariableNode(node: DeclareVariableNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        builder.declareVariableInsn(node.name, node.mutable)
+        if (node.value != null) {
+            node.accept(this)
+            builder.setVariableInsn(node.name)
+        }
     }
 
     override fun visitDoWhileNode(node: DoWhileNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        val startLabel = builder.nextLabel()
+        builder.markLabel(startLabel)
+
+        if (node.body == null) {
+            node.condition.accept(this)
+            builder.branchIfTrueInsn(startLabel)
+            return
+        }
+
+        val conditionLabel = builder.nextLabel()
+        val endLabel = builder.nextLabel()
+
+        builder.pushLoopHandlingInsn(conditionLabel, endLabel)
+
+        builder.withScope {
+            node.body.accept(this)
+        }
+        builder.popLoopHandlingInsn()
+
+        builder.markLabel(conditionLabel)
+        node.condition.accept(this)
+        builder.branchIfTrueInsn(startLabel)
+        builder.markLabel(endLabel)
     }
 
     override fun visitDoubleExpr(node: DoubleExpr) {
+        builder.markSection(node)
         builder.pushDoubleInsn(node.value)
     }
 
     override fun visitEnsureNotNullExpr(node: EnsureNotNullExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.value.accept(this)
+        builder.checkNotNullInsn()
     }
 
     override fun visitFloatExpr(node: FloatExpr) {
+        builder.markSection(node)
         builder.pushFloatInsn(node.value)
     }
 
     override fun visitForNode(node: ForNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        val nextLabel = builder.nextLabel()
+        val endLabel = builder.nextLabel()
+        builder.withScope {
+            val iterator = "${node.variableName}\$__iterator"
+            builder.declareVariableInsn(iterator, false)
+            node.iterable.accept(this)
+            builder.invokeMemberInsn("__iterator", 0)
+            builder.setVariableInsn(iterator)
+
+            builder.markLabel(nextLabel)
+            builder.getVariableInsn(iterator)
+            builder.invokeMemberInsn("__hasNext", 0)
+            builder.branchIfFalseInsn(endLabel)
+            builder.withScope {
+                builder.declareVariableInsn(node.variableName, false)
+                builder.getVariableInsn(iterator)
+                builder.invokeMemberInsn("__next", 0)
+                builder.setVariableInsn(node.variableName)
+                node.body.accept(this)
+            }
+            builder.jumpInsn(nextLabel)
+            builder.markLabel(endLabel)
+        }
     }
 
     override fun visitFunctionExpr(node: FunctionExpr) {
+        builder.markSection(node)
+        val compiler = NodeCompiler()
         TODO("Not yet implemented")
     }
 
     override fun visitIdentifierExpr(node: IdentifierExpr) {
-        builder.loadIdentifierInsn(node.name)
+        builder.markSection(node)
+        builder.getVariableInsn(node.name)
     }
 
     override fun visitIfExpr(node: IfExpr) {
-        TODO("Not yet implemented")
+        val elseLabel = builder.nextLabel()
+        val endLabel = builder.nextLabel()
+
+        builder.markSection(node)
+        node.condition.accept(this)
+        builder.branchIfFalseInsn(elseLabel)
+        builder.pushScopeInsn()
+        node.thenBranch.accept(this)
+        builder.popScopeInsn()
+        builder.jumpInsn(endLabel)
+        builder.markLabel(elseLabel)
+        builder.pushScopeInsn()
+        node.thenBranch.accept(this)
+        builder.popScopeInsn()
+        builder.markLabel(endLabel)
     }
 
     override fun visitIfNode(node: IfNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+
+        if (node.elseBranch == null) {
+            val endLabel = builder.nextLabel()
+            node.condition.accept(this)
+            builder.branchIfFalseInsn(endLabel)
+            builder.pushScopeInsn()
+            node.thenBranch.accept(this)
+            builder.popScopeInsn()
+            builder.markLabel(endLabel)
+        }
+
+        val elseLabel = builder.nextLabel()
+        val endLabel = builder.nextLabel()
+
+        builder.markSection(node)
+        node.condition.accept(this)
+        builder.branchIfFalseInsn(elseLabel)
+        builder.pushScopeInsn()
+        node.thenBranch.accept(this)
+        builder.popScopeInsn()
+        builder.jumpInsn(endLabel)
+        builder.markLabel(elseLabel)
+        builder.pushScopeInsn()
+        node.thenBranch.accept(this)
+        builder.popScopeInsn()
+        builder.markLabel(endLabel)
     }
 
     override fun visitIntExpr(node: IntExpr) {
+        builder.markSection(node)
         builder.pushIntInsn(node.value)
     }
 
     override fun visitInvalidNode(node: InvalidNode) {
-        TODO("Not yet implemented")
+        throw SyntaxException(node.toString(), node.section)
     }
 
     override fun visitInvokeExpr(node: InvokeExpr) {
+        builder.markSection(node)
         node.target.accept(this)
         for (argument in node.arguments) {
             argument.accept(this)
@@ -122,6 +247,7 @@ class NodeCompiler : NodeVisitor {
     }
 
     override fun visitInvokeLocalExpr(node: InvokeLocalExpr) {
+        builder.markSection(node)
         for (argument in node.arguments) {
             argument.accept(this)
         }
@@ -129,6 +255,7 @@ class NodeCompiler : NodeVisitor {
     }
 
     override fun visitInvokeMemberExpr(node: InvokeMemberExpr) {
+        builder.markSection(node)
         node.target.accept(this)
         for (argument in node.arguments) {
             argument.accept(this)
@@ -137,86 +264,193 @@ class NodeCompiler : NodeVisitor {
     }
 
     override fun visitLongExpr(node: LongExpr) {
+        builder.markSection(node)
         builder.pushLongInsn(node.value)
     }
 
-    override fun visitLoopNode(node: LoopNode) {
-        TODO("Not yet implemented")
-    }
-
     override fun visitMultiExpr(node: MultiExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        for (each in node.list) {
+            each.accept(this)
+            if (each is Expr) {
+                builder.popInsn()
+            }
+        }
+        node.last.accept(this)
     }
 
     override fun visitMultiNode(node: MultiNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        for (each in node.list) {
+            each.accept(this)
+            if (each is Expr) {
+                builder.popInsn()
+            }
+        }
     }
 
     override fun visitNullExpr(node: NullExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        builder.pushNullInsn()
     }
 
     override fun visitObjectExpr(node: ObjectExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        builder.newObjectInsn()
+        for ((key, value) in node.value) {
+            key.accept(this)
+            value.accept(this)
+            builder.objectInsertInsn()
+        }
     }
 
     override fun visitPropertyAccessExpr(node: PropertyAccessExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.target.accept(this)
+        if (!node.nullSafe) {
+            builder.getMemberPropertyInsn(node.name)
+            return
+        }
+
+        val skip = builder.nextLabel()
+        builder.dupInsn()
+        builder.pushNullInsn()
+        builder.binaryOperationInsn(BinaryOperationType.EQUALS)
+        builder.branchIfTrueInsn(skip)
+        builder.getMemberPropertyInsn(node.name)
+        builder.markLabel(skip)
     }
 
     override fun visitPropertyAssignNode(node: PropertyAssignNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.target.accept(this)
+        if (!node.nullSafe) {
+            node.value.accept(this)
+            builder.setMemberPropertyInsn(node.name)
+            return
+        }
+
+        val skip = builder.nextLabel()
+        builder.dupInsn()
+        builder.pushNullInsn()
+        builder.binaryOperationInsn(BinaryOperationType.EQUALS)
+        builder.branchIfTrueInsn(skip)
+        node.value.accept(this)
+        builder.setMemberPropertyInsn(node.name)
+        builder.markLabel(skip)
     }
 
     override fun visitReturnExpr(node: ReturnExpr) {
-        TODO("Not yet implemented")
-    }
-
-    override fun visitScopeExpr(node: ScopeExpr) {
-        TODO("Not yet implemented")
-    }
-
-    override fun visitScopeNode(node: ScopeNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.value.accept(this)
+        builder.returnInsn()
     }
 
     override fun visitStringExpr(node: StringExpr) {
+        builder.markSection(node)
         builder.pushStringInsn(node.value)
     }
 
     override fun visitSubscriptAccessExpr(node: SubscriptAccessExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.target.accept(this)
+        for (argument in node.arguments) {
+            argument.accept(this)
+        }
+        builder.getSubscriptInsn(node.arguments.size)
     }
 
     override fun visitSubscriptAssignNode(node: SubscriptAssignNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.target.accept(this)
+        for (argument in node.arguments) {
+            argument.accept(this)
+        }
+        node.value.accept(this)
+        builder.setSubscriptInsn(node.arguments.size)
     }
 
     override fun visitThisExpr(node: ThisExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        builder.pushThisInsn()
     }
 
     override fun visitThrowExpr(node: ThrowExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        builder.throwInsn()
     }
 
     override fun visitTryExpr(node: TryExpr) {
-        TODO("Not yet implemented")
+        // TODO This implementation does not implements `finally`.
+
+        builder.markSection(node)
+        if (node.catchBranch == null) {
+            builder.pushScopeInsn()
+            node.tryBranch.accept(this)
+            builder.popScopeInsn()
+            return
+        }
+        val catchLabel = builder.nextLabel()
+        val endLabel = builder.nextLabel()
+
+        builder.withExceptionHandling(catchLabel, endLabel) {
+            builder.withScope {
+                node.tryBranch.accept(this)
+            }
+        }
+
+        builder.jumpInsn(endLabel)
+        builder.markLabel(catchLabel)
+        if (node.catchBranch.caughtName == null) {
+            builder.popInsn()
+        } else {
+            builder.pushScopeInsn()
+            builder.declareVariableInsn(node.catchBranch.caughtName, false)
+            builder.setVariableInsn(node.catchBranch.caughtName)
+        }
+
+        builder.withScope {
+            node.catchBranch.branch.accept(this)
+        }
+
+        if (node.catchBranch.caughtName != null) {
+            builder.popScopeInsn()
+        }
+        builder.markLabel(endLabel)
     }
 
     override fun visitTypeofExpr(node: TypeofExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.value.accept(this)
+        builder.typeofInsn()
     }
 
     override fun visitUnaryOperation(node: UnaryOperation) {
-        TODO("Not yet implemented")
-    }
-
-    override fun visitUnitExpr(node: UnitExpr) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        node.target.accept(this)
+        builder.unaryOperationInsn(node.operator)
     }
 
     override fun visitWhileNode(node: WhileNode) {
-        TODO("Not yet implemented")
+        builder.markSection(node)
+        val startLabel = builder.nextLabel()
+        builder.markLabel(startLabel)
+        node.condition.accept(this)
+
+        if (node.body == null) {
+            builder.branchIfTrueInsn(startLabel)
+            return
+        }
+
+        val endLabel = builder.nextLabel()
+        builder.branchIfFalseInsn(endLabel)
+
+        builder.withLoopHandling(startLabel, endLabel) {
+            builder.withScope {
+                node.body.accept(this)
+            }
+        }
+        builder.jumpInsn(startLabel)
+        builder.markLabel(endLabel)
     }
 }

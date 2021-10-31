@@ -4,9 +4,9 @@ import com.github.adriantodt.lin.ast.node.Expr
 import com.github.adriantodt.lin.ast.node.InvalidNode
 import com.github.adriantodt.lin.ast.node.Node
 import com.github.adriantodt.lin.ast.node.misc.BinaryOperation
-import com.github.adriantodt.lin.ast.node.misc.BinaryOperationType
 import com.github.adriantodt.lin.grammar.utils.maybeIgnoreNL
 import com.github.adriantodt.lin.lexer.TokenType
+import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.tartar.api.parser.InfixParser
 import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException

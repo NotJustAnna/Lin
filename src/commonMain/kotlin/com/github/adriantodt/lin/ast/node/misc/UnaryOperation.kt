@@ -5,6 +5,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeMapVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
+import com.github.adriantodt.lin.utils.UnaryOperationType
 import com.github.adriantodt.tartar.api.lexer.Section
 
 class UnaryOperation(val target: Expr, val operator: UnaryOperationType, override val section: Section) : Expr {

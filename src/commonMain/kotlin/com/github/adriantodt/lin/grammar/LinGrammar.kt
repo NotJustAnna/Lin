@@ -1,8 +1,6 @@
 package com.github.adriantodt.lin.grammar
 
 import com.github.adriantodt.lin.ast.node.Node
-import com.github.adriantodt.lin.ast.node.misc.BinaryOperationType
-import com.github.adriantodt.lin.ast.node.misc.UnaryOperationType
 import com.github.adriantodt.lin.grammar.parselets.control.*
 import com.github.adriantodt.lin.grammar.parselets.misc.*
 import com.github.adriantodt.lin.grammar.parselets.operations.BinaryOperatorParser
@@ -11,6 +9,8 @@ import com.github.adriantodt.lin.grammar.parselets.value.*
 import com.github.adriantodt.lin.lexer.TokenType
 import com.github.adriantodt.lin.lexer.TokenType.*
 import com.github.adriantodt.lin.parser.Precedence
+import com.github.adriantodt.lin.utils.BinaryOperationType
+import com.github.adriantodt.lin.utils.UnaryOperationType
 import com.github.adriantodt.tartar.createGrammar
 
 val linStdGrammar = createGrammar<TokenType, Node> {
@@ -20,7 +20,7 @@ val linStdGrammar = createGrammar<TokenType, Node> {
     prefix(FLOAT, FloatParser)
     prefix(DOUBLE, DoubleParser)
     prefix(NULL, NullParser)
-    prefix(UNIT, UnitParser)
+    //prefix(UNIT, UnitParser)
     prefix(THIS, ThisParser)
     prefix(CHAR, CharParser)
     prefix(STRING, StringParser)

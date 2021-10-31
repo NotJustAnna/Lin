@@ -5,6 +5,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeMapVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
+import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.tartar.api.lexer.Section
 
 data class BinaryOperation(

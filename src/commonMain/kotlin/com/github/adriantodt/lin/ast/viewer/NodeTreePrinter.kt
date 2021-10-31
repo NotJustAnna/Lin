@@ -5,9 +5,6 @@ import com.github.adriantodt.lin.ast.node.MultiExpr
 import com.github.adriantodt.lin.ast.node.MultiNode
 import com.github.adriantodt.lin.ast.node.access.*
 import com.github.adriantodt.lin.ast.node.control.*
-import com.github.adriantodt.lin.ast.node.control.optimization.LoopNode
-import com.github.adriantodt.lin.ast.node.control.optimization.ScopeExpr
-import com.github.adriantodt.lin.ast.node.control.optimization.ScopeNode
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
@@ -145,9 +142,9 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
         appendLine("LongExpr ${node.section} = ${node.value}")
     }
 
-    override fun visitLoopNode(node: LoopNode) {
-        TODO("Not yet implemented")
-    }
+//    override fun visitLoopNode(node: LoopNode) {
+//        TODO("Not yet implemented")
+//    }
 
     override fun visitMultiExpr(node: MultiExpr) {
         appendIndent()
@@ -211,13 +208,13 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
         TODO("Not yet implemented")
     }
 
-    override fun visitScopeExpr(node: ScopeExpr) {
-        TODO("Not yet implemented")
-    }
+//    override fun visitScopeExpr(node: ScopeExpr) {
+//        TODO("Not yet implemented")
+//    }
 
-    override fun visitScopeNode(node: ScopeNode) {
-        TODO("Not yet implemented")
-    }
+//    override fun visitScopeNode(node: ScopeNode) {
+//        TODO("Not yet implemented")
+//    }
 
     override fun visitStringExpr(node: StringExpr) {
         appendIndent()
@@ -269,11 +266,11 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
         appendLine('}')
     }
 
-    override fun visitUnitExpr(node: UnitExpr) {
-        appendIndent()
-        appendName()
-        appendLine("UnitExpr ${node.section}")
-    }
+//    override fun visitUnitExpr(node: UnitExpr) {
+//        appendIndent()
+//        appendName()
+//        appendLine("UnitExpr ${node.section}")
+//    }
 
     override fun visitWhileNode(node: WhileNode) {
         TODO("Not yet implemented")

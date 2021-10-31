@@ -3,9 +3,6 @@ package com.github.adriantodt.lin.ast.visitor
 import com.github.adriantodt.lin.ast.node.*
 import com.github.adriantodt.lin.ast.node.access.*
 import com.github.adriantodt.lin.ast.node.control.*
-import com.github.adriantodt.lin.ast.node.control.optimization.LoopNode
-import com.github.adriantodt.lin.ast.node.control.optimization.ScopeExpr
-import com.github.adriantodt.lin.ast.node.control.optimization.ScopeNode
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
@@ -70,8 +67,6 @@ interface NodeMapVisitor {
 
     fun visitLongExpr(node: LongExpr): Expr
 
-    fun visitLoopNode(node: LoopNode): Node
-
     fun visitMultiExpr(node: MultiExpr): Expr
 
     fun visitMultiNode(node: MultiNode): Node
@@ -85,10 +80,6 @@ interface NodeMapVisitor {
     fun visitPropertyAssignNode(node: PropertyAssignNode): Node
 
     fun visitReturnExpr(node: ReturnExpr): Expr
-
-    fun visitScopeExpr(node: ScopeExpr): Expr
-
-    fun visitScopeNode(node: ScopeNode): Node
 
     fun visitStringExpr(node: StringExpr): Expr
 
@@ -105,8 +96,6 @@ interface NodeMapVisitor {
     fun visitTypeofExpr(node: TypeofExpr): Expr
 
     fun visitUnaryOperation(node: UnaryOperation): Expr
-
-    fun visitUnitExpr(node: UnitExpr): Expr
 
     fun visitWhileNode(node: WhileNode): Node
 }
