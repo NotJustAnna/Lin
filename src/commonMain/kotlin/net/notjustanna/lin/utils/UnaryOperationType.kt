@@ -1,4 +1,4 @@
-package net.notjustanna.lin.ast.node.misc
+package net.notjustanna.lin.utils
 
 enum class UnaryOperationType {
     POSITIVE, NEGATIVE, NOT, TRUTH

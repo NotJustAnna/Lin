@@ -24,7 +24,6 @@ fun main() {
     """.trimIndent()
 
     val node = linStdParser.parse(Source(text), linStdLexer)
-
     println(buildString {
         node.accept(NodeTreePrinter(this))
     })

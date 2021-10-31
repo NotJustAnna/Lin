@@ -5,6 +5,7 @@ import net.notjustanna.lin.ast.visitor.NodeMapVisitor
 import net.notjustanna.lin.ast.visitor.NodeVisitor
 import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
+import net.notjustanna.lin.utils.UnaryOperationType
 import net.notjustanna.tartar.api.lexer.Section
 
 class UnaryOperation(val target: Expr, val operator: UnaryOperationType, override val section: Section) : Expr {

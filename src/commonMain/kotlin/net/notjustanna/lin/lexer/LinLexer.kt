@@ -95,7 +95,7 @@ val linStdLexer = createLexer<LinToken> {
                 "true" -> makeToken(TRUE, 4)
                 "try" -> makeToken(TRY, 3)
                 "typeof" -> makeToken(TYPEOF, 6)
-                "unit" -> makeToken(UNIT, 4)
+                //"unit" -> makeToken(UNIT, 4)
                 "val" -> makeToken(VAL, 3)
                 "var" -> makeToken(VAR, 3)
                 "when" -> makeToken(WHEN, 4)

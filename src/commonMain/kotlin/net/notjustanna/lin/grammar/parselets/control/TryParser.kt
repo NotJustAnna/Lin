@@ -28,11 +28,14 @@ object TryParser : PrefixParser<TokenType, Node> {
                     "catch" -> {
                         val catchToken = ctx.last
                         ctx.skipOnlyUntil(TokenType.L_PAREN)
-                        ctx.eat(TokenType.L_PAREN)
-                        ctx.skipOnlyUntil(TokenType.IDENTIFIER)
-                        val name = ctx.eat(TokenType.IDENTIFIER).value
-                        ctx.skipOnlyUntil(TokenType.R_PAREN)
-                        ctx.eat(TokenType.R_PAREN)
+                        val name = if (ctx.match(TokenType.L_PAREN)) {
+                            ctx.eat(TokenType.L_PAREN)
+                            ctx.skipOnlyUntil(TokenType.IDENTIFIER)
+                            val value = if (ctx.match(TokenType.IDENTIFIER)) ctx.last.value else null
+                            ctx.skipOnlyUntil(TokenType.R_PAREN)
+                            ctx.eat(TokenType.R_PAREN)
+                            value
+                        } else null
                         ctx.skipOnlyUntil(TokenType.L_BRACE)
                         ctx.eat(TokenType.L_BRACE)
                         val branch = ctx.parseBlock(braceConsumed = true) ?: error("Impossible to be null.")

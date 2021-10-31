@@ -4,9 +4,9 @@ import net.notjustanna.lin.ast.node.Expr
 import net.notjustanna.lin.ast.node.InvalidNode
 import net.notjustanna.lin.ast.node.Node
 import net.notjustanna.lin.ast.node.misc.BinaryOperation
-import net.notjustanna.lin.ast.node.misc.BinaryOperationType
 import net.notjustanna.lin.grammar.utils.maybeIgnoreNL
 import net.notjustanna.lin.lexer.TokenType
+import net.notjustanna.lin.utils.BinaryOperationType
 import net.notjustanna.tartar.api.parser.InfixParser
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
