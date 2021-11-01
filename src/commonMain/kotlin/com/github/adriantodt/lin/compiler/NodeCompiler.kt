@@ -174,7 +174,7 @@ class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuil
 
         val parameters = node.parameters.map { (name, varargs, defaultValue) ->
             CompiledParameter(
-                name,
+                sourceBuilder.constantId(name),
                 varargs,
                 defaultValue?.let {
                     NodeCompiler(sourceBuilder).also { c -> it.accept(c) }.builder.nodeId

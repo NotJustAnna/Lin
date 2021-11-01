@@ -1,3 +1,11 @@
 package com.github.adriantodt.lin.bytecode.insn
 
-data class UnaryOperationInsn(val operatorId: Int) : Insn()
+import okio.Buffer
+
+data class UnaryOperationInsn(val operatorId: Int) : Insn() {
+    override fun serializeTo(buffer: Buffer) {
+        buffer.writeByte(Opcode.SIMPLE.ordinal)
+            .writeByte(SimpleCode.UNARY_OPERATION.ordinal)
+            .writeShort(operatorId)
+    }
+}

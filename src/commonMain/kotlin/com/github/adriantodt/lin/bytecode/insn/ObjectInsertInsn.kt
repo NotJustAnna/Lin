@@ -1,3 +1,12 @@
 package com.github.adriantodt.lin.bytecode.insn
 
-object ObjectInsertInsn : Insn()
+import okio.Buffer
+
+object ObjectInsertInsn : Insn() {
+    override fun serializeTo(buffer: Buffer) {
+        buffer.writeByte(Opcode.PARAMETERLESS.ordinal)
+            .writeByte(0)
+            .writeShort(ParameterlessCode.OBJECT_INSERT.ordinal)
+    }
+}
+

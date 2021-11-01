@@ -1,3 +1,10 @@
 package com.github.adriantodt.lin.bytecode.insn
 
-data class InvokeInsn(val size: Int) : Insn()
+import okio.Buffer
+
+data class InvokeInsn(val size: Int) : Insn() {
+    override fun serializeTo(buffer: Buffer) {
+        buffer.writeByte(Opcode.INVOKE.ordinal)
+            .writeShort(0).writeByte(size)
+    }
+}

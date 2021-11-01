@@ -37,6 +37,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("com.github.adriantodt:tartar:2.2")
+                implementation("com.squareup.okio:okio:3.0.0")
             }
         }
         val commonTest by getting {
@@ -46,9 +47,16 @@ kotlin {
         }
         val jvmMain by getting
         val jvmTest by getting
-        val jsMain by getting
+        val commonNonJvmMain by creating {
+            dependsOn(commonMain)
+        }
+        val jsMain by getting {
+            dependsOn(commonNonJvmMain)
+        }
         val jsTest by getting
-        val nativeMain by getting
+        val nativeMain by getting {
+            dependsOn(commonNonJvmMain)
+        }
         val nativeTest by getting
     }
 }

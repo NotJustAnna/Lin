@@ -13,10 +13,6 @@ fun main() {
     val node = linStdParser.parse(Source(text), linStdLexer)
 
     val compiler = NodeCompiler()
-
     node.accept(compiler)
-
-    for (instruction in compiler.builder.instructions) {
-        println(instruction)
-    }
+    println(compiler.sourceBuilder.build().toBytes().hex())
 }
