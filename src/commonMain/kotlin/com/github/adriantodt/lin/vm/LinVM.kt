@@ -3,14 +3,19 @@ package com.github.adriantodt.lin.vm
 import com.github.adriantodt.lin.bytecode.CompiledNode
 import com.github.adriantodt.lin.bytecode.CompiledSource
 import com.github.adriantodt.lin.bytecode.insn.*
-import com.github.adriantodt.lin.vm.types.LAny
+import com.github.adriantodt.lin.vm.scope.DefaultMutableScope
+import com.github.adriantodt.lin.vm.scope.MutableScope
+import com.github.adriantodt.lin.vm.scope.Scope
+import com.github.adriantodt.lin.vm.types.*
 
-class LinVM(source: CompiledSource) {
+class LinVM(source: CompiledSource, rootScope: Scope? = null) {
     val sources = mutableListOf(source)
     val shelvedContexts = mutableListOf<ExecutionContext>()
 
+    var currentScope: Scope = DefaultMutableScope(rootScope)
     var currentSource = source
     var currentNode = currentSource.nodes[0]
+    var currentThis: LAny? = null
     var next: Int = 0
     val stack = mutableListOf<LAny>()
     val exceptionHandlers = mutableListOf<ExceptionHandler>()
@@ -64,11 +69,13 @@ class LinVM(source: CompiledSource) {
     }
 
     private fun handleArrayInsert() {
-        TODO("Not yet implemented")
+        val value = stack.removeLast()
+        val array = stack.last() as? LArray ?: error("Value is not an LArray.")
+        array.value.add(value)
     }
 
     private fun handleAssign(nameConst: Int) {
-        TODO("Not yet implemented")
+        currentScope.set(currentSource.stringPool[nameConst], stack.removeLast())
     }
 
     private fun handleBinaryOperation(operatorId: Int) {
@@ -76,7 +83,11 @@ class LinVM(source: CompiledSource) {
     }
 
     private fun handleBranchIf(value: Boolean, labelCode: Int) {
-        TODO("Not yet implemented")
+        val truth = stack.removeLast().truth()
+
+        if (truth == value) {
+            next = resolveLabel(labelCode)
+        }
     }
 
     private fun handleBreak() {
@@ -92,11 +103,12 @@ class LinVM(source: CompiledSource) {
     }
 
     private fun handleDeclareVariable(mutable: Boolean, nameConst: Int) {
-        TODO("Not yet implemented")
+        val s = currentScope as? MutableScope ?: error("Current scope is not mutable")
+        s.declareVariable(currentSource.stringPool[nameConst], mutable)
     }
 
     private fun handleDup() {
-        TODO("Not yet implemented")
+        stack.add(stack.last())
     }
 
     private fun handleGetMemberProperty(nameConst: Int) {
@@ -108,7 +120,7 @@ class LinVM(source: CompiledSource) {
     }
 
     private fun handleGetVariable(nameConst: Int) {
-        TODO("Not yet implemented")
+        stack.add(currentScope.get(currentSource.stringPool[nameConst]))
     }
 
     private fun handleInvoke(size: Int) {
@@ -124,23 +136,24 @@ class LinVM(source: CompiledSource) {
     }
 
     private fun handleJump(labelCode: Int) {
-        TODO("Not yet implemented")
+        next = resolveLabel(labelCode)
+
     }
 
     private fun handleLoadDecimal(valueConst: Int) {
-        TODO("Not yet implemented")
+        stack.add(LDecimal(Double.fromBits(currentSource.longPool[valueConst])))
     }
 
     private fun handleLoadInteger(valueConst: Int) {
-        TODO("Not yet implemented")
+        stack.add(LInteger(currentSource.longPool[valueConst]))
     }
 
     private fun handleLoadString(valueConst: Int) {
-        TODO("Not yet implemented")
+        stack.add(LString(currentSource.stringPool[valueConst]))
     }
 
     private fun handleNewArray() {
-        TODO("Not yet implemented")
+        stack.add(LArray())
     }
 
     private fun handleNewFunction(functionId: Int) {
@@ -148,59 +161,62 @@ class LinVM(source: CompiledSource) {
     }
 
     private fun handleNewObject() {
-        TODO("Not yet implemented")
+        stack.add(LObject())
     }
 
     private fun handleObjectInsert() {
-        TODO("Not yet implemented")
+        val value = stack.removeLast()
+        val key = stack.removeLast()
+        val obj = stack.last() as? LObject ?: error("Value is not an LObject.")
+        obj.value[key] = value
     }
 
     private fun handlePopExceptionHandling() {
-        TODO("Not yet implemented")
+        exceptionHandlers.removeLast()
     }
 
     private fun handlePop() {
-        TODO("Not yet implemented")
+        stack.removeLast()
     }
 
     private fun handlePopLoopHandling() {
-        TODO("Not yet implemented")
+        loopHandlers.removeLast()
     }
 
     private fun handlePopScope() {
-        TODO("Not yet implemented")
+        currentScope = currentScope.parent ?: throw error("Can't pop root scope.")
     }
 
     private fun handlePushBoolean(value: Boolean) {
-        TODO("Not yet implemented")
+        stack.add(if (value) LTrue else LFalse)
     }
 
     private fun handlePushDecimal(immediateValue: Int) {
-        TODO("Not yet implemented")
+        stack.add(LDecimal(immediateValue.toDouble()))
     }
 
     private fun handlePushExceptionHandling(catchLabel: Int, endLabel: Int) {
-        TODO("Not yet implemented")
+        exceptionHandlers.add(ExceptionHandler(stack.size, resolveLabel(catchLabel), resolveLabel(endLabel)))
     }
 
     private fun handlePushInteger(immediateValue: Int) {
-        TODO("Not yet implemented")
+        stack.add(LInteger(immediateValue.toLong()))
     }
 
     private fun handlePushLoopHandling(breakLabel: Int, continueLabel: Int) {
-        TODO("Not yet implemented")
+        loopHandlers.add(LoopHandler(stack.size, resolveLabel(breakLabel), resolveLabel(continueLabel)))
     }
 
     private fun handlePushNull() {
-        TODO("Not yet implemented")
+        stack.add(LNull)
     }
 
     private fun handlePushScope() {
-        TODO("Not yet implemented")
+        currentScope = DefaultMutableScope(currentScope)
     }
 
     private fun handlePushThis() {
-        TODO("Not yet implemented")
+        stack.add(currentThis ?: error("There's no 'this' defined."))
     }
 
     private fun handleReturn() {
@@ -216,7 +232,7 @@ class LinVM(source: CompiledSource) {
     }
 
     private fun handleSetVariable(nameConst: Int) {
-        TODO("Not yet implemented")
+        currentScope.set(currentSource.stringPool[nameConst], stack.removeLast())
     }
 
     private fun handleThrow() {
@@ -224,11 +240,27 @@ class LinVM(source: CompiledSource) {
     }
 
     private fun handleTypeof() {
-        TODO("Not yet implemented")
+        val type = when (stack.removeLast()) {
+            is LArray -> "array"
+            is LDecimal -> "decimal"
+            LFalse, LTrue -> "boolean"
+            is LInteger -> "integer"
+            LNull -> "null"
+            is LObject -> "object"
+            is LString -> "string"
+        }
+
+        stack.add(LString(type))
     }
 
     private fun handleUnaryOperation(operatorId: Int) {
         TODO("Not yet implemented")
+    }
+
+    private fun resolveLabel(code: Int): Int {
+        val indexOf = currentNode.labels.binarySearchBy(code) { it.code }
+        check(indexOf >= 0) { "Label $code was not found." }
+        return currentNode.labels[indexOf].at
     }
 
     data class ExecutionContext(
