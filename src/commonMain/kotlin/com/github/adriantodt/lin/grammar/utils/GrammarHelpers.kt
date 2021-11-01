@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.value.FunctionExpr
 import com.github.adriantodt.lin.lexer.TokenType
 import com.github.adriantodt.tartar.api.parser.ParserContext
-import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import com.github.adriantodt.lin.parser.utils.matchAll
 
 /**
  * This method consumes [TokenType.NL] tokens to allow some multiline neatness.

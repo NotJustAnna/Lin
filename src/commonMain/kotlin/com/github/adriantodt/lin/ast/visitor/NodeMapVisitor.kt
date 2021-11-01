@@ -1,18 +1,44 @@
 package com.github.adriantodt.lin.ast.visitor
 
-import com.github.adriantodt.lin.ast.node.*
-import com.github.adriantodt.lin.ast.node.access.*
-import com.github.adriantodt.lin.ast.node.control.*
+import com.github.adriantodt.lin.ast.node.value.ArrayExpr
+import com.github.adriantodt.lin.ast.node.Expr
+import com.github.adriantodt.lin.ast.node.access.AssignNode
+import com.github.adriantodt.lin.ast.node.Node
+import com.github.adriantodt.lin.ast.node.misc.BinaryOperation
+import com.github.adriantodt.lin.ast.node.value.BooleanExpr
+import com.github.adriantodt.lin.ast.node.control.BreakExpr
+import com.github.adriantodt.lin.ast.node.control.ContinueExpr
+import com.github.adriantodt.lin.ast.node.value.DecimalExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
+import com.github.adriantodt.lin.ast.node.control.DoWhileNode
+import com.github.adriantodt.lin.ast.node.misc.EnsureNotNullExpr
+import com.github.adriantodt.lin.ast.node.control.ForNode
+import com.github.adriantodt.lin.ast.node.value.FunctionExpr
+import com.github.adriantodt.lin.ast.node.access.IdentifierExpr
+import com.github.adriantodt.lin.ast.node.control.IfExpr
+import com.github.adriantodt.lin.ast.node.control.IfNode
+import com.github.adriantodt.lin.ast.node.value.IntegerExpr
+import com.github.adriantodt.lin.ast.node.InvalidNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
 import com.github.adriantodt.lin.ast.node.invoke.InvokeLocalExpr
 import com.github.adriantodt.lin.ast.node.invoke.InvokeMemberExpr
-import com.github.adriantodt.lin.ast.node.misc.BinaryOperation
-import com.github.adriantodt.lin.ast.node.misc.EnsureNotNullExpr
+import com.github.adriantodt.lin.ast.node.MultiExpr
+import com.github.adriantodt.lin.ast.node.MultiNode
+import com.github.adriantodt.lin.ast.node.value.NullExpr
+import com.github.adriantodt.lin.ast.node.value.ObjectExpr
+import com.github.adriantodt.lin.ast.node.access.PropertyAccessExpr
+import com.github.adriantodt.lin.ast.node.access.PropertyAssignNode
+import com.github.adriantodt.lin.ast.node.control.ReturnExpr
+import com.github.adriantodt.lin.ast.node.value.StringExpr
+import com.github.adriantodt.lin.ast.node.access.SubscriptAccessExpr
+import com.github.adriantodt.lin.ast.node.access.SubscriptAssignNode
+import com.github.adriantodt.lin.ast.node.value.ThisExpr
+import com.github.adriantodt.lin.ast.node.control.ThrowExpr
+import com.github.adriantodt.lin.ast.node.control.TryExpr
 import com.github.adriantodt.lin.ast.node.misc.TypeofExpr
 import com.github.adriantodt.lin.ast.node.misc.UnaryOperation
-import com.github.adriantodt.lin.ast.node.value.*
+import com.github.adriantodt.lin.ast.node.control.WhileNode
 
 /**
  * A Node Visitor with no parameters and with its interface as return value.
@@ -29,9 +55,9 @@ interface NodeMapVisitor {
 
     fun visitBreakExpr(node: BreakExpr): Expr
 
-    fun visitCharExpr(node: CharExpr): Expr
-
     fun visitContinueExpr(node: ContinueExpr): Expr
+
+    fun visitDecimalExpr(node: DecimalExpr): Expr
 
     fun visitDeclareFunctionExpr(node: DeclareFunctionExpr): Expr
 
@@ -39,11 +65,7 @@ interface NodeMapVisitor {
 
     fun visitDoWhileNode(node: DoWhileNode): Node
 
-    fun visitDoubleExpr(node: DoubleExpr): Expr
-
     fun visitEnsureNotNullExpr(node: EnsureNotNullExpr): Expr
-
-    fun visitFloatExpr(node: FloatExpr): Expr
 
     fun visitForNode(node: ForNode): Node
 
@@ -55,7 +77,7 @@ interface NodeMapVisitor {
 
     fun visitIfNode(node: IfNode): Node
 
-    fun visitIntExpr(node: IntExpr): Expr
+    fun visitIntegerExpr(node: IntegerExpr): Expr
 
     fun visitInvalidNode(node: InvalidNode): Expr
 
@@ -64,8 +86,6 @@ interface NodeMapVisitor {
     fun visitInvokeLocalExpr(node: InvokeLocalExpr): Expr
 
     fun visitInvokeMemberExpr(node: InvokeMemberExpr): Expr
-
-    fun visitLongExpr(node: LongExpr): Expr
 
     fun visitMultiExpr(node: MultiExpr): Expr
 

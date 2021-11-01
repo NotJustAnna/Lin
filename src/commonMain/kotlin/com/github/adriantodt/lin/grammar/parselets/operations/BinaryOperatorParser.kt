@@ -11,7 +11,7 @@ import com.github.adriantodt.tartar.api.parser.InfixParser
 import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import com.github.adriantodt.lin.parser.utils.matchAll
 
 class BinaryOperatorParser(
     override val precedence: Int,

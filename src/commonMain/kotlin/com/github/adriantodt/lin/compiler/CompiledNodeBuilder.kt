@@ -64,59 +64,18 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     }
 
     /**
-     * Pushes a character into the stack.
-     *
-     * Stack Inputs: ()
-     *
-     * Stack Outputs: (value)
-     */
-    fun pushCharInsn(value: Char) {
-        instructions += PushCharInsn(value)
-    }
-
-    /**
      * Pushes a double into the stack.
      *
      * Stack Inputs: ()
      *
      * Stack Outputs: (value)
      */
-    fun pushDoubleInsn(value: Double) {
+    fun pushDecimalInsn(value: Double) {
         if (value % 1 == 0.0 && value.toInt() in i24Range) {
-            instructions += PushDoubleInsn(value.toInt())
+            instructions += PushDecimalInsn(value.toInt())
             return
         }
-        instructions += LoadDoubleInsn(parent.constantId(value))
-    }
-
-    /**
-     * Pushes a float into the stack.
-     *
-     * Stack Inputs: ()
-     *
-     * Stack Outputs: (value)
-     */
-    fun pushFloatInsn(value: Float) {
-        if (value % 1 == 0f && value.toInt() in i24Range) {
-            instructions += PushFloatInsn(value.toInt())
-            return
-        }
-        instructions += LoadFloatInsn(parent.constantId(value))
-    }
-
-    /**
-     * Pushes an integer into the stack.
-     *
-     * Stack Inputs: ()
-     *
-     * Stack Outputs: (value)
-     */
-    fun pushIntInsn(value: Int) {
-        if (value % 1 == 0 && value in i24Range) {
-            instructions += PushIntInsn(value)
-            return
-        }
-        instructions += LoadIntInsn(parent.constantId(value))
+        instructions += LoadDecimalInsn(parent.constantId(value))
     }
 
     /**
@@ -126,12 +85,12 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (value)
      */
-    fun pushLongInsn(value: Long) {
+    fun pushIntegerInsn(value: Long) {
         if (value % 1 == 0L && value.toInt() in i24Range) {
-            instructions += PushLongInsn(value.toInt())
+            instructions += PushIntegerInsn(value.toInt())
             return
         }
-        instructions += LoadLongInsn(parent.constantId(value))
+        instructions += LoadIntegerInsn(parent.constantId(value))
     }
 
     /**

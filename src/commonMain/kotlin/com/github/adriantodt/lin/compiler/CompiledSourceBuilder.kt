@@ -5,10 +5,7 @@ import com.github.adriantodt.lin.bytecode.CompiledParameter
 import com.github.adriantodt.lin.bytecode.CompiledSource
 
 class CompiledSourceBuilder {
-    private val intPool = mutableListOf<Int>()
     private val longPool = mutableListOf<Long>()
-    private val floatPool = mutableListOf<Float>()
-    private val doublePool = mutableListOf<Double>()
     private val stringPool = mutableListOf<String>()
 
     private val functionParameters = mutableListOf<List<CompiledParameter>>()
@@ -30,24 +27,7 @@ class CompiledSourceBuilder {
     }
 
     fun constantId(value: Double): Int {
-        val indexOf = doublePool.indexOf(value)
-        if (indexOf != -1) return indexOf
-        doublePool.add(value)
-        return stringPool.lastIndex
-    }
-
-    fun constantId(value: Float): Int {
-        val indexOf = floatPool.indexOf(value)
-        if (indexOf != -1) return indexOf
-        floatPool.add(value)
-        return stringPool.lastIndex
-    }
-
-    fun constantId(value: Int): Int {
-        val indexOf = intPool.indexOf(value)
-        if (indexOf != -1) return indexOf
-        intPool.add(value)
-        return stringPool.lastIndex
+        return constantId(value.toBits())
     }
 
     fun constantId(value: Long): Int {
@@ -68,10 +48,7 @@ class CompiledSourceBuilder {
     }
 
     fun build() = CompiledSource(
-        intPool.toList(),
         longPool.toList(),
-        floatPool.toList(),
-        doublePool.toList(),
         stringPool.toList(),
         functionParameters.toList(),
         functions.toList(),

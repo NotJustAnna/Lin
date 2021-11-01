@@ -5,7 +5,7 @@ import com.github.adriantodt.lin.grammar.linStdGrammar
 import com.github.adriantodt.lin.lexer.TokenType
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.createParser
-import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import com.github.adriantodt.lin.parser.utils.matchAll
 
 val linStdParser = createParser(linStdGrammar) {
     val start = peek()

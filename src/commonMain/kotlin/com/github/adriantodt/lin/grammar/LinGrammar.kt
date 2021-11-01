@@ -15,14 +15,14 @@ import com.github.adriantodt.tartar.createGrammar
 
 val linStdGrammar = createGrammar<TokenType, Node> {
     // Simple Expressions
-    prefix(INT, IntParser)
-    prefix(LONG, LongParser)
-    prefix(FLOAT, FloatParser)
-    prefix(DOUBLE, DoubleParser)
+    prefix(INTEGER, IntegerParser)
+    //prefix(LONG, LongParser)
+    //prefix(FLOAT, FloatParser)
+    prefix(DECIMAL, DecimalParser)
     prefix(NULL, NullParser)
     //prefix(UNIT, UnitParser)
     prefix(THIS, ThisParser)
-    prefix(CHAR, CharParser)
+    //prefix(CHAR, CharParser)
     prefix(STRING, StringParser)
     prefix(TRUE, BooleanParser(true))
     prefix(FALSE, BooleanParser(false))

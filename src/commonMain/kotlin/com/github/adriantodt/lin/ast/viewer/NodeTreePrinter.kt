@@ -54,11 +54,11 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
         TODO("Not yet implemented")
     }
 
-    override fun visitCharExpr(node: CharExpr) {
-        appendIndent()
-        appendName()
-        appendLine("CharExpr ${node.section} = '${node.value}'")
-    }
+//    override fun visitCharExpr(node: CharExpr) {
+//        appendIndent()
+//        appendName()
+//        appendLine("CharExpr ${node.section} = '${node.value}'")
+//    }
 
     override fun visitContinueExpr(node: ContinueExpr) {
         TODO("Not yet implemented")
@@ -76,21 +76,21 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
         TODO("Not yet implemented")
     }
 
-    override fun visitDoubleExpr(node: DoubleExpr) {
+    override fun visitDecimalExpr(node: DecimalExpr) {
         appendIndent()
         appendName()
-        appendLine("DoubleExpr ${node.section} = ${node.value}")
+        appendLine("DecimalExpr ${node.section} = ${node.value}")
     }
 
     override fun visitEnsureNotNullExpr(node: EnsureNotNullExpr) {
         TODO("Not yet implemented")
     }
 
-    override fun visitFloatExpr(node: FloatExpr) {
-        appendIndent()
-        appendName()
-        appendLine("FloatExpr ${node.section} = ${node.value}")
-    }
+//    override fun visitFloatExpr(node: FloatExpr) {
+//        appendIndent()
+//        appendName()
+//        appendLine("FloatExpr ${node.section} = ${node.value}")
+//    }
 
     override fun visitForNode(node: ForNode) {
         TODO("Not yet implemented")
@@ -114,10 +114,10 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
         TODO("Not yet implemented")
     }
 
-    override fun visitIntExpr(node: IntExpr) {
+    override fun visitIntegerExpr(node: IntegerExpr) {
         appendIndent()
         appendName()
-        appendLine("IntExpr ${node.section} = ${node.value}")
+        appendLine("IntegerExpr ${node.section} = ${node.value}")
     }
 
     override fun visitInvalidNode(node: InvalidNode) {
@@ -136,11 +136,11 @@ class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : No
         TODO("Not yet implemented")
     }
 
-    override fun visitLongExpr(node: LongExpr) {
-        appendIndent()
-        appendName()
-        appendLine("LongExpr ${node.section} = ${node.value}")
-    }
+//    override fun visitLongExpr(node: LongExpr) {
+//        appendIndent()
+//        appendName()
+//        appendLine("LongExpr ${node.section} = ${node.value}")
+//    }
 
 //    override fun visitLoopNode(node: LoopNode) {
 //        TODO("Not yet implemented")

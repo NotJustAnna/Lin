@@ -1,20 +1,42 @@
 package com.github.adriantodt.lin.ast.visitor
 
-import com.github.adriantodt.lin.ast.node.InvalidNode
-import com.github.adriantodt.lin.ast.node.MultiExpr
-import com.github.adriantodt.lin.ast.node.MultiNode
-import com.github.adriantodt.lin.ast.node.access.*
-import com.github.adriantodt.lin.ast.node.control.*
+import com.github.adriantodt.lin.ast.node.value.ArrayExpr
+import com.github.adriantodt.lin.ast.node.access.AssignNode
+import com.github.adriantodt.lin.ast.node.misc.BinaryOperation
+import com.github.adriantodt.lin.ast.node.value.BooleanExpr
+import com.github.adriantodt.lin.ast.node.control.BreakExpr
+import com.github.adriantodt.lin.ast.node.control.ContinueExpr
+import com.github.adriantodt.lin.ast.node.value.DecimalExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.declare.DeclareVariableNode
+import com.github.adriantodt.lin.ast.node.control.DoWhileNode
+import com.github.adriantodt.lin.ast.node.misc.EnsureNotNullExpr
+import com.github.adriantodt.lin.ast.node.control.ForNode
+import com.github.adriantodt.lin.ast.node.value.FunctionExpr
+import com.github.adriantodt.lin.ast.node.access.IdentifierExpr
+import com.github.adriantodt.lin.ast.node.control.IfExpr
+import com.github.adriantodt.lin.ast.node.control.IfNode
+import com.github.adriantodt.lin.ast.node.value.IntegerExpr
+import com.github.adriantodt.lin.ast.node.InvalidNode
 import com.github.adriantodt.lin.ast.node.invoke.InvokeExpr
 import com.github.adriantodt.lin.ast.node.invoke.InvokeLocalExpr
 import com.github.adriantodt.lin.ast.node.invoke.InvokeMemberExpr
-import com.github.adriantodt.lin.ast.node.misc.BinaryOperation
-import com.github.adriantodt.lin.ast.node.misc.EnsureNotNullExpr
+import com.github.adriantodt.lin.ast.node.MultiExpr
+import com.github.adriantodt.lin.ast.node.MultiNode
+import com.github.adriantodt.lin.ast.node.value.NullExpr
+import com.github.adriantodt.lin.ast.node.value.ObjectExpr
+import com.github.adriantodt.lin.ast.node.access.PropertyAccessExpr
+import com.github.adriantodt.lin.ast.node.access.PropertyAssignNode
+import com.github.adriantodt.lin.ast.node.control.ReturnExpr
+import com.github.adriantodt.lin.ast.node.value.StringExpr
+import com.github.adriantodt.lin.ast.node.access.SubscriptAccessExpr
+import com.github.adriantodt.lin.ast.node.access.SubscriptAssignNode
+import com.github.adriantodt.lin.ast.node.value.ThisExpr
+import com.github.adriantodt.lin.ast.node.control.ThrowExpr
+import com.github.adriantodt.lin.ast.node.control.TryExpr
 import com.github.adriantodt.lin.ast.node.misc.TypeofExpr
 import com.github.adriantodt.lin.ast.node.misc.UnaryOperation
-import com.github.adriantodt.lin.ast.node.value.*
+import com.github.adriantodt.lin.ast.node.control.WhileNode
 
 /**
  * A Node Visitor with 1 parameter and no return value.
@@ -31,9 +53,9 @@ interface NodeVisitor1<T> {
 
     fun visitBreakExpr(node: BreakExpr, param0: T)
 
-    fun visitCharExpr(node: CharExpr, param0: T)
-
     fun visitContinueExpr(node: ContinueExpr, param0: T)
+
+    fun visitDecimalExpr(node: DecimalExpr, param0: T)
 
     fun visitDeclareFunctionExpr(node: DeclareFunctionExpr, param0: T)
 
@@ -41,11 +63,7 @@ interface NodeVisitor1<T> {
 
     fun visitDoWhileNode(node: DoWhileNode, param0: T)
 
-    fun visitDoubleExpr(node: DoubleExpr, param0: T)
-
     fun visitEnsureNotNullExpr(node: EnsureNotNullExpr, param0: T)
-
-    fun visitFloatExpr(node: FloatExpr, param0: T)
 
     fun visitForNode(node: ForNode, param0: T)
 
@@ -57,7 +75,7 @@ interface NodeVisitor1<T> {
 
     fun visitIfNode(node: IfNode, param0: T)
 
-    fun visitIntExpr(node: IntExpr, param0: T)
+    fun visitIntegerExpr(node: IntegerExpr, param0: T)
 
     fun visitInvalidNode(node: InvalidNode, param0: T)
 
@@ -66,8 +84,6 @@ interface NodeVisitor1<T> {
     fun visitInvokeLocalExpr(node: InvokeLocalExpr, param0: T)
 
     fun visitInvokeMemberExpr(node: InvokeMemberExpr, param0: T)
-
-    fun visitLongExpr(node: LongExpr, param0: T)
 
     fun visitMultiExpr(node: MultiExpr, param0: T)
 

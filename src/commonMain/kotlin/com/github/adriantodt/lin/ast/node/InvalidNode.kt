@@ -5,6 +5,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
+import com.github.adriantodt.lin.ast.node.Expr
 
 data class InvalidNode(override val section: Section, val children: List<Node>, val errors: List<Exception>) : Expr {
 
