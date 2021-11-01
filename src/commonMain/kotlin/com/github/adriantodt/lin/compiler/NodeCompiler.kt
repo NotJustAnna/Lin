@@ -17,6 +17,7 @@ import com.github.adriantodt.lin.ast.node.misc.TypeofExpr
 import com.github.adriantodt.lin.ast.node.misc.UnaryOperation
 import com.github.adriantodt.lin.ast.node.value.*
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor
+import com.github.adriantodt.lin.bytecode.CompiledParameter
 import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 

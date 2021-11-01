@@ -1,3 +1,3 @@
 package com.github.adriantodt.lin.bytecode.insn
 
-data class InvokeMemberInsn(val name: String, val size: Int) : Insn()
+data class InvokeMemberInsn(val nameConst: Int, val size: Int) : Insn()
