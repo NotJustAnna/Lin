@@ -1,14 +1,19 @@
-package com.github.adriantodt.lin.bytecode
+package com.github.adriantodt.lin.compiler
 
+import com.github.adriantodt.lin.bytecode.Label
 import com.github.adriantodt.lin.bytecode.insn.*
 import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.lin.utils.UnaryOperationType
 import com.github.adriantodt.tartar.api.lexer.Sectional
 
-class InsnBuilder {
+class CompiledNodeBuilder(val nodeId: Int) {
     var instructions = mutableListOf<Insn>()
 
     private var labels = mutableListOf<Label>()
+
+    private var functionParameters = mutableListOf<List<CompiledParameter>>()
+
+    private var functions = mutableListOf<CompiledFunction>()
 
     private var nextLabelCode = 0
 
@@ -344,6 +349,14 @@ class InsnBuilder {
 
     fun setSubscriptInsn(size: Int) {
         instructions += SetSubscriptInsn(size)
+    }
+
+    fun newFunctionInsn(parameters: List<CompiledParameter>, name: String?, bodyId: Int) {
+        val parametersId = functionParameters.size
+        functionParameters += parameters
+        val functionId = functions.size
+        functions += CompiledFunction(parametersId, name, bodyId)
+        instructions += NewFunctionInsn(functionId)
     }
 
     fun dupInsn() {
