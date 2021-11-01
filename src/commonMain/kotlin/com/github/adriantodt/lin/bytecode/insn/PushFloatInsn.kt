@@ -1,10 +1,10 @@
 package com.github.adriantodt.lin.bytecode.insn
 
+import com.github.adriantodt.lin.utils.writeU24
 import okio.Buffer
 
 data class PushFloatInsn(val immediateValue: Int) : Insn() {
     override fun serializeTo(buffer: Buffer) {
-        buffer.writeByte(Opcode.PUSH_FLOAT.ordinal)
-            .writeByte(0).writeShort(immediateValue) // TODO WRITE/READ U24
+        buffer.writeByte(Opcode.PUSH_FLOAT.ordinal).writeU24(immediateValue)
     }
 }

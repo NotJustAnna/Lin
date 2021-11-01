@@ -1,3 +1,4 @@
+import com.github.adriantodt.lin.bytecode.CompiledSource
 import com.github.adriantodt.lin.compiler.NodeCompiler
 import com.github.adriantodt.lin.lexer.linStdLexer
 import com.github.adriantodt.lin.parser.linStdParser
@@ -14,5 +15,14 @@ fun main() {
 
     val compiler = NodeCompiler()
     node.accept(compiler)
-    println(compiler.sourceBuilder.build().toBytes().hex())
+
+
+    val compiled = compiler.sourceBuilder.build()
+
+    val fromBytes = CompiledSource.fromBytes(compiled.toBytes())
+
+    println(fromBytes == compiled)
+
+    println(compiled.toBytes().hex())
+    println(fromBytes.toBytes().hex())
 }

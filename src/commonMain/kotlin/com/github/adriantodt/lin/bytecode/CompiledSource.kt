@@ -1,5 +1,6 @@
 package com.github.adriantodt.lin.bytecode
 
+import com.github.adriantodt.lin.utils.Deserializer
 import com.github.adriantodt.lin.utils.Serializable
 import okio.Buffer
 import okio.ByteString.Companion.encodeUtf8
@@ -28,7 +29,10 @@ data class CompiledSource(
         for (d in doublePool) buffer.writeLong(d.toBits())
 
         buffer.writeInt(stringPool.size)
-        for (s in stringPool) buffer.write(s.encodeUtf8())
+        for (s in stringPool) {
+            val encoded = s.encodeUtf8()
+            buffer.writeInt(encoded.size).write(encoded)
+        }
 
         buffer.writeInt(functionParameters.size)
         for (list in functionParameters) {
@@ -43,4 +47,57 @@ data class CompiledSource(
         for (node in nodes) node.serializeTo(buffer)
     }
 
+
+    companion object : Deserializer<CompiledSource> {
+        override fun deserializeFrom(buffer: Buffer): CompiledSource {
+            val intPool = mutableListOf<Int>()
+            repeat(buffer.readInt()) {
+                intPool += buffer.readInt()
+            }
+
+            val longPool = mutableListOf<Long>()
+            repeat(buffer.readInt()) {
+                longPool += buffer.readLong()
+            }
+
+            val floatPool = mutableListOf<Float>()
+            repeat(buffer.readInt()) {
+                floatPool += Float.fromBits(buffer.readInt())
+            }
+
+            val doublePool = mutableListOf<Double>()
+            repeat(buffer.readInt()) {
+                doublePool += Double.fromBits(buffer.readLong())
+            }
+
+            val stringPool = mutableListOf<String>()
+            repeat(buffer.readInt()) {
+                val size = buffer.readInt()
+                stringPool += buffer.readByteString(size.toLong()).utf8()
+            }
+
+            val functionParameters = mutableListOf<List<CompiledParameter>>()
+            repeat(buffer.readInt()) {
+                val list = mutableListOf<CompiledParameter>()
+                repeat(buffer.readInt()) {
+                    list += CompiledParameter.deserializeFrom(buffer)
+                }
+                functionParameters += list
+            }
+
+            val functions = mutableListOf<CompiledFunction>()
+            repeat(buffer.readInt()) {
+                functions += CompiledFunction.deserializeFrom(buffer)
+            }
+
+            val nodes = mutableListOf<CompiledNode>()
+            repeat(buffer.readInt()) {
+                nodes += CompiledNode.deserializeFrom(buffer)
+            }
+
+            return CompiledSource(
+                intPool, longPool, floatPool, doublePool, stringPool, functionParameters, functions, nodes
+            )
+        }
+    }
 }
