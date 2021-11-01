@@ -1,34 +1,19 @@
 package net.notjustanna.lin.compiler
 
+import net.notjustanna.lin.bytecode.CompiledNode
+import net.notjustanna.lin.bytecode.CompiledParameter
 import net.notjustanna.lin.bytecode.Label
 import net.notjustanna.lin.bytecode.insn.*
 import net.notjustanna.lin.utils.BinaryOperationType
 import net.notjustanna.lin.utils.UnaryOperationType
 import net.notjustanna.tartar.api.lexer.Sectional
 
-class CompiledNodeBuilder(val nodeId: Int) {
-    var instructions = mutableListOf<Insn>()
+class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId: Int) {
+    private val instructions = mutableListOf<Insn>()
 
-    private var labels = mutableListOf<Label>()
-
-    private var functionParameters = mutableListOf<List<CompiledParameter>>()
-
-    private var functions = mutableListOf<CompiledFunction>()
+    private val labels = mutableListOf<Label>()
 
     private var nextLabelCode = 0
-
-//    fun consuming(block: () -> Unit): MutableList<Insn> {
-//        stack.add(instructions)
-//        instructions = mutableListOf()
-//        block()
-//        val last = instructions
-//        instructions = stack.removeLast()
-//        return last
-//    }
-
-//    fun addAll(instructions: MutableList<Insn>) {
-//        this.instructions += instructions
-//    }
 
     fun nextLabel(): Int {
         return nextLabelCode++
@@ -64,7 +49,7 @@ class CompiledNodeBuilder(val nodeId: Int) {
      * Stack Outputs: ()
      */
     fun assignInsn(name: String) {
-        instructions += AssignInsn(name)
+        instructions += AssignInsn(parent.constantId(name))
     }
 
     /**
@@ -97,7 +82,11 @@ class CompiledNodeBuilder(val nodeId: Int) {
      * Stack Outputs: (value)
      */
     fun pushDoubleInsn(value: Double) {
-        instructions += PushDoubleInsn(value)
+        if (value % 1 == 0.0 && value.toInt() in i24Range) {
+            instructions += PushDoubleInsn(value.toInt())
+            return
+        }
+        instructions += LoadDoubleInsn(parent.constantId(value))
     }
 
     /**
@@ -108,7 +97,11 @@ class CompiledNodeBuilder(val nodeId: Int) {
      * Stack Outputs: (value)
      */
     fun pushFloatInsn(value: Float) {
-        instructions += PushFloatInsn(value)
+        if (value % 1 == 0f && value.toInt() in i24Range) {
+            instructions += PushFloatInsn(value.toInt())
+            return
+        }
+        instructions += LoadFloatInsn(parent.constantId(value))
     }
 
     /**
@@ -119,7 +112,26 @@ class CompiledNodeBuilder(val nodeId: Int) {
      * Stack Outputs: (value)
      */
     fun pushIntInsn(value: Int) {
-        instructions += PushIntInsn(value)
+        if (value % 1 == 0 && value in i24Range) {
+            instructions += PushIntInsn(value)
+            return
+        }
+        instructions += LoadIntInsn(parent.constantId(value))
+    }
+
+    /**
+     * Pushes a long into the stack.
+     *
+     * Stack Inputs: ()
+     *
+     * Stack Outputs: (value)
+     */
+    fun pushLongInsn(value: Long) {
+        if (value % 1 == 0L && value.toInt() in i24Range) {
+            instructions += PushLongInsn(value.toInt())
+            return
+        }
+        instructions += LoadLongInsn(parent.constantId(value))
     }
 
     /**
@@ -141,7 +153,7 @@ class CompiledNodeBuilder(val nodeId: Int) {
      * Stack Outputs: (result)
      */
     fun invokeLocalInsn(name: String, size: Int) {
-        instructions += InvokeLocalInsn(name, size)
+        instructions += InvokeLocalInsn(parent.constantId(name), size)
     }
 
     /**
@@ -152,18 +164,7 @@ class CompiledNodeBuilder(val nodeId: Int) {
      * Stack Outputs: (result)
      */
     fun invokeMemberInsn(name: String, size: Int) {
-        instructions += InvokeMemberInsn(name, size)
-    }
-
-    /**
-     * Pushes a long into the stack.
-     *
-     * Stack Inputs: ()
-     *
-     * Stack Outputs: (value)
-     */
-    fun pushLongInsn(value: Long) {
-        instructions += PushLongInsn(value)
+        instructions += InvokeMemberInsn(parent.constantId(name), size)
     }
 
     /**
@@ -174,7 +175,7 @@ class CompiledNodeBuilder(val nodeId: Int) {
      * Stack Outputs: (value)
      */
     fun pushStringInsn(value: String) {
-        instructions += PushStringInsn(value)
+        instructions += LoadStringInsn(parent.constantId(value))
     }
 
     /**
@@ -309,15 +310,15 @@ class CompiledNodeBuilder(val nodeId: Int) {
     }
 
     fun unaryOperationInsn(operator: UnaryOperationType) {
-        instructions += UnaryOperationInsn(operator)
+        instructions += UnaryOperationInsn(operator.ordinal)
     }
 
     fun binaryOperationInsn(operator: BinaryOperationType) {
-        instructions += BinaryOperationInsn(operator)
+        instructions += BinaryOperationInsn(operator.ordinal)
     }
 
     fun declareVariableInsn(name: String, mutable: Boolean) {
-        instructions += DeclareVariableInsn(name, mutable)
+        instructions += DeclareVariableInsn(parent.constantId(name), mutable)
     }
 
     /**
@@ -328,19 +329,19 @@ class CompiledNodeBuilder(val nodeId: Int) {
      * Stack Outputs: (value)
      */
     fun getVariableInsn(name: String) {
-        instructions += GetVariableInsn(name)
+        instructions += GetVariableInsn(parent.constantId(name))
     }
 
     fun setVariableInsn(name: String) {
-        instructions += SetVariableInsn(name)
+        instructions += SetVariableInsn(parent.constantId(name))
     }
 
     fun getMemberPropertyInsn(name: String) {
-        instructions += GetMemberPropertyInsn(name)
+        instructions += GetMemberPropertyInsn(parent.constantId(name))
     }
 
     fun setMemberPropertyInsn(name: String) {
-        instructions += SetMemberPropertyInsn(name)
+        instructions += SetMemberPropertyInsn(parent.constantId(name))
     }
 
     fun getSubscriptInsn(size: Int) {
@@ -352,11 +353,13 @@ class CompiledNodeBuilder(val nodeId: Int) {
     }
 
     fun newFunctionInsn(parameters: List<CompiledParameter>, name: String?, bodyId: Int) {
-        val parametersId = functionParameters.size
-        functionParameters += parameters
-        val functionId = functions.size
-        functions += CompiledFunction(parametersId, name, bodyId)
-        instructions += NewFunctionInsn(functionId)
+        instructions += NewFunctionInsn(
+            parent.registerFunction(
+                parent.registerParameters(parameters),
+                name,
+                bodyId
+            )
+        )
     }
 
     fun dupInsn() {
@@ -431,5 +434,13 @@ class CompiledNodeBuilder(val nodeId: Int) {
         pushScopeInsn()
         block()
         popScopeInsn()
+    }
+
+    fun build() = CompiledNode(instructions.toList(), labels.toList())
+
+    companion object {
+        private const val I24_MAX = 0x7FFFFF
+        private const val I24_MIN = -0x800000
+        private val i24Range = I24_MIN..I24_MAX
     }
 }

@@ -17,6 +17,7 @@ import net.notjustanna.lin.ast.node.misc.TypeofExpr
 import net.notjustanna.lin.ast.node.misc.UnaryOperation
 import net.notjustanna.lin.ast.node.value.*
 import net.notjustanna.lin.ast.visitor.NodeVisitor
+import net.notjustanna.lin.bytecode.CompiledParameter
 import net.notjustanna.lin.utils.BinaryOperationType
 import net.notjustanna.tartar.api.parser.SyntaxException
 
