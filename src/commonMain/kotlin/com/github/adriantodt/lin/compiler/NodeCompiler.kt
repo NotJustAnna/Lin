@@ -22,10 +22,6 @@ import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 
 class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuilder()) : NodeVisitor {
-    /*
-     * Check out this code:
-     * https://github.com/Avarel/Kaiper/blob/master/Kaiper-Compiler/src/main/java/xyz/avarel/kaiper/compiler/ExprCompiler.java
-     */
     val builder = sourceBuilder.newNodeBuilder()
 
     override fun visitArrayExpr(node: ArrayExpr) {
