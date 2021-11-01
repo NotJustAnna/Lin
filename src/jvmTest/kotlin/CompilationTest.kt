@@ -1,3 +1,4 @@
+import net.notjustanna.lin.bytecode.CompiledSource
 import net.notjustanna.lin.compiler.NodeCompiler
 import net.notjustanna.lin.lexer.linStdLexer
 import net.notjustanna.lin.parser.linStdParser
@@ -14,5 +15,14 @@ fun main() {
 
     val compiler = NodeCompiler()
     node.accept(compiler)
-    println(compiler.sourceBuilder.build().toBytes().hex())
+
+
+    val compiled = compiler.sourceBuilder.build()
+
+    val fromBytes = CompiledSource.fromBytes(compiled.toBytes())
+
+    println(fromBytes == compiled)
+
+    println(compiled.toBytes().hex())
+    println(fromBytes.toBytes().hex())
 }
