@@ -58,7 +58,7 @@ class CompiledSourceBuilder {
     }
 
     fun registerFunction(parametersId: Int, name: String?, bodyId: Int): Int {
-        functions += CompiledFunction(parametersId, name, bodyId)
+        functions += CompiledFunction(parametersId, name?.let(this::constantId) ?: -1, bodyId)
         return functions.lastIndex
     }
 

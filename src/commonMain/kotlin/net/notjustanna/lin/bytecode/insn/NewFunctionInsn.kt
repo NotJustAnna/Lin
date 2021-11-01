@@ -1,3 +1,10 @@
 package net.notjustanna.lin.bytecode.insn
 
-data class NewFunctionInsn(val functionId: Int) : Insn()
+import okio.Buffer
+
+data class NewFunctionInsn(val functionId: Int) : Insn() {
+    override fun serializeTo(buffer: Buffer) {
+        buffer.writeByte(Opcode.NEW_FUNCTION.ordinal)
+            .writeByte(0).writeShort(functionId) // TODO WRITE/READ U24
+    }
+}

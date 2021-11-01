@@ -1,3 +1,11 @@
 package net.notjustanna.lin.bytecode.insn
 
-data class BinaryOperationInsn(val operatorId: Int) : Insn()
+import okio.Buffer
+
+data class BinaryOperationInsn(val operatorId: Int) : Insn() {
+    override fun serializeTo(buffer: Buffer) {
+        buffer.writeByte(Opcode.SIMPLE.ordinal)
+            .writeByte(SimpleCode.BINARY_OPERATION.ordinal)
+            .writeShort(operatorId)
+    }
+}

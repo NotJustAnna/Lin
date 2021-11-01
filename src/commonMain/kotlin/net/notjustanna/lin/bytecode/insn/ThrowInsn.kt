@@ -1,3 +1,11 @@
 package net.notjustanna.lin.bytecode.insn
 
-object ThrowInsn : Insn()
+import okio.Buffer
+
+object ThrowInsn : Insn() {
+    override fun serializeTo(buffer: Buffer) {
+        buffer.writeByte(Opcode.PARAMETERLESS.ordinal)
+            .writeByte(0)
+            .writeShort(ParameterlessCode.THROW.ordinal)
+    }
+}

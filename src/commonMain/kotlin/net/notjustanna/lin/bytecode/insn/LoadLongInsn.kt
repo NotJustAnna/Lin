@@ -1,3 +1,10 @@
 package net.notjustanna.lin.bytecode.insn
 
-data class LoadLongInsn(val valueConst: Int) : Insn()
+import okio.Buffer
+
+data class LoadLongInsn(val valueConst: Int) : Insn() {
+    override fun serializeTo(buffer: Buffer) {
+        buffer.writeByte(Opcode.LOAD_LONG.ordinal)
+            .writeByte(0).writeShort(valueConst) // TODO WRITE/READ U24
+    }
+}
