@@ -8,7 +8,7 @@ import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.value.FunctionExpr
 import net.notjustanna.lin.lexer.TokenType
 import net.notjustanna.tartar.api.parser.ParserContext
-import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import net.notjustanna.lin.parser.utils.matchAll
 
 /**
  * This method consumes [TokenType.NL] tokens to allow some multiline neatness.

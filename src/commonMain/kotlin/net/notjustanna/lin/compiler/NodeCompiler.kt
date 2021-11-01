@@ -72,11 +72,6 @@ class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuil
         builder.breakInsn()
     }
 
-    override fun visitCharExpr(node: CharExpr) {
-        builder.markSection(node)
-        builder.pushCharInsn(node.value)
-    }
-
     override fun visitContinueExpr(node: ContinueExpr) {
         builder.markSection(node)
         builder.continueInsn()
@@ -126,20 +121,15 @@ class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuil
         builder.markLabel(endLabel)
     }
 
-    override fun visitDoubleExpr(node: DoubleExpr) {
+    override fun visitDecimalExpr(node: DecimalExpr) {
         builder.markSection(node)
-        builder.pushDoubleInsn(node.value)
+        builder.pushDecimalInsn(node.value)
     }
 
     override fun visitEnsureNotNullExpr(node: EnsureNotNullExpr) {
         builder.markSection(node)
         node.value.accept(this)
         builder.checkNotNullInsn()
-    }
-
-    override fun visitFloatExpr(node: FloatExpr) {
-        builder.markSection(node)
-        builder.pushFloatInsn(node.value)
     }
 
     override fun visitForNode(node: ForNode) {
@@ -240,9 +230,9 @@ class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuil
         builder.markLabel(endLabel)
     }
 
-    override fun visitIntExpr(node: IntExpr) {
+    override fun visitIntegerExpr(node: IntegerExpr) {
         builder.markSection(node)
-        builder.pushIntInsn(node.value)
+        builder.pushIntegerInsn(node.value)
     }
 
     override fun visitInvalidNode(node: InvalidNode) {
@@ -273,11 +263,6 @@ class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuil
             argument.accept(this)
         }
         builder.invokeMemberInsn(node.name, node.arguments.size)
-    }
-
-    override fun visitLongExpr(node: LongExpr) {
-        builder.markSection(node)
-        builder.pushLongInsn(node.value)
     }
 
     override fun visitMultiExpr(node: MultiExpr) {

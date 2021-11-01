@@ -13,7 +13,7 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.PrefixParser
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import net.notjustanna.lin.parser.utils.matchAll
 
 object ObjectParser : PrefixParser<TokenType, Node> {
     override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
@@ -46,13 +46,11 @@ object ObjectParser : PrefixParser<TokenType, Node> {
                         }
                     }
                     continue
-                } else if (ctx.nextIsAny(INT, LONG, FLOAT, DOUBLE, TRUE, FALSE)) {
+                } else if (ctx.nextIsAny(INTEGER, DECIMAL, TRUE, FALSE)) {
                     val (type, value, section) = ctx.eat()
                     key = when (type) {
-                        INT -> IntExpr(value.toInt(), section)
-                        LONG -> LongExpr(value.toLong(), section)
-                        FLOAT -> FloatExpr(value.toFloat(), section)
-                        DOUBLE -> DoubleExpr(value.toDouble(), section)
+                        INTEGER -> IntegerExpr(value.toLong(), section)
+                        DECIMAL -> DecimalExpr(value.toDouble(), section)
                         TRUE -> BooleanExpr(true, section)
                         FALSE -> BooleanExpr(false, section)
                         else -> throw AssertionError("[INTERNAL] Impossible token type")

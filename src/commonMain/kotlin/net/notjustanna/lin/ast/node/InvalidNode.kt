@@ -5,6 +5,7 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor
 import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
+import net.notjustanna.lin.ast.node.Expr
 
 data class InvalidNode(override val section: Section, val children: List<Node>, val errors: List<Exception>) : Expr {
 

@@ -5,7 +5,7 @@ import net.notjustanna.lin.grammar.linStdGrammar
 import net.notjustanna.lin.lexer.TokenType
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.createParser
-import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import net.notjustanna.lin.parser.utils.matchAll
 
 val linStdParser = createParser(linStdGrammar) {
     val start = peek()

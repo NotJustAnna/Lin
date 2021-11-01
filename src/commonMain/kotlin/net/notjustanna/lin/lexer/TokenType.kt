@@ -48,13 +48,13 @@ enum class TokenType {
     DECREMENT, // --
 
     STRING,
-    CHAR,
+    //CHAR,
     IDENTIFIER,
 
-    INT,
-    LONG,
-    FLOAT,
-    DOUBLE,
+    INTEGER,
+    //LONG,
+    //FLOAT,
+    DECIMAL,
 
     TRUE,
     FALSE,

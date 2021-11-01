@@ -1,12 +1,12 @@
 package net.notjustanna.lin.bytecode.insn
 
+import net.notjustanna.lin.utils.writeU24
 import okio.Buffer
 
 data class PushBooleanInsn(val value: Boolean) : Insn() {
     override fun serializeTo(buffer: Buffer) {
-        buffer.writeByte(Opcode.SIMPLE.ordinal)
-            .writeByte(SimpleCode.PUSH_BOOLEAN.ordinal)
-            .writeShort(if (value) 1 else 0)
+        buffer.writeByte(Opcode.PARAMETERLESS.ordinal)
+            .writeU24((if (value) ParameterlessCode.PUSH_TRUE else ParameterlessCode.PUSH_FALSE).ordinal)
     }
 }
 

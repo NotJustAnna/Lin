@@ -12,7 +12,7 @@ import net.notjustanna.tartar.api.parser.InfixParser
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
-import io.github.cafeteriaguild.lin.parser.utils.matchAll
+import net.notjustanna.lin.parser.utils.matchAll
 
 class DotParser(private val nullSafe: Boolean) : InfixParser<TokenType, Node> {
     override val precedence: Int = Precedence.POSTFIX

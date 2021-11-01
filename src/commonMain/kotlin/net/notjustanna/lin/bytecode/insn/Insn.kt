@@ -13,18 +13,18 @@ sealed class Insn : Serializable {
     enum class Opcode {
         PARAMETERLESS, SIMPLE, ASSIGN, BRANCH_IF_FALSE, BRANCH_IF_TRUE, DECLARE_VARIABLE_IMMUTABLE,
         DECLARE_VARIABLE_MUTABLE, GET_MEMBER_PROPERTY, GET_SUBSCRIPT, GET_VARIABLE, INVOKE, INVOKE_LOCAL, INVOKE_MEMBER,
-        JUMP, LOAD_DOUBLE, LOAD_FLOAT, LOAD_INT, LOAD_LONG, LOAD_STRING, NEW_FUNCTION, PUSH_DOUBLE, PUSH_FLOAT, PUSH_INT,
-        PUSH_LONG, PUSH_EXCEPTION_HANDLING, PUSH_LOOP_HANDLING, SET_MEMBER_PROPERTY, SET_SUBSCRIPT, SET_VARIABLE
+        JUMP, LOAD_DECIMAL, LOAD_INTEGER, LOAD_STRING, NEW_FUNCTION, PUSH_DECIMAL,
+        PUSH_INTEGER, PUSH_EXCEPTION_HANDLING, PUSH_LOOP_HANDLING, SET_MEMBER_PROPERTY, SET_SUBSCRIPT, SET_VARIABLE
     }
 
     enum class ParameterlessCode {
         ARRAY_INSERT, BREAK, CHECK_NOT_NULL, CONTINUE, DUP, NEW_ARRAY, NEW_OBJECT, OBJECT_INSERT, POP,
         POP_SCOPE, POP_EXCEPTION_HANDLING, POP_LOOP_HANDLING, PUSH_NULL, PUSH_SCOPE, PUSH_THIS, RETURN,
-        THROW, TYPEOF
+        THROW, TYPEOF, PUSH_TRUE, PUSH_FALSE
     }
 
     enum class SimpleCode {
-        UNARY_OPERATION, BINARY_OPERATION, PUSH_BOOLEAN, PUSH_CHAR
+        UNARY_OPERATION, BINARY_OPERATION
     }
 
     companion object : Deserializer<Insn> {
@@ -70,17 +70,11 @@ sealed class Insn : Serializable {
                 Opcode.JUMP -> {
                     JumpInsn(buffer.readU24())
                 }
-                Opcode.LOAD_DOUBLE -> {
-                    LoadDoubleInsn(buffer.readU24())
+                Opcode.LOAD_DECIMAL -> {
+                    LoadDecimalInsn(buffer.readU24())
                 }
-                Opcode.LOAD_FLOAT -> {
-                    LoadFloatInsn(buffer.readU24())
-                }
-                Opcode.LOAD_INT -> {
-                    LoadIntInsn(buffer.readU24())
-                }
-                Opcode.LOAD_LONG -> {
-                    LoadLongInsn(buffer.readU24())
+                Opcode.LOAD_INTEGER -> {
+                    LoadIntegerInsn(buffer.readU24())
                 }
                 Opcode.LOAD_STRING -> {
                     LoadStringInsn(buffer.readU24())
@@ -88,17 +82,11 @@ sealed class Insn : Serializable {
                 Opcode.NEW_FUNCTION -> {
                     NewFunctionInsn(buffer.readU24())
                 }
-                Opcode.PUSH_DOUBLE -> {
-                    PushDoubleInsn(buffer.readU24())
+                Opcode.PUSH_DECIMAL -> {
+                    PushDecimalInsn(buffer.readU24())
                 }
-                Opcode.PUSH_FLOAT -> {
-                    PushFloatInsn(buffer.readU24())
-                }
-                Opcode.PUSH_INT -> {
-                    PushIntInsn(buffer.readU24())
-                }
-                Opcode.PUSH_LONG -> {
-                    PushLongInsn(buffer.readU24())
+                Opcode.PUSH_INTEGER -> {
+                    PushIntegerInsn(buffer.readU24())
                 }
                 Opcode.PUSH_EXCEPTION_HANDLING -> {
                     val (first, second) = buffer.readU12Pair()
@@ -140,6 +128,8 @@ sealed class Insn : Serializable {
                 ParameterlessCode.RETURN -> ReturnInsn
                 ParameterlessCode.THROW -> ThrowInsn
                 ParameterlessCode.TYPEOF -> TypeofInsn
+                ParameterlessCode.PUSH_TRUE -> PushBooleanInsn(true)
+                ParameterlessCode.PUSH_FALSE -> PushBooleanInsn(false)
             }
         }
 
@@ -147,8 +137,6 @@ sealed class Insn : Serializable {
             return when (SimpleCode.values()[buffer.readByte().toInt()]) {
                 SimpleCode.UNARY_OPERATION -> UnaryOperationInsn(buffer.readShort().toInt())
                 SimpleCode.BINARY_OPERATION -> BinaryOperationInsn(buffer.readShort().toInt())
-                SimpleCode.PUSH_BOOLEAN -> PushBooleanInsn(buffer.readShort().toInt() != 0)
-                SimpleCode.PUSH_CHAR -> PushCharInsn(buffer.readShort().toInt().toChar())
             }
         }
     }

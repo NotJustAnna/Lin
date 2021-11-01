@@ -61,7 +61,7 @@ val linStdLexer = createLexer<LinToken> {
     '<' { process(makeToken(LT)) }
     ">=" { process(makeToken(GTE, 2)) }
     '>' { process(makeToken(GT)) }
-    '\'' { process(makeToken(CHAR, readLinString(it))) }
+    '\'' { readLinTemplateString(it.toString(), false) }
     "\"\"\"" { readLinTemplateString(it.toString(), true) }
     "\"\"" { process(makeToken(STRING, 2)) }
     '"' { readLinTemplateString(it.toString(), false) }
@@ -70,8 +70,8 @@ val linStdLexer = createLexer<LinToken> {
         process(
             when (val n = readNumber(it)) {
                 is LexicalNumber.Invalid -> makeToken(INVALID, n.string)
-                is LexicalNumber.Decimal -> makeToken(if (n.isFloat) FLOAT else DOUBLE, n.value.toString())
-                is LexicalNumber.Integer -> makeToken(if (n.isLong) LONG else INT, n.value.toString())
+                is LexicalNumber.Decimal -> makeToken(DECIMAL, n.value.toString())
+                is LexicalNumber.Integer -> makeToken(INTEGER, n.value.toString())
             }
         )
     }
