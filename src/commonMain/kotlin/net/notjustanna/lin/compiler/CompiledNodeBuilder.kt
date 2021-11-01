@@ -254,7 +254,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      * Stack Outputs: ()
      */
     fun branchIfFalseInsn(labelCode: Int) {
-        instructions += BranchIfFalseInsn(labelCode)
+        instructions += BranchIfInsn(false, labelCode)
     }
 
     /**
@@ -265,7 +265,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      * Stack Outputs: ()
      */
     fun branchIfTrueInsn(labelCode: Int) {
-        instructions += BranchIfTrueInsn(labelCode)
+        instructions += BranchIfInsn(true, labelCode)
     }
 
     fun unaryOperationInsn(operator: UnaryOperationType) {

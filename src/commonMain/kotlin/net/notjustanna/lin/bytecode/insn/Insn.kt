@@ -1,8 +1,6 @@
 package net.notjustanna.lin.bytecode.insn
 
 import net.notjustanna.lin.utils.*
-import net.notjustanna.lin.utils.readU24
-import net.notjustanna.lin.utils.skipByte
 import okio.Buffer
 
 sealed class Insn : Serializable {
@@ -37,11 +35,10 @@ sealed class Insn : Serializable {
                     AssignInsn(buffer.readU24())
                 }
                 Opcode.BRANCH_IF_FALSE -> {
-                    BranchIfFalseInsn(buffer.readU24())
+                    BranchIfInsn(false, buffer.readU24())
                 }
                 Opcode.BRANCH_IF_TRUE -> {
-                    buffer.readByte() // Ignored
-                    BranchIfTrueInsn(buffer.readU24())
+                    BranchIfInsn(true, buffer.readU24())
                 }
                 Opcode.DECLARE_VARIABLE_IMMUTABLE -> {
                     DeclareVariableInsn(buffer.readU24(), false)
