@@ -17,16 +17,15 @@ import net.notjustanna.lin.ast.node.misc.TypeofExpr
 import net.notjustanna.lin.ast.node.misc.UnaryOperation
 import net.notjustanna.lin.ast.node.value.*
 import net.notjustanna.lin.ast.visitor.NodeVisitor
-import net.notjustanna.lin.bytecode.InsnBuilder
 import net.notjustanna.lin.utils.BinaryOperationType
 import net.notjustanna.tartar.api.parser.SyntaxException
 
-class NodeCompiler : NodeVisitor {
+class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuilder()) : NodeVisitor {
     /*
      * Check out this code:
      * https://github.com/Avarel/Kaiper/blob/master/Kaiper-Compiler/src/main/java/xyz/avarel/kaiper/compiler/ExprCompiler.java
      */
-    val builder = InsnBuilder()
+    val builder = sourceBuilder.newNodeBuilder()
 
     override fun visitArrayExpr(node: ArrayExpr) {
         builder.markSection(node)
@@ -171,8 +170,20 @@ class NodeCompiler : NodeVisitor {
 
     override fun visitFunctionExpr(node: FunctionExpr) {
         builder.markSection(node)
-        val compiler = NodeCompiler()
-        TODO("Not yet implemented")
+
+        val parameters = node.parameters.map { (name, varargs, defaultValue) ->
+            CompiledParameter(
+                name,
+                varargs,
+                defaultValue?.let {
+                    NodeCompiler(sourceBuilder).also { c -> it.accept(c) }.builder.nodeId
+                } ?: -1
+            )
+        }
+
+        val bodyId = node.body?.let { NodeCompiler(sourceBuilder).also { c -> it.accept(c) }.builder.nodeId } ?: -1
+
+        builder.newFunctionInsn(parameters, node.name, bodyId)
     }
 
     override fun visitIdentifierExpr(node: IdentifierExpr) {
