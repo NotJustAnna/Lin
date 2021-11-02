@@ -1,70 +1,92 @@
 package net.notjustanna.lin.test.regression.vm
 
-import net.notjustanna.lin.compiler.NodeCompiler
-import net.notjustanna.lin.lexer.linStdLexer
-import net.notjustanna.lin.parser.linStdParser
-import net.notjustanna.lin.test.utils.TestScope
-import net.notjustanna.lin.vm.LinVM
-import net.notjustanna.lin.vm.types.LDecimal
-import net.notjustanna.lin.vm.types.LInteger
-import net.notjustanna.lin.vm.types.LString
-import net.notjustanna.lin.vm.types.LTrue
+import net.notjustanna.lin.test.utils.ExecutionBenchmark
+import net.notjustanna.lin.vm.types.*
 import net.notjustanna.tartar.api.lexer.Source
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class VirtualMachineRegressionTests {
     @Test
     fun forLoop() {
-        val array = listOf(
-            LInteger(1), LInteger(1), LDecimal(2.0),
-            LDecimal(2.0), LTrue, LString("a"), LString("abc")
-        )
         val code = """
             for (value in [1, 1L, 2f, 2.0, true, 'a', "abc"]) {
                 publish(value)
             }
         """.trimIndent()
 
-        val compiler = NodeCompiler()
-        linStdParser.parse(Source(code), linStdLexer).accept(compiler)
-        val compiledSource = compiler.sourceBuilder.build()
+        val execution = ExecutionBenchmark("forLoop", Source(code))
 
-        val testScope = TestScope()
+        assertEquals(LNull, execution.result, "Code should not produce result.")
 
-        val vm = LinVM(compiledSource, rootScope = testScope.scope)
-        while (vm.step());
-        assertNull(vm.result, "Code should not produce result.")
+        val array = listOf(
+            LInteger(1), LInteger(1), LDecimal(2.0),
+            LDecimal(2.0), LTrue, LString("a"), LString("abc")
+        )
 
         for (any in array) {
-            assertEquals(any, testScope.output.removeFirst())
+            assertEquals(any, execution.output.removeFirst())
         }
+        assertTrue(execution.output.isEmpty())
     }
 
     @Test
     fun variables() {
-        val array = listOf(
-            LInteger(1), LInteger(2),
-        )
         val code = """
             val a = 1
             val b = 2
             publish(a, b)
         """.trimIndent()
 
-        val compiler = NodeCompiler()
-        linStdParser.parse(Source(code), linStdLexer).accept(compiler)
-        val compiledSource = compiler.sourceBuilder.build()
+        val execution = ExecutionBenchmark("variables", Source(code))
 
-        val testScope = TestScope()
-
-        val vm = LinVM(compiledSource, rootScope = testScope.scope)
-        while (vm.step());
-        assertNull(vm.result, "Code should not produce result.")
-
-        for (any in array) {
-            assertEquals(any, testScope.output.removeFirst())
+        assertEquals(LNull, execution.result, "Code should not produce result.")
+        for (any in listOf(LInteger(1), LInteger(2))) {
+            assertEquals(any, execution.output.removeFirst())
         }
+        assertTrue(execution.output.isEmpty())
+    }
+
+    @Test
+    fun simpleReturn() {
+        val code = """
+            "Hello, World!"
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("simpleReturn", Source(code))
+
+        assertEquals(LString("Hello, World!"), execution.result, "Code should produce 'Hello, World!'")
+        assertTrue(execution.output.isEmpty())
+    }
+
+    @Test
+    fun returnBreakingFlow() {
+        val code = """
+            return false
+            true
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("simpleReturn", Source(code))
+
+        assertEquals(LFalse, execution.result, "Code should produce false")
+        assertTrue(execution.output.isEmpty())
+    }
+
+    @Test
+    fun breakWhileLoop() {
+        val code = """
+            var i = 100
+            while (i) {
+                break
+                i = i - 1
+            }
+            i
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("simpleReturn", Source(code))
+
+        assertEquals(LInteger(100), execution.result, "Code should produce 100")
+        assertTrue(execution.output.isEmpty())
     }
 }

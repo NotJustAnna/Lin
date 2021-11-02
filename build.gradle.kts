@@ -8,6 +8,7 @@ version = "0.0.1"
 repositories {
     mavenCentral()
     maven { url = uri("https://maven.cafeteria.dev") }
+    jcenter()
 }
 
 kotlin {
@@ -33,6 +34,7 @@ kotlin {
     }
 
     sourceSets {
+        all { languageSettings.optIn("kotlin.RequiresOptIn") }
         val commonMain by getting {
             dependencies {
                 implementation("net.notjustanna:tartar:2.2")
@@ -42,6 +44,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation("net.notjustanna:kotlin-unified-platform:1.1.1")
             }
         }
         val jvmMain by getting
