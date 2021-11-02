@@ -14,6 +14,12 @@ data class CompiledNode(val instructions: List<Insn>, val labels: List<Label>) :
         for (label in labels.sortedBy { it.code }) label.serializeTo(buffer)
     }
 
+    fun resolveLabel(code: Int): Int {
+        val indexOf = labels.binarySearchBy(code) { it.code }
+        check(indexOf >= 0) { "Label $code was not found." }
+        return labels[indexOf].at
+    }
+
     companion object : Deserializer<CompiledNode> {
         override fun deserializeFrom(buffer: Buffer): CompiledNode {
             val instructions = mutableListOf<Insn>()

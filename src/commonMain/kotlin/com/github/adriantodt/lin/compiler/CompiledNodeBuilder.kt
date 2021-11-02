@@ -345,8 +345,8 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         instructions += PopExceptionHandlingInsn
     }
 
-    fun pushLoopHandlingInsn(breakLabel: Int, continueLabel: Int) {
-        instructions += PushLoopHandlingInsn(breakLabel, continueLabel)
+    fun pushLoopHandlingInsn(continueLabel: Int, breakLabel: Int) {
+        instructions += PushLoopHandlingInsn(continueLabel, breakLabel)
     }
 
     fun popLoopHandlingInsn() {
@@ -380,8 +380,8 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     /**
      * Automatically pushes/pops the required loop handlers.
      */
-    inline fun withLoopHandling(breakLabel: Int, continueLabel: Int, block: () -> Unit) {
-        pushLoopHandlingInsn(breakLabel, continueLabel)
+    inline fun withLoopHandling(continueLabel: Int, breakLabel: Int, block: () -> Unit) {
+        pushLoopHandlingInsn(continueLabel, breakLabel)
         block()
         popLoopHandlingInsn()
     }

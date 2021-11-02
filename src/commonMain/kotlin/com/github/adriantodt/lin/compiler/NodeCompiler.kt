@@ -1,9 +1,6 @@
 package com.github.adriantodt.lin.compiler
 
-import com.github.adriantodt.lin.ast.node.Expr
-import com.github.adriantodt.lin.ast.node.InvalidNode
-import com.github.adriantodt.lin.ast.node.MultiExpr
-import com.github.adriantodt.lin.ast.node.MultiNode
+import com.github.adriantodt.lin.ast.node.*
 import com.github.adriantodt.lin.ast.node.access.*
 import com.github.adriantodt.lin.ast.node.control.*
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
@@ -18,11 +15,24 @@ import com.github.adriantodt.lin.ast.node.misc.UnaryOperation
 import com.github.adriantodt.lin.ast.node.value.*
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor
 import com.github.adriantodt.lin.bytecode.CompiledParameter
+import com.github.adriantodt.lin.bytecode.CompiledSource
 import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 
-class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuilder()) : NodeVisitor {
-    val builder = sourceBuilder.newNodeBuilder()
+class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBuilder()) : NodeVisitor {
+    companion object {
+        fun compile(node: Node): CompiledSource {
+            val compiler = NodeCompiler()
+            node.accept(compiler)
+            return compiler.compiledSource()
+        }
+    }
+
+    private val builder = source.newNodeBuilder()
+
+    fun compiledSource(): CompiledSource {
+        return source.build()
+    }
 
     override fun visitArrayExpr(node: ArrayExpr) {
         builder.markSection(node)
@@ -160,15 +170,15 @@ class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuil
 
         val parameters = node.parameters.map { (name, varargs, defaultValue) ->
             CompiledParameter(
-                sourceBuilder.constantId(name),
+                source.constantId(name),
                 varargs,
                 defaultValue?.let {
-                    NodeCompiler(sourceBuilder).also { c -> it.accept(c) }.builder.nodeId
+                    NodeCompiler(source).also { c -> it.accept(c) }.builder.nodeId
                 } ?: -1
             )
         }
 
-        val bodyId = node.body?.let { NodeCompiler(sourceBuilder).also { c -> it.accept(c) }.builder.nodeId } ?: -1
+        val bodyId = node.body?.let { NodeCompiler(source).also { c -> it.accept(c) }.builder.nodeId } ?: -1
 
         builder.newFunctionInsn(parameters, node.name, bodyId)
     }
