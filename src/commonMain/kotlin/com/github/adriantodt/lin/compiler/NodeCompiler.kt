@@ -85,7 +85,7 @@ class NodeCompiler(val sourceBuilder: CompiledSourceBuilder = CompiledSourceBuil
         builder.markSection(node)
         builder.declareVariableInsn(node.name, node.mutable)
         if (node.value != null) {
-            node.accept(this)
+            node.value.accept(this)
             builder.setVariableInsn(node.name)
         }
     }

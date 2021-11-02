@@ -3,6 +3,10 @@ package com.github.adriantodt.lin.vm.types
 sealed class LAny {
     abstract fun truth(): Boolean
 
+    abstract val linType: String
+
+    abstract fun getMember(name: String): LAny?
+
     companion object {
         fun of(value: Any?): LAny {
             return when (value) {

@@ -19,10 +19,9 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    js(BOTH) {
-        browser {
-
-        }
+    js(IR) {
+        browser()
+        nodejs()
     }
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
@@ -47,15 +46,15 @@ kotlin {
         }
         val jvmMain by getting
         val jvmTest by getting
-        val commonNonJvmMain by creating {
-            dependsOn(commonMain)
-        }
+        // val commonNonJvmMain by creating {
+        //     dependsOn(commonMain)
+        // }
         val jsMain by getting {
-            dependsOn(commonNonJvmMain)
+            // dependsOn(commonNonJvmMain)
         }
         val jsTest by getting
         val nativeMain by getting {
-            dependsOn(commonNonJvmMain)
+            // dependsOn(commonNonJvmMain)
         }
         val nativeTest by getting
     }
