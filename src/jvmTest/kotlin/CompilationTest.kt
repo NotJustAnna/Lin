@@ -27,13 +27,13 @@ fun main() {
 //    println(fromBytes.toBytes().hex())
 
     println("STRING POOL: " + compiled.stringPool)
-
     println("LONG POOL: " + compiled.longPool)
+    println("-------------------------")
 
-    val vm = LinVM(compiled)
-    var i = 0
-    while (true) {
-        println("Step ${i++} -- ${vm.currentNode.instructions[vm.next]}")
-        vm.step()
-    }
+    val vm = LinVM(compiled, rootScope = testScope())
+    //var i = 0
+    // do {
+    //    println("Step ${i++} -- ${vm.currentNode.instructions.getOrNull(vm.next)}")
+    // }
+    while (vm.step());
 }

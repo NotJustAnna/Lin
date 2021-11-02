@@ -4,257 +4,144 @@ import net.notjustanna.lin.bytecode.CompiledNode
 import net.notjustanna.lin.bytecode.CompiledSource
 import net.notjustanna.lin.bytecode.insn.*
 import net.notjustanna.lin.vm.scope.DefaultMutableScope
-import net.notjustanna.lin.vm.scope.MutableScope
 import net.notjustanna.lin.vm.scope.Scope
-import net.notjustanna.lin.vm.types.*
+import net.notjustanna.lin.vm.types.LAny
 
-class LinVM(source: CompiledSource, rootScope: Scope? = null) {
-    val sources = mutableListOf(source)
-    val shelvedContexts = mutableListOf<ExecutionContext>()
-
-    var currentScope: Scope = DefaultMutableScope(rootScope)
-    var currentSource = source
-    var currentNode = currentSource.nodes[0]
-    var currentThis: LAny? = null
+class LinVM(source: CompiledSource, node: CompiledNode = source.nodes[0], rootScope: Scope? = null) : InsnEvents {
+    /**
+     * Contexts below the current context.
+     */
     var next: Int = 0
-    val stack = mutableListOf<LAny>()
-    val exceptionHandlers = mutableListOf<ExceptionHandler>()
-    val loopHandlers = mutableListOf<LoopHandler>()
 
-    fun step() {
+    //    val shelvedContexts = mutableListOf<ExecutionContext>()
+    var handleFinish: (LinVM.() -> Unit)? = null
+    var result: NodeResult? = null
+
+    var currentNode = node
+
+//    data class ExecutionContext(
+//        var scope: Scope,
+//        var source: CompiledSource,
+//        var node: CompiledNode,
+//        var thisValue: LAny?,
+//        var next: Int,
+//        val stack: MutableList<LAny>,
+//        val exceptionHandlers: MutableList<InsnHandler.ExceptionHandler>,
+//        val loopHandlers: MutableList<InsnHandler.LoopHandler>
+//    )
+
+//    fun shelveContext() {
+//        shelvedContexts += ExecutionContext(
+//            currentScope, currentSource, currentNode, currentThis, next, stack, exceptionHandlers, loopHandlers
+//        )
+//    }
+
+//    fun unshelveContext() {
+//        val last = shelvedContexts.removeLast()
+//        this.currentScope = last.scope
+//        this.currentSource = last.source
+//        this.currentNode = last.node
+//        this.currentThis = last.thisValue
+//        this.next = last.next
+//        this.stack = last.stack
+//        this.exceptionHandlers = last.exceptionHandlers
+//        this.loopHandlers = last.loopHandlers
+//    }
+
+    val h = InsnHandler(DefaultMutableScope(rootScope), source, this)
+
+    fun step(): Boolean {
+        if (result != null || next > currentNode.instructions.lastIndex) {
+            val h = handleFinish
+            handleFinish = null
+            if (h != null) this.h()
+            return result != null || handleFinish != null
+        }
         when (val insn = currentNode.instructions[next++]) {
-            ArrayInsertInsn -> handleArrayInsert()
-            is AssignInsn -> handleAssign(insn.nameConst)
-            is BinaryOperationInsn -> handleBinaryOperation(insn.operatorId)
-            is BranchIfInsn -> handleBranchIf(insn.value, insn.labelCode)
-            BreakInsn -> handleBreak()
-            CheckNotNullInsn -> handleCheckNotNull()
-            ContinueInsn -> handleContinue()
-            is DeclareVariableInsn -> handleDeclareVariable(insn.mutable, insn.nameConst)
-            DupInsn -> handleDup()
-            is GetMemberPropertyInsn -> handleGetMemberProperty(insn.nameConst)
-            is GetSubscriptInsn -> handleGetSubscript(insn.size)
-            is GetVariableInsn -> handleGetVariable(insn.nameConst)
-            is InvokeInsn -> handleInvoke(insn.size)
-            is InvokeLocalInsn -> handleInvokeLocal(insn.nameConst, insn.size)
-            is InvokeMemberInsn -> handleInvokeMember(insn.nameConst, insn.size)
-            is JumpInsn -> handleJump(insn.labelCode)
-            is LoadDecimalInsn -> handleLoadDecimal(insn.valueConst)
-            is LoadIntegerInsn -> handleLoadInteger(insn.valueConst)
-            is LoadStringInsn -> handleLoadString(insn.valueConst)
-            NewArrayInsn -> handleNewArray()
-            is NewFunctionInsn -> handleNewFunction(insn.functionId)
-            NewObjectInsn -> handleNewObject()
-            ObjectInsertInsn -> handleObjectInsert()
-            PopExceptionHandlingInsn -> handlePopExceptionHandling()
-            PopInsn -> handlePop()
-            PopLoopHandlingInsn -> handlePopLoopHandling()
-            PopScopeInsn -> handlePopScope()
-            is PushBooleanInsn -> handlePushBoolean(insn.value)
-            is PushDecimalInsn -> handlePushDecimal(insn.immediateValue)
-            is PushExceptionHandlingInsn -> handlePushExceptionHandling(insn.catchLabel, insn.endLabel)
-            is PushIntegerInsn -> handlePushInteger(insn.immediateValue)
-            is PushLoopHandlingInsn -> handlePushLoopHandling(insn.breakLabel, insn.continueLabel)
-            PushNullInsn -> handlePushNull()
-            PushScopeInsn -> handlePushScope()
-            PushThisInsn -> handlePushThis()
-            ReturnInsn -> handleReturn()
-            is SetMemberPropertyInsn -> handleSetMemberProperty(insn.nameConst)
-            is SetSubscriptInsn -> handleSetSubscript(insn.size)
-            is SetVariableInsn -> handleSetVariable(insn.nameConst)
-            ThrowInsn -> handleThrow()
-            TypeofInsn -> handleTypeof()
-            is UnaryOperationInsn -> handleUnaryOperation(insn.operatorId)
+            ArrayInsertInsn -> h.handleArrayInsert()
+            is AssignInsn -> h.handleAssign(insn.nameConst)
+            is BinaryOperationInsn -> h.handleBinaryOperation(insn.operatorId)
+            is BranchIfInsn -> h.handleBranchIf(insn.value, insn.labelCode)
+            BreakInsn -> h.handleBreak()
+            CheckNotNullInsn -> h.handleCheckNotNull()
+            ContinueInsn -> h.handleContinue()
+            is DeclareVariableInsn -> h.handleDeclareVariable(insn.mutable, insn.nameConst)
+            DupInsn -> h.handleDup()
+            is GetMemberPropertyInsn -> h.handleGetMemberProperty(insn.nameConst)
+            is GetSubscriptInsn -> h.handleGetSubscript(insn.size)
+            is GetVariableInsn -> h.handleGetVariable(insn.nameConst)
+            is InvokeInsn -> h.handleInvoke(insn.size)
+            is InvokeLocalInsn -> h.handleInvokeLocal(insn.nameConst, insn.size)
+            is InvokeMemberInsn -> h.handleInvokeMember(insn.nameConst, insn.size)
+            is JumpInsn -> h.handleJump(insn.labelCode)
+            is LoadDecimalInsn -> h.handleLoadDecimal(insn.valueConst)
+            is LoadIntegerInsn -> h.handleLoadInteger(insn.valueConst)
+            is LoadStringInsn -> h.handleLoadString(insn.valueConst)
+            NewArrayInsn -> h.handleNewArray()
+            is NewFunctionInsn -> h.handleNewFunction(insn.functionId)
+            NewObjectInsn -> h.handleNewObject()
+            ObjectInsertInsn -> h.handleObjectInsert()
+            PopExceptionHandlingInsn -> h.handlePopExceptionHandling()
+            PopInsn -> h.handlePop()
+            PopLoopHandlingInsn -> h.handlePopLoopHandling()
+            PopScopeInsn -> h.handlePopScope()
+            is PushBooleanInsn -> h.handlePushBoolean(insn.value)
+            is PushDecimalInsn -> h.handlePushDecimal(insn.immediateValue)
+            is PushExceptionHandlingInsn -> h.handlePushExceptionHandling(insn.catchLabel, insn.endLabel)
+            is PushIntegerInsn -> h.handlePushInteger(insn.immediateValue)
+            is PushLoopHandlingInsn -> h.handlePushLoopHandling(insn.breakLabel, insn.continueLabel)
+            PushNullInsn -> h.handlePushNull()
+            PushScopeInsn -> h.handlePushScope()
+            PushThisInsn -> h.handlePushThis()
+            ReturnInsn -> h.handleReturn()
+            is SetMemberPropertyInsn -> h.handleSetMemberProperty(insn.nameConst)
+            is SetSubscriptInsn -> h.handleSetSubscript(insn.size)
+            is SetVariableInsn -> h.handleSetVariable(insn.nameConst)
+            ThrowInsn -> h.handleThrow()
+            TypeofInsn -> h.handleTypeof()
+            is UnaryOperationInsn -> h.handleUnaryOperation(insn.operatorId)
         }
+        return true
     }
 
-    private fun handleArrayInsert() {
-        val value = stack.removeLast()
-        val array = stack.last() as? LArray ?: error("Value is not an LArray.")
-        array.value.add(value)
+//    fun configureCompiledFunction(thisValue: LAny?, function: LFunction.Compiled, arguments: List<LAny>) {
+//        // TODO Configure arguments.
+//        configure(
+//            function.source,
+//            function.source.nodes[function.data.bodyId],
+//            DefaultMutableScope(function.rootScope),
+//            thisValue
+//        )
+//        this.handleFinish = {
+//            val r = result
+//            unshelveContext()
+//            result = null
+//            when (r) {
+//                is NodeResult.Returned -> stack.add(r.value)
+//                is NodeResult.Thrown -> TODO()
+//                null -> stack.add(LNull)
+//            }
+//        }
+//    }
+
+//    private fun configure(source: CompiledSource, node: CompiledNode, scope: Scope, thisValue: LAny?) {
+//        this.currentSource = source
+//        this.currentNode = node
+//        this.currentScope = scope
+//        this.currentThis = thisValue
+//        this.next = 0
+//        this.stack = mutableListOf()
+//        this.exceptionHandlers = mutableListOf()
+//        this.loopHandlers = mutableListOf()
+//    }
+
+    sealed class NodeResult {
+        data class Returned(val value: LAny) : NodeResult()
+        data class Thrown(val value: LAny) : NodeResult()
     }
 
-    private fun handleAssign(nameConst: Int) {
-        currentScope.set(currentSource.stringPool[nameConst], stack.removeLast())
-    }
-
-    private fun handleBinaryOperation(operatorId: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleBranchIf(value: Boolean, labelCode: Int) {
-        val truth = stack.removeLast().truth()
-
-        if (truth == value) {
-            next = resolveLabel(labelCode)
-        }
-    }
-
-    private fun handleBreak() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleCheckNotNull() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleContinue() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleDeclareVariable(mutable: Boolean, nameConst: Int) {
-        val s = currentScope as? MutableScope ?: error("Current scope is not mutable")
-        s.declareVariable(currentSource.stringPool[nameConst], mutable)
-    }
-
-    private fun handleDup() {
-        stack.add(stack.last())
-    }
-
-    private fun handleGetMemberProperty(nameConst: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleGetSubscript(size: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleGetVariable(nameConst: Int) {
-        stack.add(currentScope.get(currentSource.stringPool[nameConst]))
-    }
-
-    private fun handleInvoke(size: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleInvokeLocal(nameConst: Int, size: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleInvokeMember(nameConst: Int, size: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleJump(labelCode: Int) {
+    override fun jumpToLabel(labelCode: Int) {
         next = resolveLabel(labelCode)
-
-    }
-
-    private fun handleLoadDecimal(valueConst: Int) {
-        stack.add(LDecimal(Double.fromBits(currentSource.longPool[valueConst])))
-    }
-
-    private fun handleLoadInteger(valueConst: Int) {
-        stack.add(LInteger(currentSource.longPool[valueConst]))
-    }
-
-    private fun handleLoadString(valueConst: Int) {
-        stack.add(LString(currentSource.stringPool[valueConst]))
-    }
-
-    private fun handleNewArray() {
-        stack.add(LArray())
-    }
-
-    private fun handleNewFunction(functionId: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleNewObject() {
-        stack.add(LObject())
-    }
-
-    private fun handleObjectInsert() {
-        val value = stack.removeLast()
-        val key = stack.removeLast()
-        val obj = stack.last() as? LObject ?: error("Value is not an LObject.")
-        obj.value[key] = value
-    }
-
-    private fun handlePopExceptionHandling() {
-        exceptionHandlers.removeLast()
-    }
-
-    private fun handlePop() {
-        stack.removeLast()
-    }
-
-    private fun handlePopLoopHandling() {
-        loopHandlers.removeLast()
-    }
-
-    private fun handlePopScope() {
-        currentScope = currentScope.parent ?: throw error("Can't pop root scope.")
-    }
-
-    private fun handlePushBoolean(value: Boolean) {
-        stack.add(if (value) LTrue else LFalse)
-    }
-
-    private fun handlePushDecimal(immediateValue: Int) {
-        stack.add(LDecimal(immediateValue.toDouble()))
-    }
-
-    private fun handlePushExceptionHandling(catchLabel: Int, endLabel: Int) {
-        exceptionHandlers.add(ExceptionHandler(stack.size, resolveLabel(catchLabel), resolveLabel(endLabel)))
-    }
-
-    private fun handlePushInteger(immediateValue: Int) {
-        stack.add(LInteger(immediateValue.toLong()))
-    }
-
-    private fun handlePushLoopHandling(breakLabel: Int, continueLabel: Int) {
-        loopHandlers.add(LoopHandler(stack.size, resolveLabel(breakLabel), resolveLabel(continueLabel)))
-    }
-
-    private fun handlePushNull() {
-        stack.add(LNull)
-    }
-
-    private fun handlePushScope() {
-        currentScope = DefaultMutableScope(currentScope)
-    }
-
-    private fun handlePushThis() {
-        stack.add(currentThis ?: error("There's no 'this' defined."))
-    }
-
-    private fun handleReturn() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleSetMemberProperty(nameConst: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleSetSubscript(size: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleSetVariable(nameConst: Int) {
-        currentScope.set(currentSource.stringPool[nameConst], stack.removeLast())
-    }
-
-    private fun handleThrow() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleTypeof() {
-        val type = when (stack.removeLast()) {
-            is LArray -> "array"
-            is LDecimal -> "decimal"
-            LFalse, LTrue -> "boolean"
-            is LInteger -> "integer"
-            LNull -> "null"
-            is LObject -> "object"
-            is LString -> "string"
-        }
-
-        stack.add(LString(type))
-    }
-
-    private fun handleUnaryOperation(operatorId: Int) {
-        TODO("Not yet implemented")
     }
 
     private fun resolveLabel(code: Int): Int {
@@ -263,19 +150,4 @@ class LinVM(source: CompiledSource, rootScope: Scope? = null) {
         return currentNode.labels[indexOf].at
     }
 
-    data class ExecutionContext(
-        val source: CompiledSource,
-        val node: CompiledNode,
-        var next: Int = 0,
-        val stack: MutableList<LAny> = mutableListOf(),
-        val exceptionHandlers: MutableList<ExceptionHandler> = mutableListOf(),
-        val loopHandlers: MutableList<LoopHandler> = mutableListOf()
-    )
-
-    data class ExceptionHandler(val keepOnStack: Int, val jumpOnException: Int, val jumpOnEnd: Int)
-    data class LoopHandler(val keepOnStack: Int, val jumpOnBreak: Int, val jumpOnContinue: Int)
-    sealed class NodeResult {
-        data class Returned(val value: LAny) : NodeResult()
-        data class Thrown(val value: LAny) : NodeResult()
-    }
 }
