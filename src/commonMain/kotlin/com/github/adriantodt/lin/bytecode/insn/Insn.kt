@@ -9,7 +9,7 @@ sealed class Insn : Serializable {
     }
 
     enum class Opcode {
-        PARAMETERLESS, SIMPLE, ASSIGN, BRANCH_IF_FALSE, BRANCH_IF_TRUE, DECLARE_VARIABLE_IMMUTABLE,
+        PARAMETERLESS, ASSIGN, BRANCH_IF_FALSE, BRANCH_IF_TRUE, DECLARE_VARIABLE_IMMUTABLE,
         DECLARE_VARIABLE_MUTABLE, GET_MEMBER_PROPERTY, GET_SUBSCRIPT, GET_VARIABLE, INVOKE, INVOKE_LOCAL, INVOKE_MEMBER,
         JUMP, LOAD_DECIMAL, LOAD_INTEGER, LOAD_STRING, NEW_FUNCTION, PUSH_DECIMAL,
         PUSH_INTEGER, PUSH_EXCEPTION_HANDLING, PUSH_LOOP_HANDLING, SET_MEMBER_PROPERTY, SET_SUBSCRIPT, SET_VARIABLE
@@ -18,11 +18,9 @@ sealed class Insn : Serializable {
     enum class ParameterlessCode {
         ARRAY_INSERT, BREAK, CHECK_NOT_NULL, CONTINUE, DUP, NEW_ARRAY, NEW_OBJECT, OBJECT_INSERT, POP,
         POP_SCOPE, POP_EXCEPTION_HANDLING, POP_LOOP_HANDLING, PUSH_NULL, PUSH_SCOPE, PUSH_THIS, RETURN,
-        THROW, TYPEOF, PUSH_TRUE, PUSH_FALSE
-    }
-
-    enum class SimpleCode {
-        UNARY_OPERATION, BINARY_OPERATION
+        THROW, TYPEOF, PUSH_TRUE, PUSH_FALSE, UNARY_POSITIVE, UNARY_NEGATIVE, UNARY_TRUTH, UNARY_NOT,
+        BINARY_ADD, BINARY_SUBTRACT, BINARY_MULTIPLY, BINARY_DIVIDE, BINARY_REMAINING, BINARY_EQUALS,
+        BINARY_NOT_EQUALS, BINARY_LT, BINARY_LTE, BINARY_GT, BINARY_GTE, BINARY_IN, BINARY_RANGE
     }
 
     companion object : Deserializer<Insn> {
@@ -30,7 +28,6 @@ sealed class Insn : Serializable {
             val opcodeNum = buffer.readByte().toInt()
             return when (Opcode.values()[opcodeNum]) {
                 Opcode.PARAMETERLESS -> deserializeParameterlessFrom(buffer)
-                Opcode.SIMPLE -> deserializeSimpleFrom(buffer)
                 Opcode.ASSIGN -> {
                     AssignInsn(buffer.readU24())
                 }
@@ -127,13 +124,23 @@ sealed class Insn : Serializable {
                 ParameterlessCode.TYPEOF -> TypeofInsn
                 ParameterlessCode.PUSH_TRUE -> PushBooleanInsn(true)
                 ParameterlessCode.PUSH_FALSE -> PushBooleanInsn(false)
-            }
-        }
-
-        private fun deserializeSimpleFrom(buffer: Buffer): Insn {
-            return when (SimpleCode.values()[buffer.readByte().toInt()]) {
-                SimpleCode.UNARY_OPERATION -> UnaryOperationInsn(buffer.readShort().toInt())
-                SimpleCode.BINARY_OPERATION -> BinaryOperationInsn(buffer.readShort().toInt())
+                ParameterlessCode.UNARY_POSITIVE -> UnaryPositiveOperationInsn
+                ParameterlessCode.UNARY_NEGATIVE -> UnaryNegativeOperationInsn
+                ParameterlessCode.UNARY_TRUTH -> UnaryTruthOperationInsn
+                ParameterlessCode.UNARY_NOT -> UnaryNotOperationInsn
+                ParameterlessCode.BINARY_ADD -> BinaryAddOperationInsn
+                ParameterlessCode.BINARY_SUBTRACT -> BinarySubtractOperationInsn
+                ParameterlessCode.BINARY_MULTIPLY -> BinaryMultiplyOperationInsn
+                ParameterlessCode.BINARY_DIVIDE -> BinaryDivideOperationInsn
+                ParameterlessCode.BINARY_REMAINING -> BinaryRemainingOperationInsn
+                ParameterlessCode.BINARY_EQUALS -> BinaryEqualsOperationInsn
+                ParameterlessCode.BINARY_NOT_EQUALS -> BinaryNotEqualsOperationInsn
+                ParameterlessCode.BINARY_LT -> BinaryLtOperationInsn
+                ParameterlessCode.BINARY_LTE -> BinaryLteOperationInsn
+                ParameterlessCode.BINARY_GT -> BinaryGtOperationInsn
+                ParameterlessCode.BINARY_GTE -> BinaryGteOperationInsn
+                ParameterlessCode.BINARY_IN -> BinaryInOperationInsn
+                ParameterlessCode.BINARY_RANGE -> BinaryRangeOperationInsn
             }
         }
     }

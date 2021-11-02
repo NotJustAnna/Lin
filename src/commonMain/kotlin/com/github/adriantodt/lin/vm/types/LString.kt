@@ -13,6 +13,6 @@ data class LString(val value: String) : LAny() {
     }
 
     override fun toString(): String {
-        return value.toString()
+        return value
     }
 }

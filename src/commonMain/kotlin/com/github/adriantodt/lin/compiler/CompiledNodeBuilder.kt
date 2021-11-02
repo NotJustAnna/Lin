@@ -269,11 +269,31 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     }
 
     fun unaryOperationInsn(operator: UnaryOperationType) {
-        instructions += UnaryOperationInsn(operator.ordinal)
+        instructions += when (operator) {
+            UnaryOperationType.POSITIVE -> UnaryPositiveOperationInsn
+            UnaryOperationType.NEGATIVE -> UnaryNegativeOperationInsn
+            UnaryOperationType.NOT -> UnaryNotOperationInsn
+            UnaryOperationType.TRUTH -> UnaryTruthOperationInsn
+        }
     }
 
     fun binaryOperationInsn(operator: BinaryOperationType) {
-        instructions += BinaryOperationInsn(operator.ordinal)
+        instructions += when (operator) {
+            BinaryOperationType.ADD -> BinaryAddOperationInsn
+            BinaryOperationType.SUBTRACT -> BinarySubtractOperationInsn
+            BinaryOperationType.MULTIPLY -> BinaryMultiplyOperationInsn
+            BinaryOperationType.DIVIDE -> BinaryDivideOperationInsn
+            BinaryOperationType.REMAINING -> BinaryRemainingOperationInsn
+            BinaryOperationType.EQUALS -> BinaryEqualsOperationInsn
+            BinaryOperationType.NOT_EQUALS -> BinaryNotEqualsOperationInsn
+            BinaryOperationType.LT -> BinaryLtOperationInsn
+            BinaryOperationType.LTE -> BinaryLteOperationInsn
+            BinaryOperationType.GT -> BinaryGtOperationInsn
+            BinaryOperationType.GTE -> BinaryGteOperationInsn
+            BinaryOperationType.IN -> BinaryInOperationInsn
+            BinaryOperationType.RANGE -> BinaryRangeOperationInsn
+            else -> throw RuntimeException("The operator $operator can't be converted to a instruction and must be de-sugared.")
+        }
     }
 
     fun declareVariableInsn(name: String, mutable: Boolean) {
