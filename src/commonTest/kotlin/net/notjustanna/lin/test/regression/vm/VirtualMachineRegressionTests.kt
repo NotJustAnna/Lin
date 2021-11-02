@@ -84,7 +84,25 @@ class VirtualMachineRegressionTests {
             i
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("simpleReturn", Source(code))
+        val execution = ExecutionBenchmark("breakWhileLoop", Source(code))
+
+        assertEquals(LInteger(100), execution.result, "Code should produce 100")
+        assertTrue(execution.output.isEmpty())
+    }
+
+    @Test
+    fun continueWhileLoop() {
+        val code = """
+            var i = 100
+            while (i) {
+                i = i - 1
+                continue
+                return false
+            }
+            true
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("continueWhileLoop", Source(code))
 
         assertEquals(LInteger(100), execution.result, "Code should produce 100")
         assertTrue(execution.output.isEmpty())

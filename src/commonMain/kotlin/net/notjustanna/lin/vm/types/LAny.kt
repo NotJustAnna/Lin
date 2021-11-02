@@ -25,5 +25,9 @@ sealed class LAny {
                 else -> throw IllegalArgumentException("Can't convert $value to LAny.")
             }
         }
+
+        fun ofBoolean(value: Boolean): LAny {
+            return if (value) LTrue else LFalse
+        }
     }
 }

@@ -52,6 +52,22 @@ class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBui
     override fun visitBinaryOperation(node: BinaryOperation) {
         builder.markSection(node)
         node.left.accept(this)
+        if (node.operator == BinaryOperationType.ELVIS) {
+            val skip = builder.nextLabel()
+            builder.dupInsn()
+            builder.pushNullInsn()
+            builder.binaryOperationInsn(BinaryOperationType.EQUALS)
+            builder.branchIfFalseInsn(skip)
+            builder.popInsn()
+            node.right.accept(this)
+            builder.markLabel(skip)
+            return
+        } else if (node.operator == BinaryOperationType.IS) {
+            builder.typeofInsn()
+            node.right.accept(this)
+            builder.binaryOperationInsn(BinaryOperationType.EQUALS)
+            return
+        }
         if (node.operator == BinaryOperationType.AND || node.operator == BinaryOperationType.OR) {
             val skip = builder.nextLabel()
             builder.dupInsn()
@@ -61,7 +77,6 @@ class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBui
                 builder.branchIfTrueInsn(skip)
             }
             node.right.accept(this)
-            builder.binaryOperationInsn(node.operator)
             builder.markLabel(skip)
         }
         node.right.accept(this)
