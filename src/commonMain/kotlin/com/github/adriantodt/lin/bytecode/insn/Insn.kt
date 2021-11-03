@@ -1,6 +1,10 @@
 package com.github.adriantodt.lin.bytecode.insn
 
-import com.github.adriantodt.lin.utils.*
+import com.github.adriantodt.lin.bytecode.utils.readU12Pair
+import com.github.adriantodt.lin.bytecode.utils.readU24
+import com.github.adriantodt.lin.bytecode.utils.skipByte
+import com.github.adriantodt.lin.utils.Deserializer
+import com.github.adriantodt.lin.utils.Serializable
 import okio.Buffer
 
 sealed class Insn : Serializable {

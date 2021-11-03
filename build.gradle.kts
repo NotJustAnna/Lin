@@ -7,6 +7,7 @@ version = "0.0.1"
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven { url = uri("https://maven.cafeteria.dev") }
 }
 
@@ -24,23 +25,33 @@ kotlin {
         nodejs()
     }
 
-    linuxX64("linuxX64")
-    macosX64("macosX64")
-    // macosArm64("macosArm64") // TODO
-    mingwX64("mingwX64")
+    /*
+     * The targets linuxArm64 and macosArm64 are disabled due to Okio.
+     * See: https://github.com/square/okio/issues/1006
+     *      https://github.com/Kotlin/kotlinx-datetime/issues/75
+     *      https://youtrack.jetbrains.com/issue/KT-43996
+     *
+     * JetBrains pls fix your CI >.>
+     */
+
+    linuxX64()
+    // linuxArm64()
+    macosX64()
+    // macosArm64()
+    mingwX64()
 
     sourceSets {
         all { languageSettings.optIn("kotlin.RequiresOptIn") }
         val commonMain by getting {
             dependencies {
-                implementation("com.github.adriantodt:tartar:2.3")
+                implementation("com.github.adriantodt:tartar:3.0.2")
                 implementation("com.squareup.okio:okio:3.0.0")
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("com.github.adriantodt:kotlin-unified-platform:1.2")
+                implementation("com.github.adriantodt:kotlin-unified-platform:1.3")
             }
         }
         val jvmMain by getting
@@ -59,6 +70,12 @@ kotlin {
         val linuxX64Test by getting {
             dependsOn(nativeTest)
         }
+        // val linuxArm64Main by getting {
+        //     dependsOn(nativeMain)
+        // }
+        // val linuxArm64Test by getting {
+        //     dependsOn(nativeTest)
+        // }
         val mingwX64Main by getting {
             dependsOn(nativeMain)
         }
@@ -71,5 +88,11 @@ kotlin {
         val macosX64Test by getting {
             dependsOn(nativeTest)
         }
+        // val macosArm64Main by getting {
+        //     dependsOn(nativeMain)
+        // }
+        // val macosArm64Test by getting {
+        //     dependsOn(nativeTest)
+        // }
     }
 }

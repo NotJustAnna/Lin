@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.bytecode.insn
 
-import com.github.adriantodt.lin.utils.writeU12Pair
+import com.github.adriantodt.lin.bytecode.utils.writeU12Pair
 import okio.Buffer
 
 data class PushLoopHandlingInsn(val continueLabel: Int, val breakLabel: Int) : Insn() {

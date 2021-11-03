@@ -1,8 +1,9 @@
 package com.github.adriantodt.lin.lexer
 
 import com.github.adriantodt.lin.lexer.TokenType.*
+import com.github.adriantodt.tartar.api.dsl.CharPredicate
+import com.github.adriantodt.tartar.api.lexer.Lexer
 import com.github.adriantodt.tartar.api.parser.Token
-import com.github.adriantodt.tartar.createLexer
 import com.github.adriantodt.tartar.extensions.LexicalNumber
 import com.github.adriantodt.tartar.extensions.makeToken
 import com.github.adriantodt.tartar.extensions.readNumber
@@ -10,7 +11,7 @@ import com.github.adriantodt.tartar.extensions.readString
 
 typealias LinToken = Token<TokenType>
 
-internal fun linStdLexer() = createLexer<LinToken> {
+internal fun linStdLexer() = Lexer.create<LinToken> {
     ' ' { while (hasNext()) if (!match(' ')) break }
     '\r' {
         match('\n')
@@ -66,7 +67,7 @@ internal fun linStdLexer() = createLexer<LinToken> {
     "\"\"" { process(makeToken(STRING, 2)) }
     '"' { readLinTemplateString(it.toString(), false) }
     "`" { process(makeToken(IDENTIFIER, readString(it))) }
-    matching { it.isDigit() }.configure {
+    matching(CharPredicate.isDigit).configure {
         process(
             when (val n = readNumber(it)) {
                 is LexicalNumber.Invalid -> makeToken(INVALID, n.string)

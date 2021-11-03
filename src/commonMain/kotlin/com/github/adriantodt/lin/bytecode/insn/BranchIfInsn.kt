@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.bytecode.insn
 
-import com.github.adriantodt.lin.utils.writeU24
+import com.github.adriantodt.lin.bytecode.utils.writeU24
 import okio.Buffer
 
 data class BranchIfInsn(val value: Boolean, val labelCode: Int) : Insn() {

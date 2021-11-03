@@ -1,5 +1,6 @@
 package com.github.adriantodt.lin.test.regression.vm
 
+import com.github.adriantodt.lin.Lin
 import com.github.adriantodt.lin.test.utils.ExecutionBenchmark
 import com.github.adriantodt.lin.vm.types.*
 import com.github.adriantodt.tartar.api.lexer.Source
@@ -15,6 +16,10 @@ class VirtualMachineRegressionTests {
                 publish(value)
             }
         """.trimIndent()
+
+        Lin.lexer.parse(Source(code)) {
+            println(it)
+        }
 
         val execution = ExecutionBenchmark("forLoop", Source(code))
 

@@ -21,7 +21,7 @@ class ExecutionBenchmark(private val name: String, source: Source, inputValues: 
     private val executionDuration: Duration
 
     init {
-        val (node, parseDuration) = measureTimedValue { Lin.parser.parse(source, Lin.lexer) }
+        val (node, parseDuration) = measureTimedValue { Lin.parser.parse(source) }
         val (compiledSource, compileDuration) = measureTimedValue { NodeCompiler.compile(node) }
         val (input, output, scope) = TestScope(inputValues)
         val (result, executionDuration) = measureTimedValue { LinVirtualMachine(scope, compiledSource).run() }
