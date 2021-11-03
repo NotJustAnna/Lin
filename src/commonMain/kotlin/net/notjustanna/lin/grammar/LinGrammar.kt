@@ -13,7 +13,7 @@ import net.notjustanna.lin.utils.BinaryOperationType
 import net.notjustanna.lin.utils.UnaryOperationType
 import net.notjustanna.tartar.createGrammar
 
-val linStdGrammar = createGrammar<TokenType, Node> {
+internal fun linStdGrammar() = createGrammar<TokenType, Node> {
     // Simple Expressions
     prefix(INTEGER, IntegerParser)
     //prefix(LONG, LongParser)

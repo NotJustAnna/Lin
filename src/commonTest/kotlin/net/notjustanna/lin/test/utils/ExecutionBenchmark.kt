@@ -1,8 +1,7 @@
 package net.notjustanna.lin.test.utils
 
+import net.notjustanna.lin.Lin
 import net.notjustanna.lin.compiler.NodeCompiler
-import net.notjustanna.lin.lexer.linStdLexer
-import net.notjustanna.lin.parser.linStdParser
 import net.notjustanna.lin.vm.LinVirtualMachine
 import net.notjustanna.lin.vm.types.LAny
 import net.notjustanna.tartar.api.lexer.Source
@@ -22,7 +21,7 @@ class ExecutionBenchmark(private val name: String, source: Source, inputValues: 
     private val executionDuration: Duration
 
     init {
-        val (node, parseDuration) = measureTimedValue { linStdParser.parse(source, linStdLexer) }
+        val (node, parseDuration) = measureTimedValue { Lin.parser.parse(source, Lin.lexer) }
         val (compiledSource, compileDuration) = measureTimedValue { NodeCompiler.compile(node) }
         val (input, output, scope) = TestScope(inputValues)
         val (result, executionDuration) = measureTimedValue { LinVirtualMachine(scope, compiledSource).run() }

@@ -1,13 +1,13 @@
 package net.notjustanna.lin.parser
 
 import net.notjustanna.lin.ast.node.*
-import net.notjustanna.lin.grammar.linStdGrammar
 import net.notjustanna.lin.lexer.TokenType
+import net.notjustanna.lin.parser.utils.matchAll
+import net.notjustanna.tartar.api.parser.Grammar
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.createParser
-import net.notjustanna.lin.parser.utils.matchAll
 
-val linStdParser = createParser(linStdGrammar) {
+internal fun linStdParser(grammar: Grammar<TokenType, Node>) = createParser(grammar) {
     val start = peek()
     val list = mutableListOf<Node>()
     matchAll(TokenType.NL, TokenType.SEMICOLON)
