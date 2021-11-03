@@ -1,4 +1,4 @@
-<img style="float: right" src="https://github.com/adriantodt/Lin/raw/main/resources/logo.svg" height="250" width="250" alt="Lin Logo">
+<img align="right" src="https://github.com/adriantodt/Lin/raw/main/resources/logo.svg" height="250" width="250" alt="Lin Logo">
 
 # Lin
 
