@@ -107,4 +107,32 @@ class VirtualMachineRegressionTests {
         assertEquals(LTrue, execution.result, "Code should produce true")
         assertTrue(execution.output.isEmpty())
     }
+
+    @Test
+    fun compiledFunctionInvocation() {
+        val code = """
+            (fun() {
+                return true
+            })()
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("compiledFunctionInvocation", Source(code))
+
+        assertEquals(LTrue, execution.result, "Code should produce true")
+        assertTrue(execution.output.isEmpty())
+    }
+
+    @Test
+    fun compiledFunctionInvocationWithDefaultValue() {
+        val code = """
+            (fun(name = "World!") {
+                return "Hello, " + name
+            })()
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("compiledFunctionInvocationWithDefaultValue", Source(code))
+
+        assertEquals(LString("Hello, World!"), execution.result, "Code should produce 'Hello, World!'")
+        assertTrue(execution.output.isEmpty())
+    }
 }

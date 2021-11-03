@@ -16,4 +16,6 @@ class DefaultMutableScope(override val parent: Scope?) : AbstractMutableScope() 
     override fun implGet(name: String): LAny {
         return map.getValue(name)
     }
+
+    fun immutable() = ImmutableMapScope(map.toMap(), parent)
 }
