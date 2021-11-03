@@ -1,8 +1,7 @@
 package com.github.adriantodt.lin.test.utils
 
+import com.github.adriantodt.lin.Lin
 import com.github.adriantodt.lin.compiler.NodeCompiler
-import com.github.adriantodt.lin.lexer.linStdLexer
-import com.github.adriantodt.lin.parser.linStdParser
 import com.github.adriantodt.lin.vm.LinVirtualMachine
 import com.github.adriantodt.lin.vm.types.LAny
 import com.github.adriantodt.tartar.api.lexer.Source
@@ -22,7 +21,7 @@ class ExecutionBenchmark(private val name: String, source: Source, inputValues: 
     private val executionDuration: Duration
 
     init {
-        val (node, parseDuration) = measureTimedValue { linStdParser.parse(source, linStdLexer) }
+        val (node, parseDuration) = measureTimedValue { Lin.parser.parse(source, Lin.lexer) }
         val (compiledSource, compileDuration) = measureTimedValue { NodeCompiler.compile(node) }
         val (input, output, scope) = TestScope(inputValues)
         val (result, executionDuration) = measureTimedValue { LinVirtualMachine(scope, compiledSource).run() }

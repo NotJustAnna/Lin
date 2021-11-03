@@ -13,7 +13,7 @@ import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.lin.utils.UnaryOperationType
 import com.github.adriantodt.tartar.createGrammar
 
-val linStdGrammar = createGrammar<TokenType, Node> {
+internal fun linStdGrammar() = createGrammar<TokenType, Node> {
     // Simple Expressions
     prefix(INTEGER, IntegerParser)
     //prefix(LONG, LongParser)

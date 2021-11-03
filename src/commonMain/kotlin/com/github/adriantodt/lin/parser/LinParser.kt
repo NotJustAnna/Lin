@@ -1,13 +1,13 @@
 package com.github.adriantodt.lin.parser
 
 import com.github.adriantodt.lin.ast.node.*
-import com.github.adriantodt.lin.grammar.linStdGrammar
 import com.github.adriantodt.lin.lexer.TokenType
+import com.github.adriantodt.lin.parser.utils.matchAll
+import com.github.adriantodt.tartar.api.parser.Grammar
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.createParser
-import com.github.adriantodt.lin.parser.utils.matchAll
 
-val linStdParser = createParser(linStdGrammar) {
+internal fun linStdParser(grammar: Grammar<TokenType, Node>) = createParser(grammar) {
     val start = peek()
     val list = mutableListOf<Node>()
     matchAll(TokenType.NL, TokenType.SEMICOLON)

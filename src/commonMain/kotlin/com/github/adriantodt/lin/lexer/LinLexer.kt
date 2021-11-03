@@ -10,7 +10,7 @@ import com.github.adriantodt.tartar.extensions.readString
 
 typealias LinToken = Token<TokenType>
 
-val linStdLexer = createLexer<LinToken> {
+internal fun linStdLexer() = createLexer<LinToken> {
     ' ' { while (hasNext()) if (!match(' ')) break }
     '\r' {
         match('\n')
