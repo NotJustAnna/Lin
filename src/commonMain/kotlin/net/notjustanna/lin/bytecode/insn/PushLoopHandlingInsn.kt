@@ -1,6 +1,6 @@
 package net.notjustanna.lin.bytecode.insn
 
-import net.notjustanna.lin.utils.writeU12Pair
+import net.notjustanna.lin.bytecode.utils.writeU12Pair
 import okio.Buffer
 
 data class PushLoopHandlingInsn(val continueLabel: Int, val breakLabel: Int) : Insn() {

@@ -1,6 +1,10 @@
 package net.notjustanna.lin.bytecode.insn
 
-import net.notjustanna.lin.utils.*
+import net.notjustanna.lin.bytecode.utils.readU12Pair
+import net.notjustanna.lin.bytecode.utils.readU24
+import net.notjustanna.lin.bytecode.utils.skipByte
+import net.notjustanna.lin.utils.Deserializer
+import net.notjustanna.lin.utils.Serializable
 import okio.Buffer
 
 sealed class Insn : Serializable {

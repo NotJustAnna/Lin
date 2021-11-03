@@ -1,6 +1,6 @@
 package net.notjustanna.lin.bytecode.insn
 
-import net.notjustanna.lin.utils.writeU24
+import net.notjustanna.lin.bytecode.utils.writeU24
 import okio.Buffer
 
 object BinaryLtOperationInsn : Insn() {

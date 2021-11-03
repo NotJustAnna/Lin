@@ -1,0 +1,14 @@
+package net.notjustanna.lin.parser.parselets.control
+
+import net.notjustanna.lin.ast.node.Node
+import net.notjustanna.lin.ast.node.control.BreakExpr
+import net.notjustanna.lin.lexer.TokenType
+import net.notjustanna.tartar.api.grammar.PrefixParselet
+import net.notjustanna.tartar.api.parser.ParserContext
+import net.notjustanna.tartar.api.parser.Token
+
+object BreakParser : PrefixParselet<TokenType, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+        return BreakExpr(token.section)
+    }
+}

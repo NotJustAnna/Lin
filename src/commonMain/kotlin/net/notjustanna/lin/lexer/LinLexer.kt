@@ -1,8 +1,9 @@
 package net.notjustanna.lin.lexer
 
 import net.notjustanna.lin.lexer.TokenType.*
+import net.notjustanna.tartar.api.dsl.CharPredicate
+import net.notjustanna.tartar.api.lexer.Lexer
 import net.notjustanna.tartar.api.parser.Token
-import net.notjustanna.tartar.createLexer
 import net.notjustanna.tartar.extensions.LexicalNumber
 import net.notjustanna.tartar.extensions.makeToken
 import net.notjustanna.tartar.extensions.readNumber
@@ -10,7 +11,7 @@ import net.notjustanna.tartar.extensions.readString
 
 typealias LinToken = Token<TokenType>
 
-internal fun linStdLexer() = createLexer<LinToken> {
+internal fun linStdLexer() = Lexer.create<LinToken> {
     ' ' { while (hasNext()) if (!match(' ')) break }
     '\r' {
         match('\n')
@@ -66,7 +67,7 @@ internal fun linStdLexer() = createLexer<LinToken> {
     "\"\"" { process(makeToken(STRING, 2)) }
     '"' { readLinTemplateString(it.toString(), false) }
     "`" { process(makeToken(IDENTIFIER, readString(it))) }
-    matching { it.isDigit() }.configure {
+    matching(CharPredicate.isDigit).configure {
         process(
             when (val n = readNumber(it)) {
                 is LexicalNumber.Invalid -> makeToken(INVALID, n.string)
