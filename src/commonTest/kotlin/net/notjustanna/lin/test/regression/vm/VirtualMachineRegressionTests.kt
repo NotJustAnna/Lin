@@ -1,6 +1,5 @@
 package net.notjustanna.lin.test.regression.vm
 
-import net.notjustanna.lin.Lin
 import net.notjustanna.lin.test.utils.ExecutionBenchmark
 import net.notjustanna.lin.vm.types.*
 import net.notjustanna.tartar.api.lexer.Source
@@ -16,10 +15,6 @@ class VirtualMachineRegressionTests {
                 publish(value)
             }
         """.trimIndent()
-
-        Lin.lexer.parse(Source(code)) {
-            println(it)
-        }
 
         val execution = ExecutionBenchmark("forLoop", Source(code))
 
