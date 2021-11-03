@@ -104,7 +104,7 @@ class VirtualMachineRegressionTests {
 
         val execution = ExecutionBenchmark("continueWhileLoop", Source(code))
 
-        assertEquals(LInteger(100), execution.result, "Code should produce 100")
+        assertEquals(LTrue, execution.result, "Code should produce true")
         assertTrue(execution.output.isEmpty())
     }
 }
