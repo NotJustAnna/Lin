@@ -2,6 +2,8 @@ package com.github.adriantodt.lin.vm.types
 
 import com.github.adriantodt.lin.bytecode.CompiledFunction
 import com.github.adriantodt.lin.bytecode.CompiledSource
+import com.github.adriantodt.lin.vm.LinVirtualMachine
+import com.github.adriantodt.lin.vm.impl.FunctionSetupLayer
 import com.github.adriantodt.lin.vm.scope.Scope
 
 sealed class LFunction : LAny() {
@@ -35,11 +37,7 @@ sealed class LFunction : LAny() {
         val rootScope: Scope
     ) : LFunction() {
         override fun invoke(vararg arguments: LAny): LAny {
-            if (data.bodyId == -1) {
-                return LNull
-            }
-            TODO("Not implemented yet.")
-//            LinVM(source, source.nodes[data.bodyId])
+            return LinVirtualMachine { FunctionSetupLayer(it, this, null, arguments.toList()) }.run()
         }
 
         override fun toString(): String {

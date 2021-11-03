@@ -9,10 +9,19 @@ import com.github.adriantodt.lin.vm.scope.Scope
 import com.github.adriantodt.lin.vm.types.LAny
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class LinVirtualMachine(scope: Scope, source: CompiledSource) {
+class LinVirtualMachine(layerInitializer: (VMEvents) -> ExecutionLayer) {
+
+    constructor(source: CompiledSource, scope: Scope) : this({
+        DefaultExecutionLayer(it, DefaultMutableScope(scope), source)
+    })
+
     private val layerStack = mutableListOf<ExecutionLayer>()
-    private var currentLayer: ExecutionLayer = DefaultExecutionLayer(Events(), DefaultMutableScope(scope), source)
+    private var currentLayer: ExecutionLayer
     private var result: VMResult? = null
+
+    init {
+        currentLayer = layerInitializer(EventsImpl(this))
+    }
 
     fun run(): LAny {
         while (hasNextStep()) {
@@ -42,33 +51,33 @@ class LinVirtualMachine(scope: Scope, source: CompiledSource) {
         class Thrown(val value: LAny) : VMResult()
     }
 
-    private inner class Events : VMEvents {
+    private class EventsImpl(private val vm: LinVirtualMachine) : VMEvents {
         override fun pushLayer(layer: ExecutionLayer) {
-            layerStack += currentLayer
-            currentLayer = layer
+            vm.layerStack += vm.currentLayer
+            vm.currentLayer = layer
         }
 
         override fun replaceLayer(layer: ExecutionLayer) {
-            currentLayer = layer
+            vm.currentLayer = layer
         }
 
         override fun onReturn(value: LAny) {
-            val layer = layerStack.removeLastOrNull()
+            val layer = vm.layerStack.removeLastOrNull()
             if (layer == null) {
-                result = VMResult.Returned(value)
+                vm.result = VMResult.Returned(value)
                 return
             }
-            currentLayer = layer
+            vm.currentLayer = layer
             layer.onReturn(value)
         }
 
         override fun onThrow(value: LAny) {
-            val layer = layerStack.removeLastOrNull()
+            val layer = vm.layerStack.removeLastOrNull()
             if (layer == null) {
-                result = VMResult.Thrown(value)
+                vm.result = VMResult.Thrown(value)
                 return
             }
-            currentLayer = layer
+            vm.currentLayer = layer
             layer.onThrow(value)
         }
     }
