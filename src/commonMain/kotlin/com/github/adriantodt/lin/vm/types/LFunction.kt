@@ -18,7 +18,7 @@ sealed class LFunction : LAny() {
         return null
     }
 
-    class Native(val nativeBlock: (List<LAny>) -> LAny) : LFunction() {
+    class Native(val nativeBlock: (params: List<LAny>) -> LAny) : LFunction() {
         override fun invoke(vararg arguments: LAny): LAny {
             return nativeBlock(arguments.toList())
         }

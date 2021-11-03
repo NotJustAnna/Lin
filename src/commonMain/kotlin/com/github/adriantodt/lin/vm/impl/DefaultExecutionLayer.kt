@@ -13,16 +13,16 @@ class DefaultExecutionLayer(
     private var scope: Scope,
     private val source: CompiledSource,
     private val node: CompiledNode = source.nodes[0],
-    private var thisValue: LAny? = null
+    private val thisValue: LAny? = null
 ) : ExecutionLayer {
     private var next: Int = 0
 
-    override fun step(): Boolean {
+    override fun step() {
         val insn = node.instructions.getOrNull(next++)
 
         if (insn == null) {
             events.onReturn(stack.removeLastOrNull() ?: LNull)
-            return false
+            return
         }
 
         when (insn) {
@@ -84,7 +84,6 @@ class DefaultExecutionLayer(
             UnaryPositiveOperationInsn -> handleUnaryPositiveOperation()
             UnaryTruthOperationInsn -> handleUnaryTruthOperation()
         }
-        return true
     }
 
     override fun onReturn(value: LAny) {
@@ -164,59 +163,20 @@ class DefaultExecutionLayer(
     private fun handleInvoke(size: Int) {
         val arguments = List(size) { stack.removeLast() }.reversed()
         val function = stack.removeLast()
-        if (function !is LFunction) {
-            throw IllegalStateException("Can't invoke function for type '${function.linType}'")
-        }
-
-        if (function is LFunction.Native) {
-            stack.add(function.nativeBlock(arguments))
-        }
-
-        if (function !is LFunction.Compiled) {
-            throw AssertionError("Impossible.")
-        }
-
-        TODO("Not yet implemented")
+        invocation(null, function, arguments)
     }
 
     private fun handleInvokeLocal(nameConst: Int, size: Int) {
         val arguments = List(size) { stack.removeLast() }.reversed()
         val function = scope.get(source.stringPool[nameConst])
-        if (function !is LFunction) {
-            throw IllegalStateException("Can't invoke function for type '${function.linType}'")
-        }
-
-        if (function is LFunction.Native) {
-            stack.add(function.nativeBlock(arguments))
-            return
-        }
-
-        if (function !is LFunction.Compiled) {
-            throw AssertionError("Impossible.")
-        }
-
-        TODO("Not yet implemented")
+        invocation(null, function, arguments)
     }
 
     private fun handleInvokeMember(nameConst: Int, size: Int) {
         val arguments = List(size) { stack.removeLast() }.reversed()
         val parent = stack.removeLast()
-
         val function = parent.getMember(source.stringPool[nameConst]) ?: LNull
-        if (function !is LFunction) {
-            throw IllegalStateException("Can't invoke function for type '${function.linType}'")
-        }
-
-        if (function is LFunction.Native) {
-            stack.add(function.nativeBlock(arguments))
-            return
-        }
-
-        if (function !is LFunction.Compiled) {
-            throw AssertionError("Impossible.")
-        }
-
-        TODO("Not yet implemented")
+        invocation(parent, function, arguments)
     }
 
     private fun handleJump(labelCode: Int) {
@@ -483,5 +443,24 @@ class DefaultExecutionLayer(
 
     private fun handleUnaryTruthOperation() {
         stack.add(LAny.ofBoolean(stack.removeLast().truth()))
+    }
+
+    private fun invocation(thisValue: LAny?, function: LAny, arguments: List<LAny>) {
+        if (function !is LFunction) {
+            throw IllegalStateException("Can't invoke function for type '${function.linType}'")
+        }
+
+        if (function is LFunction.Native) {
+            stack.add(function.nativeBlock(arguments))
+            return
+        }
+
+        if (function !is LFunction.Compiled) {
+            throw AssertionError("Impossible.")
+        }
+
+        val layer = FunctionSetupLayer(events, function, thisValue, arguments)
+        events.pushLayer(layer)
+        layer.step()
     }
 }
