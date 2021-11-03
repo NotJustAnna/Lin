@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+    <path d="m888.6 724.36v-448.71l-388.6-224.36-388.6 224.36v448.71l388.6 224.36z" fill="#041426" fill-rule="evenodd"
+          stroke="#226dc4" stroke-linejoin="round" stroke-miterlimit="8.6" stroke-width="48"
+          style="paint-order:fill markers stroke" paint-order="stroke fill markers"/>
+    <path d="m370.47 574.79v-448.71l-129.53 74.785v448.71l259.06 149.57 259.06-149.57-129.53-74.785-129.53 74.785z"
+          fill="#226dc4" fill-rule="evenodd" stroke="#226dc4" stroke-linejoin="round" stroke-miterlimit="8.6"
+          stroke-width="48" style="paint-order:fill markers stroke" paint-order="stroke fill markers"/>
+</svg>
