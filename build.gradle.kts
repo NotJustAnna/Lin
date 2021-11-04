@@ -1,9 +1,11 @@
 plugins {
     kotlin("multiplatform") version "1.5.31"
+    `maven-publish`
+    id("org.jetbrains.dokka") version "1.5.31"
 }
 
 group = "com.github.adriantodt"
-version = "0.0.1"
+version = "0.1"
 
 repositories {
     mavenCentral()
@@ -94,5 +96,34 @@ kotlin {
         // val macosArm64Test by getting {
         //     dependsOn(nativeTest)
         // }
+    }
+}
+
+tasks {
+    register<Jar>("dokkaJar") {
+        from(dokkaHtml)
+        dependsOn(dokkaHtml)
+        archiveClassifier.set("javadoc")
+    }
+}
+
+publishing {
+    publications.withType<MavenPublication> {
+        artifact(tasks["dokkaJar"])
+    }
+
+    repositories {
+        maven {
+            url = uri("https://maven.cafeteria.dev/releases")
+
+            credentials {
+                username = "${project.findProperty("mcdUsername") ?: System.getenv("MCD_USERNAME")}"
+                password = "${project.findProperty("mcdPassword") ?: System.getenv("MCD_PASSWORD")}"
+            }
+            authentication {
+                create("basic", BasicAuthentication::class.java)
+            }
+        }
+        mavenLocal()
     }
 }
