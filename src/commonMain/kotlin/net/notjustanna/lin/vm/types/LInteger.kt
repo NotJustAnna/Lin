@@ -1,6 +1,56 @@
 package net.notjustanna.lin.vm.types
 
-data class LInteger(val value: Long) : LAny() {
+data class LInteger(val value: Long) : LNumber() {
+    override fun compareTo(other: LNumber): Int {
+        return when (other) {
+            is LDecimal -> value.compareTo(other.value)
+            is LInteger -> value.compareTo(other.value)
+        }
+    }
+
+    override fun plus(right: LNumber): LNumber {
+        return when (right) {
+            is LDecimal -> LDecimal(value + right.value)
+            is LInteger -> LInteger(value + right.value)
+        }
+    }
+
+    override fun minus(right: LNumber): LNumber {
+        return when (right) {
+            is LDecimal -> LDecimal(value - right.value)
+            is LInteger -> LInteger(value - right.value)
+        }
+    }
+
+    override fun times(right: LNumber): LNumber {
+        return when (right) {
+            is LDecimal -> LDecimal(value * right.value)
+            is LInteger -> LInteger(value * right.value)
+        }
+    }
+
+    override fun div(right: LNumber): LNumber {
+        return when (right) {
+            is LDecimal -> LDecimal(value / right.value)
+            is LInteger -> LInteger(value / right.value)
+        }
+    }
+
+    override fun rem(right: LNumber): LNumber {
+        return when (right) {
+            is LDecimal -> LDecimal(value % right.value)
+            is LInteger -> LInteger(value % right.value)
+        }
+    }
+
+    override fun unaryPlus(): LNumber {
+        return LInteger(+value)
+    }
+
+    override fun unaryMinus(): LNumber {
+        return LInteger(-value)
+    }
+
     override fun truth(): Boolean {
         return value != 0L
     }
@@ -16,4 +66,3 @@ data class LInteger(val value: Long) : LAny() {
         return value.toString()
     }
 }
-
