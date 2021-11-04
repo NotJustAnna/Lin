@@ -1,5 +1,6 @@
 package com.github.adriantodt.lin.bytecode
 
+import com.github.adriantodt.lin.exception.IllegalConstantIndexException
 import com.github.adriantodt.lin.utils.Deserializer
 import com.github.adriantodt.lin.utils.Serializable
 import okio.Buffer
@@ -35,6 +36,21 @@ data class CompiledSource(
         for (node in nodes) node.serializeTo(buffer)
     }
 
+    fun longConstOrNull(index: Int): Long? {
+        return longPool.getOrNull(index)
+    }
+
+    fun longConst(index: Int): Long {
+        return longConstOrNull(index) ?: throw IllegalConstantIndexException(index)
+    }
+
+    fun stringConstOrNull(index: Int): String? {
+        return stringPool.getOrNull(index)
+    }
+
+    fun stringConst(index: Int): String {
+        return stringConstOrNull(index) ?: throw IllegalConstantIndexException(index)
+    }
 
     companion object : Deserializer<CompiledSource> {
         override fun deserializeFrom(buffer: Buffer): CompiledSource {
@@ -68,9 +84,7 @@ data class CompiledSource(
                 nodes += CompiledNode.deserializeFrom(buffer)
             }
 
-            return CompiledSource(
-                longPool, stringPool, functionParameters, functions, nodes
-            )
+            return CompiledSource(longPool, stringPool, functionParameters, functions, nodes)
         }
     }
 }

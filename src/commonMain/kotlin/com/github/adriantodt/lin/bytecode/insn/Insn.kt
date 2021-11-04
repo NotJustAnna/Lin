@@ -20,7 +20,7 @@ sealed class Insn : Serializable {
     }
 
     enum class ParameterlessCode {
-        ARRAY_INSERT, BREAK, CHECK_NOT_NULL, CONTINUE, DUP, NEW_ARRAY, NEW_OBJECT, OBJECT_INSERT, POP,
+        ARRAY_INSERT, BREAK, CONTINUE, DUP, NEW_ARRAY, NEW_OBJECT, OBJECT_INSERT, POP,
         POP_SCOPE, POP_EXCEPTION_HANDLING, POP_LOOP_HANDLING, PUSH_NULL, PUSH_SCOPE, PUSH_THIS, RETURN,
         THROW, TYPEOF, PUSH_TRUE, PUSH_FALSE, UNARY_POSITIVE, UNARY_NEGATIVE, UNARY_TRUTH, UNARY_NOT,
         BINARY_ADD, BINARY_SUBTRACT, BINARY_MULTIPLY, BINARY_DIVIDE, BINARY_REMAINING, BINARY_EQUALS,
@@ -110,7 +110,6 @@ sealed class Insn : Serializable {
             return when (ParameterlessCode.values()[buffer.readU24()]) {
                 ParameterlessCode.ARRAY_INSERT -> ArrayInsertInsn
                 ParameterlessCode.BREAK -> BreakInsn
-                ParameterlessCode.CHECK_NOT_NULL -> CheckNotNullInsn
                 ParameterlessCode.CONTINUE -> ContinueInsn
                 ParameterlessCode.DUP -> DupInsn
                 ParameterlessCode.NEW_ARRAY -> NewArrayInsn

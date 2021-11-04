@@ -200,4 +200,20 @@ class VirtualMachineRegressionTests {
         }
         assertTrue(execution.output.isEmpty(), "Output array: ${execution.output}")
     }
+
+    @Test
+    fun tryCatch() {
+        val code = """
+            try {
+                throw null
+            } catch {
+                return true
+            }
+            return false
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("tryCatch", Source(code))
+
+        assertEquals(LTrue, execution.result, "Code should produce true")
+    }
 }

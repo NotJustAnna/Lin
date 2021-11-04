@@ -1,6 +1,9 @@
 package com.github.adriantodt.lin.vm.types
 
 data class LObject(val value: MutableMap<LAny, LAny> = mutableMapOf()) : LAny() {
+
+    constructor(vararg pairs: Pair<LAny, LAny>) : this(pairs.toMap(mutableMapOf()))
+
     override fun truth(): Boolean {
         return value.isNotEmpty()
     }

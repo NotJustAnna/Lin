@@ -28,12 +28,12 @@ class FunctionSetupLayer(
         argsLeft = arguments.toMutableList()
     }
 
-    private fun processArguments() {
+    override fun step() {
         while (paramsLeft.isNotEmpty()) {
             val parameter = paramsLeft.removeFirst()
             val value = argsLeft.removeFirstOrNull()
 
-            val paramName = function.source.stringPool[parameter.nameConst]
+            val paramName = function.source.stringConst(parameter.nameConst)
 
             // TODO Implement Varargs
             if (value != null) {
@@ -52,16 +52,13 @@ class FunctionSetupLayer(
                 return
             }
 
-            TODO("Properly send 'mismatched_args' error downstream.")
+            events.onThrow(Exceptions.mismatchedArgs())
+            return
         }
 
         events.replaceLayer(
             DefaultExecutionLayer(events, DefaultMutableScope(scope), function.source, body, thisValue)
         )
-    }
-
-    override fun step() {
-        processArguments()
     }
 
     override fun onReturn(value: LAny) {

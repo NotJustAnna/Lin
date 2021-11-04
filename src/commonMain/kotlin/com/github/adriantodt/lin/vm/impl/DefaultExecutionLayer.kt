@@ -3,6 +3,7 @@ package com.github.adriantodt.lin.vm.impl
 import com.github.adriantodt.lin.bytecode.CompiledNode
 import com.github.adriantodt.lin.bytecode.CompiledSource
 import com.github.adriantodt.lin.bytecode.insn.*
+import com.github.adriantodt.lin.exception.StackUnderflowException
 import com.github.adriantodt.lin.vm.scope.DefaultMutableScope
 import com.github.adriantodt.lin.vm.scope.MutableScope
 import com.github.adriantodt.lin.vm.scope.Scope
@@ -30,7 +31,6 @@ class DefaultExecutionLayer(
             is AssignInsn -> handleAssign(insn.nameConst)
             is BranchIfInsn -> handleBranchIf(insn.value, insn.labelCode)
             BreakInsn -> handleBreak()
-            CheckNotNullInsn -> handleCheckNotNull()
             ContinueInsn -> handleContinue()
             is DeclareVariableInsn -> handleDeclareVariable(insn.mutable, insn.nameConst)
             DupInsn -> handleDup()
@@ -107,18 +107,28 @@ class DefaultExecutionLayer(
     private val exceptionHandlers = mutableListOf<ExceptionHandler>()
     private val loopHandlers = mutableListOf<LoopHandler>()
 
+    private fun popStack(): LAny {
+        return stack.removeLastOrNull()
+            ?: throw StackUnderflowException("Tried to remove an item from the stack, but the stack is empty.")
+    }
+
+    private fun peekStack(): LAny {
+        return stack.lastOrNull()
+            ?: throw StackUnderflowException("Tried to get the last item from the stack, but the stack is empty.")
+    }
+
     private fun handleArrayInsert() {
-        val value = stack.removeLast()
-        val array = stack.last() as? LArray ?: error("Value is not an LArray.")
+        val value = popStack()
+        val array = peekStack() as? LArray ?: error("Value is not an LArray.")
         array.value.add(value)
     }
 
     private fun handleAssign(nameConst: Int) {
-        scope.set(source.stringPool[nameConst], stack.removeLast())
+        scope.set(source.stringConst(nameConst), popStack())
     }
 
     private fun handleBranchIf(value: Boolean, labelCode: Int) {
-        val truth = stack.removeLast().truth()
+        val truth = popStack().truth()
 
         if (truth == value) {
             next = node.resolveLabel(labelCode)
@@ -130,10 +140,6 @@ class DefaultExecutionLayer(
         next = last.jumpOnBreak
     }
 
-    private fun handleCheckNotNull() {
-        TODO("Not yet implemented")
-    }
-
     private fun handleContinue() {
         val last = loopHandlers.removeLast()
         next = last.jumpOnContinue
@@ -141,16 +147,16 @@ class DefaultExecutionLayer(
 
     private fun handleDeclareVariable(mutable: Boolean, nameConst: Int) {
         val s = scope as? MutableScope ?: error("Current scope is not mutable")
-        s.declareVariable(source.stringPool[nameConst], mutable)
+        s.declareVariable(source.stringConst(nameConst), mutable)
     }
 
     private fun handleDup() {
-        stack.add(stack.last())
+        stack.add(peekStack())
     }
 
     private fun handleGetMemberProperty(nameConst: Int) {
-        val target = stack.removeLast()
-        val member = target.getMember(source.stringPool[nameConst]) ?: TODO("Not yet implemented")
+        val target = popStack()
+        val member = target.getMember(source.stringConst(nameConst)) ?: TODO("Not yet implemented")
         stack.add(member)
     }
 
@@ -159,25 +165,25 @@ class DefaultExecutionLayer(
     }
 
     private fun handleGetVariable(nameConst: Int) {
-        stack.add(scope.get(source.stringPool[nameConst]))
+        stack.add(scope.get(source.stringConst(nameConst)))
     }
 
     private fun handleInvoke(size: Int) {
-        val arguments = List(size) { stack.removeLast() }.reversed()
-        val function = stack.removeLast()
+        val arguments = List(size) { popStack() }.reversed()
+        val function = popStack()
         invocation(null, function, arguments)
     }
 
     private fun handleInvokeLocal(nameConst: Int, size: Int) {
-        val arguments = List(size) { stack.removeLast() }.reversed()
-        val function = scope.get(source.stringPool[nameConst])
+        val arguments = List(size) { popStack() }.reversed()
+        val function = scope.get(source.stringConst(nameConst))
         invocation(null, function, arguments)
     }
 
     private fun handleInvokeMember(nameConst: Int, size: Int) {
-        val arguments = List(size) { stack.removeLast() }.reversed()
-        val parent = stack.removeLast()
-        val function = parent.getMember(source.stringPool[nameConst]) ?: LNull
+        val arguments = List(size) { popStack() }.reversed()
+        val parent = popStack()
+        val function = parent.getMember(source.stringConst(nameConst)) ?: LNull
         invocation(parent, function, arguments)
     }
 
@@ -186,15 +192,15 @@ class DefaultExecutionLayer(
     }
 
     private fun handleLoadDecimal(valueConst: Int) {
-        stack.add(LDecimal(Double.fromBits(source.longPool[valueConst])))
+        stack.add(LDecimal(Double.fromBits(source.longConst(valueConst))))
     }
 
     private fun handleLoadInteger(valueConst: Int) {
-        stack.add(LInteger(source.longPool[valueConst]))
+        stack.add(LInteger(source.longConst(valueConst)))
     }
 
     private fun handleLoadString(valueConst: Int) {
-        stack.add(LString(source.stringPool[valueConst]))
+        stack.add(LString(source.stringConst(valueConst)))
     }
 
     private fun handleNewArray() {
@@ -203,9 +209,7 @@ class DefaultExecutionLayer(
 
     private fun handleNewFunction(functionId: Int) {
         val functionData = source.functions[functionId]
-        val functionName = if (functionData.nameConst != -1) {
-            source.stringPool[functionData.nameConst]
-        } else null
+        val functionName = source.stringConstOrNull(functionData.nameConst)
         stack.add(LFunction.Compiled(functionName, source, functionData, scope))
     }
 
@@ -214,9 +218,9 @@ class DefaultExecutionLayer(
     }
 
     private fun handleObjectInsert() {
-        val value = stack.removeLast()
-        val key = stack.removeLast()
-        val obj = stack.last() as? LObject ?: error("Value is not an LObject.")
+        val value = popStack()
+        val key = popStack()
+        val obj = peekStack() as? LObject ?: error("Value is not an LObject.")
         obj.value[key] = value
     }
 
@@ -225,7 +229,7 @@ class DefaultExecutionLayer(
     }
 
     private fun handlePop() {
-        stack.removeLast()
+        popStack()
     }
 
     private fun handlePopLoopHandling() {
@@ -269,13 +273,13 @@ class DefaultExecutionLayer(
     }
 
     private fun handleReturn() {
-        events.onReturn(stack.removeLast())
+        events.onReturn(popStack())
     }
 
     private fun handleSetMemberProperty(nameConst: Int) {
-        val value = stack.removeLast()
-        val parent = stack.removeLast() as? LObject ?: TODO("Not yet implemented")
-        parent.value[LString(source.stringPool[nameConst])] = value
+        val value = popStack()
+        val parent = popStack() as? LObject ?: TODO("Not yet implemented")
+        parent.value[LString(source.stringConst(nameConst))] = value
     }
 
     private fun handleSetSubscript(size: Int) {
@@ -283,20 +287,32 @@ class DefaultExecutionLayer(
     }
 
     private fun handleSetVariable(nameConst: Int) {
-        scope.set(source.stringPool[nameConst], stack.removeLast())
+        scope.set(source.stringConst(nameConst), popStack())
     }
 
     private fun handleThrow() {
-        events.onThrow(stack.removeLast())
+        val value = popStack()
+        val handler = exceptionHandlers.removeLastOrNull()
+        if (handler == null) {
+            events.onThrow(value)
+            return
+        }
+        if (handler.keepOnStack < stack.size) {
+            println("WTF? Stack is missing ${handler.keepOnStack - stack.size} items!! This is probably a bug!")
+        } else if (handler.keepOnStack > stack.size) {
+            repeat(handler.keepOnStack - stack.size) { popStack() }
+        }
+        stack.add(value)
+        next = handler.jumpOnException
     }
 
     private fun handleTypeof() {
-        stack.add(LString(stack.removeLast().linType))
+        stack.add(LString(popStack().linType))
     }
 
     private fun handleBinaryAddOperation() {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         if (left is LString || right is LString) {
             stack.add(LString(left.toString() + right.toString()))
             return
@@ -309,28 +325,28 @@ class DefaultExecutionLayer(
             stack.add(left + right)
             return
         }
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("add", left.linType, right.linType))
     }
 
     private fun handleBinaryDivideOperation() {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         if (left is LNumber && right is LNumber) {
             stack.add(left / right)
             return
         }
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("divide", left.linType, right.linType))
     }
 
     private fun handleBinaryEqualsOperation() {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         stack.add(LAny.ofBoolean(right == left))
     }
 
     private fun handleBinaryMultiplyOperation() {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         if (left is LString && right is LInteger) {
             stack.add(LString(left.value.repeat(right.value.toInt())))
         }
@@ -338,12 +354,12 @@ class DefaultExecutionLayer(
             stack.add(left * right)
             return
         }
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("multiply", left.linType, right.linType))
     }
 
     private fun handleBinaryNotEqualsOperation() {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         stack.add(LAny.ofBoolean(right != left))
     }
 
@@ -352,28 +368,28 @@ class DefaultExecutionLayer(
     }
 
     private fun handleBinaryRemainingOperation() {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         if (left is LNumber && right is LNumber) {
             stack.add(left % right)
             return
         }
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("remaining", left.linType, right.linType))
     }
 
     private fun handleBinarySubtractOperation() {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         if (left is LNumber && right is LNumber) {
             stack.add(left - right)
             return
         }
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("subtract", left.linType, right.linType))
     }
 
     private fun handleBinaryComparison(comparison: Comparison) {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         if (left is LString && right is LString) {
             stack.add(LAny.ofBoolean(comparison.toBoolean(left.value.compareTo(right.value))))
             return
@@ -382,7 +398,7 @@ class DefaultExecutionLayer(
             stack.add(LAny.ofBoolean(comparison.toBoolean(left.compareTo(right))))
             return
         }
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("comparison", left.linType, right.linType))
     }
 
     enum class Comparison {
@@ -403,8 +419,8 @@ class DefaultExecutionLayer(
     }
 
     private fun handleBinaryInOperation() {
-        val right = stack.removeLast()
-        val left = stack.removeLast()
+        val right = popStack()
+        val left = popStack()
         if (right is LArray) {
             stack.add(LAny.ofBoolean(left in right.value))
             return
@@ -413,39 +429,39 @@ class DefaultExecutionLayer(
             stack.add(LAny.ofBoolean(left in right.value))
             return
         }
-
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("in", left.linType, right.linType))
     }
 
     private fun handleUnaryNegativeOperation() {
-        val target = stack.removeLast()
+        val target = popStack()
         if (target is LNumber) {
             stack.add(-target)
             return
         }
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("negative", target.linType))
     }
 
     private fun handleUnaryNotOperation() {
-        stack.add(LAny.ofBoolean(!stack.removeLast().truth()))
+        stack.add(LAny.ofBoolean(!popStack().truth()))
     }
 
     private fun handleUnaryPositiveOperation() {
-        val target = stack.removeLast()
+        val target = popStack()
         if (target is LNumber) {
             stack.add(+target)
             return
         }
-        TODO("Not yet implemented")
+        events.onThrow(Exceptions.unsupportedOperation("positive", target.linType))
     }
 
     private fun handleUnaryTruthOperation() {
-        stack.add(LAny.ofBoolean(stack.removeLast().truth()))
+        stack.add(LAny.ofBoolean(popStack().truth()))
     }
 
     private fun invocation(thisValue: LAny?, function: LAny, arguments: List<LAny>) {
         if (function !is LFunction) {
-            throw IllegalStateException("Can't invoke function for type '${function.linType}'")
+            events.onThrow(Exceptions.notAFunction(function.linType))
+            return
         }
 
         if (function is LFunction.Native) {
