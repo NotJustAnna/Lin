@@ -150,7 +150,9 @@ class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBui
     override fun visitEnsureNotNullExpr(node: EnsureNotNullExpr) {
         builder.markSection(node)
         node.value.accept(this)
-        builder.checkNotNullInsn()
+        builder.dupInsn()
+        builder.invokeLocalInsn("__ensureNotNull", 1)
+        builder.popInsn()
     }
 
     override fun visitForNode(node: ForNode) {
@@ -395,6 +397,7 @@ class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBui
 
     override fun visitThrowExpr(node: ThrowExpr) {
         builder.markSection(node)
+        node.value.accept(this)
         builder.throwInsn()
     }
 

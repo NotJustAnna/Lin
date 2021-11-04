@@ -138,17 +138,6 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     }
 
     /**
-     * Throws if the value on the top of the stack is null.
-     *
-     * Stack Inputs: (value)
-     *
-     * Stack Outputs: (value)
-     */
-    fun checkNotNullInsn() {
-        instructions += CheckNotNullInsn
-    }
-
-    /**
      * Returns the value on the top of the stack.
      *
      * Stack Inputs: (value)
