@@ -69,11 +69,11 @@ class DefaultExecutionLayer(
             BinaryAddOperationInsn -> handleBinaryAddOperation()
             BinaryDivideOperationInsn -> handleBinaryDivideOperation()
             BinaryEqualsOperationInsn -> handleBinaryEqualsOperation()
-            BinaryGtOperationInsn -> handleBinaryGtOperation()
-            BinaryGteOperationInsn -> handleBinaryGteOperation()
+            BinaryGtOperationInsn -> handleBinaryComparison(Comparison.GT)
+            BinaryGteOperationInsn -> handleBinaryComparison(Comparison.GTE)
             BinaryInOperationInsn -> handleBinaryInOperation()
-            BinaryLtOperationInsn -> handleBinaryLtOperation()
-            BinaryLteOperationInsn -> handleBinaryLteOperation()
+            BinaryLtOperationInsn -> handleBinaryComparison(Comparison.LT)
+            BinaryLteOperationInsn -> handleBinaryComparison(Comparison.LTE)
             BinaryMultiplyOperationInsn -> handleBinaryMultiplyOperation()
             BinaryNotEqualsOperationInsn -> handleBinaryNotEqualsOperation()
             BinaryRangeOperationInsn -> handleBinaryRangeOperation()
@@ -149,7 +149,9 @@ class DefaultExecutionLayer(
     }
 
     private fun handleGetMemberProperty(nameConst: Int) {
-        TODO("Not yet implemented")
+        val target = stack.removeLast()
+        val member = target.getMember(source.stringPool[nameConst]) ?: TODO("Not yet implemented")
+        stack.add(member)
     }
 
     private fun handleGetSubscript(size: Int) {
@@ -271,7 +273,9 @@ class DefaultExecutionLayer(
     }
 
     private fun handleSetMemberProperty(nameConst: Int) {
-        TODO("Not yet implemented")
+        val value = stack.removeLast()
+        val parent = stack.removeLast() as? LObject ?: TODO("Not yet implemented")
+        parent.value[LString(source.stringPool[nameConst])] = value
     }
 
     private fun handleSetSubscript(size: Int) {
@@ -301,27 +305,20 @@ class DefaultExecutionLayer(
             stack.add(LArray((left.value + right.value).toMutableList()))
             return
         }
-        if (left is LInteger) {
-            if (right is LInteger) {
-                stack.add(LInteger(left.value + right.value))
-                return
-            } else if (right is LDecimal) {
-                stack.add(LDecimal(left.value + right.value))
-                return
-            }
-        } else if (left is LDecimal) {
-            if (right is LInteger) {
-                stack.add(LDecimal(left.value + right.value))
-                return
-            } else if (right is LDecimal) {
-                stack.add(LDecimal(left.value + right.value))
-                return
-            }
+        if (left is LNumber && right is LNumber) {
+            stack.add(left + right)
+            return
         }
         TODO("Not yet implemented")
     }
 
     private fun handleBinaryDivideOperation() {
+        val right = stack.removeLast()
+        val left = stack.removeLast()
+        if (left is LNumber && right is LNumber) {
+            stack.add(left / right)
+            return
+        }
         TODO("Not yet implemented")
     }
 
@@ -331,49 +328,17 @@ class DefaultExecutionLayer(
         stack.add(LAny.ofBoolean(right == left))
     }
 
-    private fun handleBinaryGtOperation() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleBinaryGteOperation() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleBinaryInOperation() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleBinaryLtOperation() {
-        TODO("Not yet implemented")
-    }
-
-    private fun handleBinaryLteOperation() {
-        TODO("Not yet implemented")
-    }
-
     private fun handleBinaryMultiplyOperation() {
         val right = stack.removeLast()
         val left = stack.removeLast()
-        if (left is LInteger) {
-            if (right is LInteger) {
-                stack.add(LInteger(left.value * right.value))
-                return
-            } else if (right is LDecimal) {
-                stack.add(LDecimal(left.value * right.value))
-                return
-            }
-        } else if (left is LDecimal) {
-            if (right is LInteger) {
-                stack.add(LDecimal(left.value * right.value))
-                return
-            } else if (right is LDecimal) {
-                stack.add(LDecimal(left.value * right.value))
-                return
-            }
-        }
         if (left is LString && right is LInteger) {
             stack.add(LString(left.value.repeat(right.value.toInt())))
         }
+        if (left is LNumber && right is LNumber) {
+            stack.add(left * right)
+            return
+        }
+        TODO("Not yet implemented")
     }
 
     private fun handleBinaryNotEqualsOperation() {
@@ -387,39 +352,75 @@ class DefaultExecutionLayer(
     }
 
     private fun handleBinaryRemainingOperation() {
+        val right = stack.removeLast()
+        val left = stack.removeLast()
+        if (left is LNumber && right is LNumber) {
+            stack.add(left % right)
+            return
+        }
         TODO("Not yet implemented")
     }
 
     private fun handleBinarySubtractOperation() {
         val right = stack.removeLast()
         val left = stack.removeLast()
-        if (left is LInteger) {
-            if (right is LInteger) {
-                stack.add(LInteger(left.value - right.value))
-                return
-            } else if (right is LDecimal) {
-                stack.add(LDecimal(left.value - right.value))
-                return
-            }
-        } else if (left is LDecimal) {
-            if (right is LInteger) {
-                stack.add(LDecimal(left.value - right.value))
-                return
-            } else if (right is LDecimal) {
-                stack.add(LDecimal(left.value - right.value))
-                return
-            }
+        if (left is LNumber && right is LNumber) {
+            stack.add(left - right)
+            return
         }
+        TODO("Not yet implemented")
+    }
+
+    private fun handleBinaryComparison(comparison: Comparison) {
+        val right = stack.removeLast()
+        val left = stack.removeLast()
+        if (left is LString && right is LString) {
+            stack.add(LAny.ofBoolean(comparison.toBoolean(left.value.compareTo(right.value))))
+            return
+        }
+        if (left is LNumber && right is LNumber) {
+            stack.add(LAny.ofBoolean(comparison.toBoolean(left.compareTo(right))))
+            return
+        }
+        TODO("Not yet implemented")
+    }
+
+    enum class Comparison {
+        GT {
+            override fun toBoolean(i: Int) = i > 0
+        },
+        GTE {
+            override fun toBoolean(i: Int) = i >= 0
+        },
+        LT {
+            override fun toBoolean(i: Int) = i < 0
+        },
+        LTE {
+            override fun toBoolean(i: Int) = i <= 0
+        };
+
+        abstract fun toBoolean(i: Int): Boolean
+    }
+
+    private fun handleBinaryInOperation() {
+        val right = stack.removeLast()
+        val left = stack.removeLast()
+        if (right is LArray) {
+            stack.add(LAny.ofBoolean(left in right.value))
+            return
+        }
+        if (right is LObject) {
+            stack.add(LAny.ofBoolean(left in right.value))
+            return
+        }
+
         TODO("Not yet implemented")
     }
 
     private fun handleUnaryNegativeOperation() {
         val target = stack.removeLast()
-        if (target is LInteger) {
-            stack.add(LInteger(-target.value))
-            return
-        } else if (target is LDecimal) {
-            stack.add(LDecimal(-target.value))
+        if (target is LNumber) {
+            stack.add(-target)
             return
         }
         TODO("Not yet implemented")
@@ -431,11 +432,8 @@ class DefaultExecutionLayer(
 
     private fun handleUnaryPositiveOperation() {
         val target = stack.removeLast()
-        if (target is LInteger) {
-            stack.add(LInteger(+target.value))
-            return
-        } else if (target is LDecimal) {
-            stack.add(LDecimal(+target.value))
+        if (target is LNumber) {
+            stack.add(+target)
             return
         }
         TODO("Not yet implemented")
