@@ -43,7 +43,7 @@ jobs:
           MCD_PASSWORD: ${{ secrets.MCD_PASSWORD }}
       - name: Publish to GitHub Packages  (macOS)
         if: ${{ runner.os == 'macOS' }}
-        run: gradle publishMacosX64PublicationToMavenRepository publishMacosArm64PublicationToMavenRepository
+        run: gradle publishMacosX64PublicationToMavenRepository
         env:
           MCD_USERNAME: ${{ secrets.MCD_USERNAME }}
           MCD_PASSWORD: ${{ secrets.MCD_PASSWORD }}
