@@ -2,16 +2,22 @@ package com.github.adriantodt.lin.compiler
 
 import com.github.adriantodt.lin.bytecode.CompiledNode
 import com.github.adriantodt.lin.bytecode.CompiledParameter
-import com.github.adriantodt.lin.bytecode.Label
+import com.github.adriantodt.lin.bytecode.JumpLabel
+import com.github.adriantodt.lin.bytecode.SectionLabel
 import com.github.adriantodt.lin.bytecode.insn.*
 import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.lin.utils.UnaryOperationType
+import com.github.adriantodt.tartar.api.lexer.Section
 import com.github.adriantodt.tartar.api.lexer.Sectional
 
 class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId: Int) {
     private val instructions = mutableListOf<Insn>()
 
-    private val labels = mutableListOf<Label>()
+    private val jumpLabels = mutableListOf<JumpLabel>()
+
+    private val sectionLabels = mutableListOf<SectionLabel>()
+
+    private val sectionStack = mutableListOf<Int>()
 
     private var nextLabelCode = 0
 
@@ -368,13 +374,33 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      * This does not produce an instruction, but rather a label.
      */
     fun markLabel(code: Int) {
-        labels += Label(at = instructions.size, code = code)
+        jumpLabels += JumpLabel(at = instructions.size, code = code)
     }
 
-    fun markSection(sectional: Sectional) {
-        // NO-OP
-        // TODO IMPLEMENT THIS
-        // This probably won't be implemented as a instruction
+    fun markSectionStart(sectionId: Int) {
+        sectionStack.add(sectionId)
+        // TODO Implement section marking.
+    }
+
+    fun markSectionStart(section: Section) {
+        markSectionStart(parent.sectionId(section))
+    }
+
+    fun markSectionEnd() {
+        sectionStack.removeLast()
+        // TODO Implement section marking.
+    }
+
+    inline fun markSection(sectionId: Int, block: () -> Unit) {
+        markSectionStart(sectionId)
+        block()
+        markSectionEnd()
+    }
+
+    inline fun markSection(sectional: Sectional, block: () -> Unit) {
+        markSectionStart(sectional.section)
+        block()
+        markSectionEnd()
     }
 
     /**
@@ -404,7 +430,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         popScopeInsn()
     }
 
-    fun build() = CompiledNode(instructions.toList(), labels.toList())
+    fun build() = CompiledNode(instructions.toList(), jumpLabels.toList())
 
     companion object {
         private const val I24_MAX = 0x7FFFFF

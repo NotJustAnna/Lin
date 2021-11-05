@@ -32,6 +32,24 @@ class VirtualMachineRegressionTests {
     }
 
     @Test
+    fun forLoopWithRange() {
+        val code = """
+            for (value in 0..100) {
+                publish(value)
+            }
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("forLoopWithRange", Source(code))
+
+        assertEquals(LNull, execution.result, "Code should not produce result.")
+
+        for (i in 0L..100L) {
+            assertEquals(LInteger(i), execution.output.removeFirst(), "Error at index $i")
+        }
+        assertTrue(execution.output.isEmpty())
+    }
+
+    @Test
     fun variables() {
         val code = """
             val a = 1

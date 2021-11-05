@@ -29,5 +29,9 @@ sealed class LAny {
         fun ofBoolean(value: Boolean): LAny {
             return if (value) LTrue else LFalse
         }
+
+        fun ofEntry(entry: Map.Entry<LAny, LAny>): LAny {
+            return LObject(LString("key") to entry.key, LString("value") to entry.value)
+        }
     }
 }

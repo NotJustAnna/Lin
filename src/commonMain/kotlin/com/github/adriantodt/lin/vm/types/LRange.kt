@@ -2,22 +2,18 @@ package com.github.adriantodt.lin.vm.types
 
 import com.github.adriantodt.lin.vm.LinRuntime
 
-data class LArray(val value: MutableList<LAny> = mutableListOf()) : LAny() {
+class LRange(val value: LongRange) : LAny() {
     override fun truth(): Boolean {
-        return value.isNotEmpty()
+        return true
     }
 
     override val linType: String
-        get() = "array"
+        get() = "range"
 
     override fun getMember(name: String): LAny? {
         if (name == "__iterator") {
             return LinRuntime.iterator
         }
         return null
-    }
-
-    override fun toString(): String {
-        return value.toString()
     }
 }

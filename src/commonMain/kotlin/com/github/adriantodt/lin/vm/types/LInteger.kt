@@ -65,4 +65,8 @@ data class LInteger(val value: Long) : LNumber() {
     override fun toString(): String {
         return value.toString()
     }
+
+    operator fun rangeTo(right: LInteger): LAny {
+        return LRange(value..right.value)
+    }
 }
