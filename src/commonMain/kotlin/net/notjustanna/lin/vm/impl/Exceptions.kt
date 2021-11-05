@@ -7,7 +7,7 @@ import net.notjustanna.lin.vm.types.LString
 object Exceptions {
     // TODO Add support for scope/lines
 
-    private fun create(type: String, description: String): LAny {
+    fun create(type: String, description: String): LAny {
         return LObject(
             LString("errorType") to LString(type),
             LString("description") to LString(description)
@@ -28,6 +28,13 @@ object Exceptions {
         )
     }
 
+    fun noElementExists(element: String): LAny {
+        return create(
+            "noElementExists",
+            "Element '$element' does not exist."
+        )
+    }
+
     fun unsupportedOperation(operation: String, leftType: String, rightType: String): LAny {
         return create(
             "unsupportedOperation",
@@ -39,6 +46,13 @@ object Exceptions {
         return create(
             "unsupportedOperation",
             "Cannot apply operation '$operation' for type '$type'."
+        )
+    }
+
+    fun nullPointer(): LAny {
+        return create(
+            "nullPointer",
+            "Argument passed is null."
         )
     }
 }

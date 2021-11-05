@@ -4,11 +4,11 @@ import net.notjustanna.lin.bytecode.CompiledNode
 import net.notjustanna.lin.bytecode.CompiledParameter
 import net.notjustanna.lin.vm.scope.DefaultMutableScope
 import net.notjustanna.lin.vm.types.LAny
-import net.notjustanna.lin.vm.types.LFunction
+import net.notjustanna.lin.vm.types.LCompiledFunction
 
 class FunctionSetupLayer(
     private val events: VMEvents,
-    private val function: LFunction.Compiled,
+    private val function: LCompiledFunction,
     private val thisValue: LAny? = null,
     arguments: List<LAny>
 ) : ExecutionLayer {
@@ -35,7 +35,10 @@ class FunctionSetupLayer(
 
             val paramName = function.source.stringConst(parameter.nameConst)
 
-            // TODO Implement Varargs
+            if (parameter.varargs) {
+                TODO("Not yet implemented: varargs parameter")
+            }
+
             if (value != null) {
                 scope.declareVariable(paramName, true)
                 scope.set(paramName, value)

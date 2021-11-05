@@ -2,11 +2,15 @@ package net.notjustanna.lin.compiler
 
 import net.notjustanna.lin.bytecode.CompiledFunction
 import net.notjustanna.lin.bytecode.CompiledParameter
+import net.notjustanna.lin.bytecode.CompiledSection
 import net.notjustanna.lin.bytecode.CompiledSource
+import net.notjustanna.tartar.api.lexer.Section
 
 class CompiledSourceBuilder {
     private val longPool = mutableListOf<Long>()
     private val stringPool = mutableListOf<String>()
+
+    private val sections = mutableListOf<CompiledSection>()
 
     private val functionParameters = mutableListOf<List<CompiledParameter>>()
     private val functions = mutableListOf<CompiledFunction>()
@@ -17,6 +21,17 @@ class CompiledSourceBuilder {
         val builder = CompiledNodeBuilder(this, nodeBuilders.size)
         nodeBuilders += builder
         return builder
+    }
+
+    fun sectionId(section: Section): Int {
+        val source = section.source
+        val pathConst = constantId(source.path)
+        val nameConst = constantId(source.name)
+        val value = CompiledSection(pathConst, nameConst, section.index, section.length)
+        val indexOf = sections.indexOf(value)
+        if (indexOf != -1) return indexOf
+        sections.add(value)
+        return sections.lastIndex
     }
 
     fun constantId(value: String): Int {

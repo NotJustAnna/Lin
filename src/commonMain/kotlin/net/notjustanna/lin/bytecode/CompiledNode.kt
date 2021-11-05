@@ -5,19 +5,19 @@ import net.notjustanna.lin.utils.Deserializer
 import net.notjustanna.lin.utils.Serializable
 import okio.Buffer
 
-data class CompiledNode(val instructions: List<Insn>, val labels: List<Label>) : Serializable {
+data class CompiledNode(val instructions: List<Insn>, val jumpLabels: List<JumpLabel>) : Serializable {
     override fun serializeTo(buffer: Buffer) {
         buffer.writeInt(instructions.size)
         for (insn in instructions) insn.serializeTo(buffer)
 
-        buffer.writeInt(labels.size)
-        for (label in labels.sortedBy { it.code }) label.serializeTo(buffer)
+        buffer.writeInt(jumpLabels.size)
+        for (label in jumpLabels.sortedBy { it.code }) label.serializeTo(buffer)
     }
 
     fun resolveLabel(code: Int): Int {
-        val indexOf = labels.binarySearchBy(code) { it.code }
+        val indexOf = jumpLabels.binarySearchBy(code) { it.code }
         check(indexOf >= 0) { "Label $code was not found." }
-        return labels[indexOf].at
+        return jumpLabels[indexOf].at
     }
 
     companion object : Deserializer<CompiledNode> {
@@ -27,12 +27,12 @@ data class CompiledNode(val instructions: List<Insn>, val labels: List<Label>) :
                 instructions += Insn.deserializeFrom(buffer)
             }
 
-            val labels = mutableListOf<Label>()
+            val jumpLabels = mutableListOf<JumpLabel>()
             repeat(buffer.readInt()) {
-                labels += Label.deserializeFrom(buffer)
+                jumpLabels += JumpLabel.deserializeFrom(buffer)
             }
 
-            return CompiledNode(instructions, labels)
+            return CompiledNode(instructions, jumpLabels)
         }
     }
 }

@@ -4,6 +4,7 @@ import net.notjustanna.lin.bytecode.CompiledNode
 import net.notjustanna.lin.bytecode.CompiledSource
 import net.notjustanna.lin.bytecode.insn.*
 import net.notjustanna.lin.exception.StackUnderflowException
+import net.notjustanna.lin.vm.LAnyException
 import net.notjustanna.lin.vm.scope.DefaultMutableScope
 import net.notjustanna.lin.vm.scope.MutableScope
 import net.notjustanna.lin.vm.scope.Scope
@@ -96,6 +97,11 @@ class DefaultExecutionLayer(
             events.onThrow(value)
             return
         }
+        if (handler.keepOnStack < stack.size) {
+            println("WTF? Stack is missing ${handler.keepOnStack - stack.size} items!! This is probably a bug!")
+        } else if (handler.keepOnStack > stack.size) {
+            repeat(handler.keepOnStack - stack.size) { popStack() }
+        }
         next = handler.jumpOnException
         stack.add(value)
     }
@@ -156,12 +162,36 @@ class DefaultExecutionLayer(
 
     private fun handleGetMemberProperty(nameConst: Int) {
         val target = popStack()
-        val member = target.getMember(source.stringConst(nameConst)) ?: TODO("Not yet implemented")
-        stack.add(member)
+        val name = source.stringConst(nameConst)
+        val member = target.getMember(name)
+        if (member != null) {
+            stack.add(member)
+        }
+        onThrow(Exceptions.noElementExists(name))
     }
 
     private fun handleGetSubscript(size: Int) {
-        TODO("Not yet implemented")
+        val arguments = List(size) { popStack() }.reversed()
+        val parent = popStack()
+        if (parent is LArray && size == 1) {
+            val arg = arguments.first()
+            if (arg is LInteger) {
+                val element = parent.value.getOrNull(arg.value.toInt())
+                if (element != null) {
+                    stack.add(element)
+                    return
+                }
+            }
+        }
+        if (parent is LObject && size == 1) {
+            val arg = arguments.first()
+            val element = parent.value[arg]
+            if (element != null) {
+                stack.add(element)
+                return
+            }
+        }
+        TODO("Not yet implemented: GetSubscript -> $parent$arguments")
     }
 
     private fun handleGetVariable(nameConst: Int) {
@@ -209,8 +239,7 @@ class DefaultExecutionLayer(
 
     private fun handleNewFunction(functionId: Int) {
         val functionData = source.functions[functionId]
-        val functionName = source.stringConstOrNull(functionData.nameConst)
-        stack.add(LFunction.Compiled(functionName, source, functionData, scope))
+        stack.add(LCompiledFunction(source, functionData, scope))
     }
 
     private fun handleNewObject() {
@@ -278,12 +307,31 @@ class DefaultExecutionLayer(
 
     private fun handleSetMemberProperty(nameConst: Int) {
         val value = popStack()
-        val parent = popStack() as? LObject ?: TODO("Not yet implemented")
-        parent.value[LString(source.stringConst(nameConst))] = value
+        val s = source.stringConst(nameConst)
+        val parent = popStack()
+        if (parent is LObject) {
+            parent.value[LString(s)] = value
+        }
+        TODO("Not yet implemented: SetMember $parent.$s = $value")
     }
 
     private fun handleSetSubscript(size: Int) {
-        TODO("Not yet implemented")
+        val value = popStack()
+        val arguments = List(size) { popStack() }.reversed()
+        val parent = popStack()
+        if (parent is LArray && size == 1) {
+            val arg = arguments.first()
+            if (arg is LInteger) {
+                parent.value[arg.value.toInt()] = value
+                return
+            }
+        }
+        if (parent is LObject && size == 1) {
+            val arg = arguments.first()
+            parent.value[arg] = value
+            return
+        }
+        TODO("Not yet implemented: SetSubscript -> $parent$arguments = $value")
     }
 
     private fun handleSetVariable(nameConst: Int) {
@@ -291,19 +339,7 @@ class DefaultExecutionLayer(
     }
 
     private fun handleThrow() {
-        val value = popStack()
-        val handler = exceptionHandlers.removeLastOrNull()
-        if (handler == null) {
-            events.onThrow(value)
-            return
-        }
-        if (handler.keepOnStack < stack.size) {
-            println("WTF? Stack is missing ${handler.keepOnStack - stack.size} items!! This is probably a bug!")
-        } else if (handler.keepOnStack > stack.size) {
-            repeat(handler.keepOnStack - stack.size) { popStack() }
-        }
-        stack.add(value)
-        next = handler.jumpOnException
+        onThrow(popStack())
     }
 
     private fun handleTypeof() {
@@ -325,7 +361,7 @@ class DefaultExecutionLayer(
             stack.add(left + right)
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("add", left.linType, right.linType))
+        onThrow(Exceptions.unsupportedOperation("add", left.linType, right.linType))
     }
 
     private fun handleBinaryDivideOperation() {
@@ -335,7 +371,7 @@ class DefaultExecutionLayer(
             stack.add(left / right)
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("divide", left.linType, right.linType))
+        onThrow(Exceptions.unsupportedOperation("divide", left.linType, right.linType))
     }
 
     private fun handleBinaryEqualsOperation() {
@@ -354,7 +390,7 @@ class DefaultExecutionLayer(
             stack.add(left * right)
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("multiply", left.linType, right.linType))
+        onThrow(Exceptions.unsupportedOperation("multiply", left.linType, right.linType))
     }
 
     private fun handleBinaryNotEqualsOperation() {
@@ -364,7 +400,13 @@ class DefaultExecutionLayer(
     }
 
     private fun handleBinaryRangeOperation() {
-        TODO("Not yet implemented")
+        val right = popStack()
+        val left = popStack()
+        if (left is LInteger && right is LInteger) {
+            stack.add(left..right)
+            return
+        }
+        onThrow(Exceptions.unsupportedOperation("range", left.linType, right.linType))
     }
 
     private fun handleBinaryRemainingOperation() {
@@ -374,7 +416,7 @@ class DefaultExecutionLayer(
             stack.add(left % right)
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("remaining", left.linType, right.linType))
+        onThrow(Exceptions.unsupportedOperation("remaining", left.linType, right.linType))
     }
 
     private fun handleBinarySubtractOperation() {
@@ -384,7 +426,7 @@ class DefaultExecutionLayer(
             stack.add(left - right)
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("subtract", left.linType, right.linType))
+        onThrow(Exceptions.unsupportedOperation("subtract", left.linType, right.linType))
     }
 
     private fun handleBinaryComparison(comparison: Comparison) {
@@ -398,7 +440,7 @@ class DefaultExecutionLayer(
             stack.add(LAny.ofBoolean(comparison.toBoolean(left.compareTo(right))))
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("comparison", left.linType, right.linType))
+        onThrow(Exceptions.unsupportedOperation("comparison", left.linType, right.linType))
     }
 
     enum class Comparison {
@@ -429,7 +471,7 @@ class DefaultExecutionLayer(
             stack.add(LAny.ofBoolean(left in right.value))
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("in", left.linType, right.linType))
+        onThrow(Exceptions.unsupportedOperation("in", left.linType, right.linType))
     }
 
     private fun handleUnaryNegativeOperation() {
@@ -438,7 +480,7 @@ class DefaultExecutionLayer(
             stack.add(-target)
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("negative", target.linType))
+        onThrow(Exceptions.unsupportedOperation("negative", target.linType))
     }
 
     private fun handleUnaryNotOperation() {
@@ -451,30 +493,33 @@ class DefaultExecutionLayer(
             stack.add(+target)
             return
         }
-        events.onThrow(Exceptions.unsupportedOperation("positive", target.linType))
+        onThrow(Exceptions.unsupportedOperation("positive", target.linType))
     }
 
     private fun handleUnaryTruthOperation() {
         stack.add(LAny.ofBoolean(popStack().truth()))
     }
 
-    private fun invocation(thisValue: LAny?, function: LAny, arguments: List<LAny>) {
-        if (function !is LFunction) {
-            events.onThrow(Exceptions.notAFunction(function.linType))
-            return
+    private fun invocation(thisValue: LAny?, function: LAny, args: List<LAny>) {
+        when (function) {
+            is LNativeFunction -> {
+                try {
+                    stack.add(function.block(thisValue, args))
+                } catch (e: LAnyException) {
+                    onThrow(e.value)
+                } catch (e: Exception) {
+                    TODO("Not yet implemented: $thisValue.$function(${args.joinToString()}) threw native exception.")
+                }
+            }
+            is LCompiledFunction -> {
+                val layer = FunctionSetupLayer(events, function, thisValue, args)
+                events.pushLayer(layer)
+                layer.step()
+            }
+            else -> {
+                onThrow(Exceptions.notAFunction(function.linType))
+            }
         }
 
-        if (function is LFunction.Native) {
-            stack.add(function.nativeBlock(arguments))
-            return
-        }
-
-        if (function !is LFunction.Compiled) {
-            throw AssertionError("Impossible.")
-        }
-
-        val layer = FunctionSetupLayer(events, function, thisValue, arguments)
-        events.pushLayer(layer)
-        layer.step()
     }
 }
