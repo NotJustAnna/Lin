@@ -1,6 +1,8 @@
 package net.notjustanna.lin.parser
 
 import net.notjustanna.lin.ast.node.*
+import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
+import net.notjustanna.lin.ast.node.value.FunctionExpr
 import net.notjustanna.lin.lexer.TokenType
 import net.notjustanna.lin.parser.utils.matchAll
 import net.notjustanna.tartar.api.grammar.Grammar
@@ -13,7 +15,12 @@ internal fun linStdParser(grammar: Grammar<TokenType, Node>) = Parser.create(gra
     matchAll(TokenType.NL, TokenType.SEMICOLON)
     val expr = try {
         do {
-            list += parseExpression()
+            val expr = parseExpression()
+
+            list += when {
+                expr is FunctionExpr && expr.name != null -> DeclareFunctionExpr(expr.name, expr, expr.section)
+                else -> expr
+            }
         } while (matchAll(TokenType.NL, TokenType.SEMICOLON) && !eof)
 
         if (list.isNotEmpty() && list.last() is Expr) {

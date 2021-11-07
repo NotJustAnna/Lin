@@ -266,7 +266,7 @@ class DefaultExecutionLayer(
     }
 
     private fun handlePopScope() {
-        scope = scope.parent ?: throw error("Can't pop root scope.")
+        scope = scope.parent ?: error("Can't pop root scope.")
     }
 
     private fun handlePushBoolean(value: Boolean) {
