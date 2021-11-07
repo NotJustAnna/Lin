@@ -234,4 +234,29 @@ class VirtualMachineRegressionTests {
 
         assertEquals(LTrue, execution.result, "Code should produce true")
     }
+
+    @Test
+    fun fib() {
+        val code = """
+            fun fib(value) {
+              var a = 1
+              var b = 0
+              var c = 0
+
+              for (i in 1..(value - 1)) {
+                c = b
+                b = a
+                a = c + b
+              }
+
+              return a
+            }
+
+            fib(10)
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark("fib", Source(code))
+
+        assertEquals(LInteger(55), execution.result, "Code should produce true")
+    }
 }

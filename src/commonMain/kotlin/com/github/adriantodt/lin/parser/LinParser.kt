@@ -1,6 +1,8 @@
 package com.github.adriantodt.lin.parser
 
 import com.github.adriantodt.lin.ast.node.*
+import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
+import com.github.adriantodt.lin.ast.node.value.FunctionExpr
 import com.github.adriantodt.lin.lexer.TokenType
 import com.github.adriantodt.lin.parser.utils.matchAll
 import com.github.adriantodt.tartar.api.grammar.Grammar
@@ -13,7 +15,12 @@ internal fun linStdParser(grammar: Grammar<TokenType, Node>) = Parser.create(gra
     matchAll(TokenType.NL, TokenType.SEMICOLON)
     val expr = try {
         do {
-            list += parseExpression()
+            val expr = parseExpression()
+
+            list += when {
+                expr is FunctionExpr && expr.name != null -> DeclareFunctionExpr(expr.name, expr, expr.section)
+                else -> expr
+            }
         } while (matchAll(TokenType.NL, TokenType.SEMICOLON) && !eof)
 
         if (list.isNotEmpty() && list.last() is Expr) {
