@@ -9,13 +9,17 @@ import net.notjustanna.lin.vm.types.LNull
 @OptIn(ExperimentalStdlibApi::class)
 class LinJsRuntime {
     val scope: ImmutableMapScope
-    val bufferedLog = mutableListOf<String>()
+    val console = StringBuilder()
 
     init {
         val map = buildMap<String, LAny> {
             put("__ensureNotNull", LinRuntime.ensureNotNull)
+            put("print", LNativeFunction { _, args ->
+                console.append(args.joinToString(" "))
+                LNull
+            })
             put("println", LNativeFunction { _, args ->
-                bufferedLog.add(args.joinToString(" "))
+                console.appendLine(args.joinToString(" "))
                 LNull
             })
         }

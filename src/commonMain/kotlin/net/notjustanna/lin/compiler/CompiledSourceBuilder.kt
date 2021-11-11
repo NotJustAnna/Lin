@@ -25,9 +25,12 @@ class CompiledSourceBuilder {
 
     fun sectionId(section: Section): Int {
         val source = section.source
-        val pathConst = constantId(source.path)
         val nameConst = constantId(source.name)
-        val value = CompiledSection(pathConst, nameConst, section.index, section.length)
+        val value = CompiledSection(
+            nameConst,
+            section.firstLine.lineNumber,
+            section.index - section.firstLine.range.first
+        )
         val indexOf = sections.indexOf(value)
         if (indexOf != -1) return indexOf
         sections.add(value)
@@ -67,6 +70,7 @@ class CompiledSourceBuilder {
         stringPool.toList(),
         functionParameters.toList(),
         functions.toList(),
+        sections.toList(),
         nodeBuilders.map { it.build() }
     )
 }

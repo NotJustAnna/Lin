@@ -16,8 +16,9 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     private val jumpLabels = mutableListOf<JumpLabel>()
 
     private val sectionLabels = mutableListOf<SectionLabel>()
-
     private val sectionStack = mutableListOf<Int>()
+    private var lastSectionInsn = 0
+
 
     private var nextLabelCode = 0
 
@@ -378,8 +379,9 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     }
 
     fun markSectionStart(sectionId: Int) {
+        val last = sectionStack.lastOrNull()
         sectionStack.add(sectionId)
-        // TODO Implement section marking.
+        if (last != null) generateSectionLabel(last)
     }
 
     fun markSectionStart(section: Section) {
@@ -387,8 +389,8 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     }
 
     fun markSectionEnd() {
-        sectionStack.removeLast()
-        // TODO Implement section marking.
+        val last = sectionStack.removeLast()
+        generateSectionLabel(last)
     }
 
     inline fun markSection(sectionId: Int, block: () -> Unit) {
@@ -430,7 +432,22 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         popScopeInsn()
     }
 
-    fun build() = CompiledNode(instructions.toList(), jumpLabels.toList())
+    private fun generateSectionLabel(lastSectionId: Int) {
+        val currSectionInsn = instructions.size
+        if (lastSectionInsn < currSectionInsn) {
+            val length = currSectionInsn - lastSectionInsn
+            sectionLabels.add(SectionLabel(length, lastSectionId))
+            lastSectionInsn = currSectionInsn
+        }
+    }
+
+    fun build(): CompiledNode {
+        if (sectionStack.isNotEmpty()) {
+            println("This should not have happened.")
+            generateSectionLabel(sectionStack.last())
+        }
+        return CompiledNode(instructions.toList(), jumpLabels.toList(), sectionLabels.toList())
+    }
 
     companion object {
         private const val I24_MAX = 0x7FFFFF

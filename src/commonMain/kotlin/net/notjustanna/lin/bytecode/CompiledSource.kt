@@ -11,6 +11,7 @@ data class CompiledSource(
     val stringPool: List<String>,
     val functionParameters: List<List<CompiledParameter>>,
     val functions: List<CompiledFunction>,
+    val sections: List<CompiledSection>,
     val nodes: List<CompiledNode>
 ) : Serializable {
     override fun serializeTo(buffer: Buffer) {
@@ -31,6 +32,9 @@ data class CompiledSource(
 
         buffer.writeInt(functions.size)
         for (function in functions) function.serializeTo(buffer)
+
+        buffer.writeInt(sections.size)
+        for (section in sections) section.serializeTo(buffer)
 
         buffer.writeInt(nodes.size)
         for (node in nodes) node.serializeTo(buffer)
@@ -79,12 +83,17 @@ data class CompiledSource(
                 functions += CompiledFunction.deserializeFrom(buffer)
             }
 
+            val sections = mutableListOf<CompiledSection>()
+            repeat(buffer.readInt()) {
+                sections += CompiledSection.deserializeFrom(buffer)
+            }
+
             val nodes = mutableListOf<CompiledNode>()
             repeat(buffer.readInt()) {
                 nodes += CompiledNode.deserializeFrom(buffer)
             }
 
-            return CompiledSource(longPool, stringPool, functionParameters, functions, nodes)
+            return CompiledSource(longPool, stringPool, functionParameters, functions, sections, nodes)
         }
     }
 }
