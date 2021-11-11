@@ -3,8 +3,11 @@ package com.github.adriantodt.lin.vm.impl
 import com.github.adriantodt.lin.bytecode.CompiledNode
 import com.github.adriantodt.lin.bytecode.CompiledSource
 import com.github.adriantodt.lin.bytecode.insn.*
+import com.github.adriantodt.lin.exception.LinNativeException
+import com.github.adriantodt.lin.exception.LinUnsupportedOperationException
 import com.github.adriantodt.lin.exception.StackUnderflowException
 import com.github.adriantodt.lin.vm.LAnyException
+import com.github.adriantodt.lin.vm.StackTrace
 import com.github.adriantodt.lin.vm.scope.DefaultMutableScope
 import com.github.adriantodt.lin.vm.scope.MutableScope
 import com.github.adriantodt.lin.vm.scope.Scope
@@ -14,6 +17,7 @@ class DefaultExecutionLayer(
     private val events: VMEvents,
     private var scope: Scope,
     private val source: CompiledSource,
+    private val functionName: String,
     private val node: CompiledNode = source.nodes[0],
     private val thisValue: LAny? = null
 ) : ExecutionLayer {
@@ -26,64 +30,73 @@ class DefaultExecutionLayer(
             events.onReturn(stack.removeLastOrNull() ?: LNull)
             return
         }
-
-        when (insn) {
-            ArrayInsertInsn -> handleArrayInsert()
-            is AssignInsn -> handleAssign(insn.nameConst)
-            is BranchIfInsn -> handleBranchIf(insn.value, insn.labelCode)
-            BreakInsn -> handleBreak()
-            ContinueInsn -> handleContinue()
-            is DeclareVariableInsn -> handleDeclareVariable(insn.mutable, insn.nameConst)
-            DupInsn -> handleDup()
-            is GetMemberPropertyInsn -> handleGetMemberProperty(insn.nameConst)
-            is GetSubscriptInsn -> handleGetSubscript(insn.size)
-            is GetVariableInsn -> handleGetVariable(insn.nameConst)
-            is InvokeInsn -> handleInvoke(insn.size)
-            is InvokeLocalInsn -> handleInvokeLocal(insn.nameConst, insn.size)
-            is InvokeMemberInsn -> handleInvokeMember(insn.nameConst, insn.size)
-            is JumpInsn -> handleJump(insn.labelCode)
-            is LoadDecimalInsn -> handleLoadDecimal(insn.valueConst)
-            is LoadIntegerInsn -> handleLoadInteger(insn.valueConst)
-            is LoadStringInsn -> handleLoadString(insn.valueConst)
-            NewArrayInsn -> handleNewArray()
-            is NewFunctionInsn -> handleNewFunction(insn.functionId)
-            NewObjectInsn -> handleNewObject()
-            ObjectInsertInsn -> handleObjectInsert()
-            PopExceptionHandlingInsn -> handlePopExceptionHandling()
-            PopInsn -> handlePop()
-            PopLoopHandlingInsn -> handlePopLoopHandling()
-            PopScopeInsn -> handlePopScope()
-            is PushBooleanInsn -> handlePushBoolean(insn.value)
-            is PushDecimalInsn -> handlePushDecimal(insn.immediateValue)
-            is PushExceptionHandlingInsn -> handlePushExceptionHandling(insn.catchLabel, insn.endLabel)
-            is PushIntegerInsn -> handlePushInteger(insn.immediateValue)
-            is PushLoopHandlingInsn -> handlePushLoopHandling(insn.breakLabel, insn.continueLabel)
-            PushNullInsn -> handlePushNull()
-            PushScopeInsn -> handlePushScope()
-            PushThisInsn -> handlePushThis()
-            ReturnInsn -> handleReturn()
-            is SetMemberPropertyInsn -> handleSetMemberProperty(insn.nameConst)
-            is SetSubscriptInsn -> handleSetSubscript(insn.size)
-            is SetVariableInsn -> handleSetVariable(insn.nameConst)
-            ThrowInsn -> handleThrow()
-            TypeofInsn -> handleTypeof()
-            BinaryAddOperationInsn -> handleBinaryAddOperation()
-            BinaryDivideOperationInsn -> handleBinaryDivideOperation()
-            BinaryEqualsOperationInsn -> handleBinaryEqualsOperation()
-            BinaryGtOperationInsn -> handleBinaryComparison(Comparison.GT)
-            BinaryGteOperationInsn -> handleBinaryComparison(Comparison.GTE)
-            BinaryInOperationInsn -> handleBinaryInOperation()
-            BinaryLtOperationInsn -> handleBinaryComparison(Comparison.LT)
-            BinaryLteOperationInsn -> handleBinaryComparison(Comparison.LTE)
-            BinaryMultiplyOperationInsn -> handleBinaryMultiplyOperation()
-            BinaryNotEqualsOperationInsn -> handleBinaryNotEqualsOperation()
-            BinaryRangeOperationInsn -> handleBinaryRangeOperation()
-            BinaryRemainingOperationInsn -> handleBinaryRemainingOperation()
-            BinarySubtractOperationInsn -> handleBinarySubtractOperation()
-            UnaryNegativeOperationInsn -> handleUnaryNegativeOperation()
-            UnaryNotOperationInsn -> handleUnaryNotOperation()
-            UnaryPositiveOperationInsn -> handleUnaryPositiveOperation()
-            UnaryTruthOperationInsn -> handleUnaryTruthOperation()
+        try {
+            when (insn) {
+                ArrayInsertInsn -> handleArrayInsert()
+                is AssignInsn -> handleAssign(insn.nameConst)
+                is BranchIfInsn -> handleBranchIf(insn.value, insn.labelCode)
+                BreakInsn -> handleBreak()
+                ContinueInsn -> handleContinue()
+                is DeclareVariableInsn -> handleDeclareVariable(insn.mutable, insn.nameConst)
+                DupInsn -> handleDup()
+                is GetMemberPropertyInsn -> handleGetMemberProperty(insn.nameConst)
+                is GetSubscriptInsn -> handleGetSubscript(insn.size)
+                is GetVariableInsn -> handleGetVariable(insn.nameConst)
+                is InvokeInsn -> handleInvoke(insn.size)
+                is InvokeLocalInsn -> handleInvokeLocal(insn.nameConst, insn.size)
+                is InvokeMemberInsn -> handleInvokeMember(insn.nameConst, insn.size)
+                is JumpInsn -> handleJump(insn.labelCode)
+                is LoadDecimalInsn -> handleLoadDecimal(insn.valueConst)
+                is LoadIntegerInsn -> handleLoadInteger(insn.valueConst)
+                is LoadStringInsn -> handleLoadString(insn.valueConst)
+                NewArrayInsn -> handleNewArray()
+                is NewFunctionInsn -> handleNewFunction(insn.functionId)
+                NewObjectInsn -> handleNewObject()
+                ObjectInsertInsn -> handleObjectInsert()
+                PopExceptionHandlingInsn -> handlePopExceptionHandling()
+                PopInsn -> handlePop()
+                PopLoopHandlingInsn -> handlePopLoopHandling()
+                PopScopeInsn -> handlePopScope()
+                is PushBooleanInsn -> handlePushBoolean(insn.value)
+                is PushDecimalInsn -> handlePushDecimal(insn.immediateValue)
+                is PushExceptionHandlingInsn -> handlePushExceptionHandling(insn.catchLabel, insn.endLabel)
+                is PushIntegerInsn -> handlePushInteger(insn.immediateValue)
+                is PushLoopHandlingInsn -> handlePushLoopHandling(insn.breakLabel, insn.continueLabel)
+                PushNullInsn -> handlePushNull()
+                PushScopeInsn -> handlePushScope()
+                PushThisInsn -> handlePushThis()
+                ReturnInsn -> handleReturn()
+                is SetMemberPropertyInsn -> handleSetMemberProperty(insn.nameConst)
+                is SetSubscriptInsn -> handleSetSubscript(insn.size)
+                is SetVariableInsn -> handleSetVariable(insn.nameConst)
+                ThrowInsn -> handleThrow()
+                TypeofInsn -> handleTypeof()
+                BinaryAddOperationInsn -> handleBinaryAddOperation()
+                BinaryDivideOperationInsn -> handleBinaryDivideOperation()
+                BinaryEqualsOperationInsn -> handleBinaryEqualsOperation()
+                BinaryGtOperationInsn -> handleBinaryComparison(Comparison.GT)
+                BinaryGteOperationInsn -> handleBinaryComparison(Comparison.GTE)
+                BinaryInOperationInsn -> handleBinaryInOperation()
+                BinaryLtOperationInsn -> handleBinaryComparison(Comparison.LT)
+                BinaryLteOperationInsn -> handleBinaryComparison(Comparison.LTE)
+                BinaryMultiplyOperationInsn -> handleBinaryMultiplyOperation()
+                BinaryNotEqualsOperationInsn -> handleBinaryNotEqualsOperation()
+                BinaryRangeOperationInsn -> handleBinaryRangeOperation()
+                BinaryRemainingOperationInsn -> handleBinaryRemainingOperation()
+                BinarySubtractOperationInsn -> handleBinarySubtractOperation()
+                UnaryNegativeOperationInsn -> handleUnaryNegativeOperation()
+                UnaryNotOperationInsn -> handleUnaryNotOperation()
+                UnaryPositiveOperationInsn -> handleUnaryPositiveOperation()
+                UnaryTruthOperationInsn -> handleUnaryTruthOperation()
+            }
+        } catch (e: Exception) {
+            onThrow(
+                when (e) {
+                    is LAnyException -> e.value
+                    is LinNativeException -> Exceptions.toObject(e, events.stackTrace())
+                    else -> Exceptions.fromNative(e, events.stackTrace())
+                }
+            )
         }
     }
 
@@ -167,7 +180,7 @@ class DefaultExecutionLayer(
         if (member != null) {
             stack.add(member)
         }
-        onThrow(Exceptions.noElementExists(name))
+        onThrow(Exceptions.noElementExists(name, events.stackTrace()))
     }
 
     private fun handleGetSubscript(size: Int) {
@@ -361,7 +374,7 @@ class DefaultExecutionLayer(
             stack.add(left + right)
             return
         }
-        onThrow(Exceptions.unsupportedOperation("add", left.linType, right.linType))
+        throw LinUnsupportedOperationException("add", left.linType, right.linType)
     }
 
     private fun handleBinaryDivideOperation() {
@@ -371,7 +384,7 @@ class DefaultExecutionLayer(
             stack.add(left / right)
             return
         }
-        onThrow(Exceptions.unsupportedOperation("divide", left.linType, right.linType))
+        throw LinUnsupportedOperationException("divide", left.linType, right.linType)
     }
 
     private fun handleBinaryEqualsOperation() {
@@ -390,7 +403,7 @@ class DefaultExecutionLayer(
             stack.add(left * right)
             return
         }
-        onThrow(Exceptions.unsupportedOperation("multiply", left.linType, right.linType))
+        throw LinUnsupportedOperationException("multiply", left.linType, right.linType)
     }
 
     private fun handleBinaryNotEqualsOperation() {
@@ -406,7 +419,7 @@ class DefaultExecutionLayer(
             stack.add(left..right)
             return
         }
-        onThrow(Exceptions.unsupportedOperation("range", left.linType, right.linType))
+        throw LinUnsupportedOperationException("range", left.linType, right.linType)
     }
 
     private fun handleBinaryRemainingOperation() {
@@ -416,7 +429,7 @@ class DefaultExecutionLayer(
             stack.add(left % right)
             return
         }
-        onThrow(Exceptions.unsupportedOperation("remaining", left.linType, right.linType))
+        throw LinUnsupportedOperationException("remaining", left.linType, right.linType)
     }
 
     private fun handleBinarySubtractOperation() {
@@ -426,7 +439,7 @@ class DefaultExecutionLayer(
             stack.add(left - right)
             return
         }
-        onThrow(Exceptions.unsupportedOperation("subtract", left.linType, right.linType))
+        throw LinUnsupportedOperationException("subtract", left.linType, right.linType)
     }
 
     private fun handleBinaryComparison(comparison: Comparison) {
@@ -440,7 +453,7 @@ class DefaultExecutionLayer(
             stack.add(LAny.ofBoolean(comparison.toBoolean(left.compareTo(right))))
             return
         }
-        onThrow(Exceptions.unsupportedOperation("comparison", left.linType, right.linType))
+        throw LinUnsupportedOperationException("comparison", left.linType, right.linType)
     }
 
     enum class Comparison {
@@ -471,7 +484,7 @@ class DefaultExecutionLayer(
             stack.add(LAny.ofBoolean(left in right.value))
             return
         }
-        onThrow(Exceptions.unsupportedOperation("in", left.linType, right.linType))
+        throw LinUnsupportedOperationException("in", left.linType, right.linType)
     }
 
     private fun handleUnaryNegativeOperation() {
@@ -480,7 +493,7 @@ class DefaultExecutionLayer(
             stack.add(-target)
             return
         }
-        onThrow(Exceptions.unsupportedOperation("negative", target.linType))
+        throw LinUnsupportedOperationException("negative", target.linType)
     }
 
     private fun handleUnaryNotOperation() {
@@ -493,7 +506,7 @@ class DefaultExecutionLayer(
             stack.add(+target)
             return
         }
-        onThrow(Exceptions.unsupportedOperation("positive", target.linType))
+        throw LinUnsupportedOperationException("positive", target.linType)
     }
 
     private fun handleUnaryTruthOperation() {
@@ -505,10 +518,15 @@ class DefaultExecutionLayer(
             is LNativeFunction -> {
                 try {
                     stack.add(function.block(thisValue, args))
-                } catch (e: LAnyException) {
-                    onThrow(e.value)
                 } catch (e: Exception) {
-                    TODO("Not yet implemented: $thisValue.$function(${args.joinToString()}) threw native exception.")
+                    val stackTrace = listOf(StackTrace(function.name ?: "<anonymous function>")) + events.stackTrace()
+                    onThrow(
+                        when (e) {
+                            is LAnyException -> e.value
+                            is LinNativeException -> Exceptions.toObject(e, stackTrace)
+                            else -> Exceptions.fromNative(e, stackTrace)
+                        }
+                    )
                 }
             }
             is LCompiledFunction -> {
@@ -517,9 +535,25 @@ class DefaultExecutionLayer(
                 layer.step()
             }
             else -> {
-                onThrow(Exceptions.notAFunction(function.linType))
+                onThrow(Exceptions.notAFunction(function.linType, events.stackTrace()))
             }
         }
+    }
 
+    override fun trace(): StackTrace? {
+        val section = source.sections.getOrNull(findSectionIndex(next - 1)) ?: return null
+        return StackTrace(functionName, source.stringConst(section.nameConst), section.line, section.column)
+    }
+
+    private fun findSectionIndex(last: Int): Int {
+        var atInsn = 0
+        for ((length, index) in node.sectionLabels) {
+            if (atInsn + length < last) {
+                atInsn += length
+                continue
+            }
+            return index
+        }
+        return -1
     }
 }

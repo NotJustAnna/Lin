@@ -1,7 +1,6 @@
 package com.github.adriantodt.lin.js
 
 import com.github.adriantodt.lin.Lin
-import com.github.adriantodt.lin.compiler.NodeCompiler
 import com.github.adriantodt.tartar.api.lexer.Source
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
@@ -10,9 +9,7 @@ import kotlin.time.measureTimedValue
 @OptIn(ExperimentalTime::class, ExperimentalJsExport::class)
 @JsExport
 object Lin {
-    fun compile(source: String): Compilation {
-        val (node, parseDuration) = measureTimedValue { Lin.parser.parse(Source(source, "snippet.lin")) }
-        val (compiledSource, compileDuration) = measureTimedValue { NodeCompiler.compile(node) }
-        return Compilation(compiledSource, parseDuration.toString(), compileDuration.toString())
+    fun parse(source: String, name: String = "snippet.lin"): ParseResult {
+        return ParseResult(measureTimedValue { Lin.parser.runCatching { parse(Source(source, name)) } })
     }
 }

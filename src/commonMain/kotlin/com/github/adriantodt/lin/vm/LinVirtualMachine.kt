@@ -11,7 +11,12 @@ import com.github.adriantodt.lin.vm.types.LAny
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class LinVirtualMachine(scope: Scope, source: CompiledSource) {
     private val layerStack = mutableListOf<ExecutionLayer>()
-    private var currentLayer: ExecutionLayer = DefaultExecutionLayer(Events(), DefaultMutableScope(scope), source)
+    private var currentLayer: ExecutionLayer = DefaultExecutionLayer(
+        Events(),
+        DefaultMutableScope(scope),
+        source,
+        "<main>"
+    )
     private var result: VMResult? = null
 
     fun run(): LAny {
@@ -70,6 +75,10 @@ class LinVirtualMachine(scope: Scope, source: CompiledSource) {
             }
             currentLayer = layer
             layer.onThrow(value)
+        }
+
+        override fun stackTrace(): List<StackTrace> {
+            return (layerStack + currentLayer).asReversed().mapNotNull(ExecutionLayer::trace)
         }
     }
 }

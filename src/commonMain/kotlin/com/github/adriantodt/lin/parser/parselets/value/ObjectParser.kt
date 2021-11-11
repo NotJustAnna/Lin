@@ -9,6 +9,7 @@ import com.github.adriantodt.lin.ast.node.value.*
 import com.github.adriantodt.lin.lexer.TokenType
 import com.github.adriantodt.lin.lexer.TokenType.*
 import com.github.adriantodt.lin.parser.utils.matchAll
+import com.github.adriantodt.lin.parser.utils.maybeIgnoreNL
 import com.github.adriantodt.lin.parser.utils.skipOnlyUntil
 import com.github.adriantodt.tartar.api.grammar.PrefixParselet
 import com.github.adriantodt.tartar.api.parser.ParserContext
@@ -90,7 +91,9 @@ object ObjectParser : PrefixParselet<TokenType, Node> {
 
                 ctx.matchAll(NL)
             } while (ctx.match(COMMA))
+            ctx.matchAll(NL)
             ctx.eat(R_BRACE)
+            ctx.maybeIgnoreNL()
         }
         return ObjectExpr(contents, token.section)
     }

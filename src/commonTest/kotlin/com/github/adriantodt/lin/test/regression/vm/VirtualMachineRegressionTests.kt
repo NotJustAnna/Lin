@@ -16,7 +16,7 @@ class VirtualMachineRegressionTests {
             }
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("forLoop", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "forLoop.lin"))
 
         assertEquals(LNull, execution.result, "Code should not produce result.")
 
@@ -39,7 +39,7 @@ class VirtualMachineRegressionTests {
             }
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("forLoopWithRange", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "forLoopWithRange.lin"))
 
         assertEquals(LNull, execution.result, "Code should not produce result.")
 
@@ -57,7 +57,7 @@ class VirtualMachineRegressionTests {
             publish(a, b)
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("variables", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "variables.lin"))
 
         assertEquals(LNull, execution.result, "Code should not produce result.")
         for ((index, any) in listOf(LInteger(1), LInteger(2)).withIndex()) {
@@ -72,7 +72,7 @@ class VirtualMachineRegressionTests {
             "Hello, World!"
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("simpleReturn", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "simpleReturn.lin"))
 
         assertEquals(LString("Hello, World!"), execution.result, "Code should produce 'Hello, World!'")
         assertTrue(execution.output.isEmpty())
@@ -85,7 +85,7 @@ class VirtualMachineRegressionTests {
             true
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("simpleReturn", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "returnBreakingFlow.lin"))
 
         assertEquals(LFalse, execution.result, "Code should produce false")
         assertTrue(execution.output.isEmpty())
@@ -102,7 +102,7 @@ class VirtualMachineRegressionTests {
             i
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("breakWhileLoop", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "breakWhileLoop.lin"))
 
         assertEquals(LInteger(100), execution.result, "Code should produce 100")
         assertTrue(execution.output.isEmpty())
@@ -120,7 +120,7 @@ class VirtualMachineRegressionTests {
             true
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("continueWhileLoop", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "continueWhileLoop.lin"))
 
         assertEquals(LTrue, execution.result, "Code should produce true")
         assertTrue(execution.output.isEmpty())
@@ -134,7 +134,7 @@ class VirtualMachineRegressionTests {
             })()
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("compiledFunctionInvocation", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "compiledFunctionInvocation.lin"))
 
         assertEquals(LTrue, execution.result, "Code should produce true")
         assertTrue(execution.output.isEmpty())
@@ -148,7 +148,7 @@ class VirtualMachineRegressionTests {
             })()
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("compiledFunctionInvocationWithDefaultValue", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "compiledFunctionInvocationWithDefaultValue.lin"))
 
         assertEquals(LString("Hello, World!"), execution.result, "Code should produce 'Hello, World!'")
         assertTrue(execution.output.isEmpty())
@@ -171,7 +171,7 @@ class VirtualMachineRegressionTests {
             )
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("numberUnaryAndBinaryOperators", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "numberUnaryAndBinaryOperators.lin"))
 
         assertEquals(LNull, execution.result, "Code should not produce result.")
 
@@ -209,7 +209,7 @@ class VirtualMachineRegressionTests {
             publish("foo" in a, "bar" in a, "foo" in b, "bar" in b)
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("testInOperator", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "testInOperator.lin"))
 
         assertEquals(LNull, execution.result, "Code should not produce result.")
 
@@ -230,7 +230,7 @@ class VirtualMachineRegressionTests {
             return false
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("tryCatch", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "tryCatch.lin"))
 
         assertEquals(LTrue, execution.result, "Code should produce true")
     }
@@ -255,8 +255,27 @@ class VirtualMachineRegressionTests {
             fib(10)
         """.trimIndent()
 
-        val execution = ExecutionBenchmark("fib", Source(code))
+        val execution = ExecutionBenchmark(Source(code, "fib.lin"))
 
         assertEquals(LInteger(55), execution.result, "Code should produce true")
+    }
+
+    @Test
+    fun objectWithFunctionInside() {
+        val code = """
+            val a = {
+                fun b() {
+                    publish(true)
+                }
+            }
+            
+            a.b()
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark(Source(code, "objectWithFunctionInside.lin"))
+
+        assertEquals(LNull, execution.result, "Code should not produce result.")
+        assertEquals(1, execution.output.size, "Output size should be 1")
+        assertEquals(LTrue, execution.output.first(), "Code should output true")
     }
 }
