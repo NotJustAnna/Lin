@@ -17,9 +17,9 @@ class LinVirtualMachine(scope: Scope, source: CompiledSource) {
         source,
         "<main>"
     )
-    private var result: VMResult? = null
+    private var result: LinResult? = null
 
-    fun run(): LAny {
+    fun run(): LinResult {
         while (hasNextStep()) {
             step()
         }
@@ -34,17 +34,8 @@ class LinVirtualMachine(scope: Scope, source: CompiledSource) {
         currentLayer.step()
     }
 
-    fun result(): LAny {
-        when (val r = result) {
-            is VMResult.Returned -> return r.value
-            is VMResult.Thrown -> throw LAnyException(r.value)
-            null -> throw RuntimeException("Execution not finished")
-        }
-    }
-
-    private sealed class VMResult {
-        class Returned(val value: LAny) : VMResult()
-        class Thrown(val value: LAny) : VMResult()
+    fun result(): LinResult {
+        return result ?: throw RuntimeException("Execution not finished")
     }
 
     private inner class Events : VMEvents {
@@ -60,7 +51,7 @@ class LinVirtualMachine(scope: Scope, source: CompiledSource) {
         override fun onReturn(value: LAny) {
             val layer = layerStack.removeLastOrNull()
             if (layer == null) {
-                result = VMResult.Returned(value)
+                result = LinResult.Returned(value)
                 return
             }
             currentLayer = layer
@@ -70,7 +61,7 @@ class LinVirtualMachine(scope: Scope, source: CompiledSource) {
         override fun onThrow(value: LAny) {
             val layer = layerStack.removeLastOrNull()
             if (layer == null) {
-                result = VMResult.Thrown(value)
+                result = LinResult.Thrown(value)
                 return
             }
             currentLayer = layer
