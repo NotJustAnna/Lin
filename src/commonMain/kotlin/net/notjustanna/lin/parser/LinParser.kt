@@ -40,7 +40,7 @@ internal fun linStdParser(grammar: Grammar<TokenType, Node>) = Parser.create(gra
             error(e)
         }
     }
-    if (!eof) InvalidNode {
+    if (!eof && expr !is InvalidNode) InvalidNode {
         child(expr)
         error(SyntaxException("Should've reached end of content", eat().section))
     } else expr

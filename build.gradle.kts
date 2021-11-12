@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "net.notjustanna"
-version = "0.1"
+version = "0.2-localtest4"
 
 repositories {
     mavenCentral()
@@ -47,8 +47,8 @@ kotlin {
         all { languageSettings.optIn("kotlin.RequiresOptIn") }
         val commonMain by getting {
             dependencies {
-                implementation("net.notjustanna:tartar:3.1.0")
-                implementation("com.squareup.okio:okio:3.0.0")
+                api("net.notjustanna:tartar:3.1.0")
+                api("com.squareup.okio:okio:3.0.0")
             }
         }
         val commonTest by getting {
