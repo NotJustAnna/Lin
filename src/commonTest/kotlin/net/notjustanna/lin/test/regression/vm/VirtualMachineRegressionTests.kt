@@ -278,4 +278,10 @@ class VirtualMachineRegressionTests {
         assertEquals(1, execution.output.size, "Output size should be 1")
         assertEquals(LTrue, execution.output.first(), "Code should output true")
     }
+
+    @Test
+    fun emptySource() {
+        val execution = ExecutionBenchmark(Source("", "emptySource.lin"))
+        assertEquals(LNull, execution.result, "Code should not produce result.")
+    }
 }

@@ -400,7 +400,8 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     }
 
     inline fun markSection(sectional: Sectional, block: () -> Unit) {
-        markSectionStart(sectional.section)
+        val section = sectional.section ?: return block()
+        markSectionStart(section)
         block()
         markSectionEnd()
     }

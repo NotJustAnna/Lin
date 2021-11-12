@@ -8,7 +8,7 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-data class AssignNode(val name: String, val value: Expr, override val section: Section) : Node {
+data class AssignNode(val name: String, val value: Expr, override val section: Section? = null) : Node {
     /* @automation(ast.impl AssignNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitAssignNode(this)
 

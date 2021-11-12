@@ -7,7 +7,7 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-data class ArrayExpr(val value: List<Expr>, override val section: Section) : Expr {
+data class ArrayExpr(val value: List<Expr>, override val section: Section? = null) : Expr {
     /* @automation(ast.impl ArrayExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitArrayExpr(this)
 

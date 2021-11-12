@@ -7,7 +7,7 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-data class ContinueExpr(override val section: Section) : Expr {
+data class ContinueExpr(override val section: Section? = null) : Expr {
     /* @automation(ast.impl ContinueExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitContinueExpr(this)
 

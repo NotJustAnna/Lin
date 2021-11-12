@@ -11,7 +11,7 @@ data class PropertyAccessExpr(
     val target: Expr,
     val nullSafe: Boolean,
     val name: String,
-    override val section: Section
+    override val section: Section? = null
 ) : Expr {
     /* @automation(ast.impl PropertyAccessExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitPropertyAccessExpr(this)

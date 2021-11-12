@@ -12,7 +12,7 @@ data class IfNode(
     val condition: Expr,
     val thenBranch: Node,
     val elseBranch: Node?,
-    override val section: Section
+    override val section: Section? = null
 ) : Node {
     /* @automation(ast.impl IfNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitIfNode(this)

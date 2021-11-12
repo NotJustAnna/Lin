@@ -10,7 +10,7 @@ import net.notjustanna.tartar.api.lexer.Section
 data class SubscriptAccessExpr(
     val target: Expr,
     val arguments: List<Expr>,
-    override val section: Section
+    override val section: Section? = null
 ) : Expr {
     /* @automation(ast.impl SubscriptAccessExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitSubscriptAccessExpr(this)
