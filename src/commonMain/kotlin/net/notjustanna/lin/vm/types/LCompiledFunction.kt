@@ -2,6 +2,8 @@ package net.notjustanna.lin.vm.types
 
 import net.notjustanna.lin.bytecode.CompiledFunction
 import net.notjustanna.lin.bytecode.CompiledSource
+import net.notjustanna.lin.vm.LinVirtualMachine
+import net.notjustanna.lin.vm.impl.FunctionSetupLayer
 import net.notjustanna.lin.vm.scope.Scope
 
 class LCompiledFunction(
@@ -13,9 +15,6 @@ class LCompiledFunction(
         get() = source.stringConstOrNull(data.nameConst)
 
     override fun call(thisValue: LAny?, args: List<LAny>): LAny {
-        if (data.bodyId == -1) {
-            return LNull
-        }
-        TODO("Not yet implemented (Depends on Kotlin 1.6)")
+        return LinVirtualMachine { FunctionSetupLayer(it, this, thisValue, args.toList()) }.run().getOrThrow()
     }
 }
