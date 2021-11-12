@@ -12,7 +12,7 @@ data class FunctionExpr(
     val parameters: List<Parameter>,
     val name: String?,
     val body: Node?,
-    override val section: Section
+    override val section: Section? = null
 ): Expr {
     /* @automation(ast.impl FunctionExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitFunctionExpr(this)

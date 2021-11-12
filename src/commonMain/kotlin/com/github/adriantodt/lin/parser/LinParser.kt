@@ -3,6 +3,7 @@ package com.github.adriantodt.lin.parser
 import com.github.adriantodt.lin.ast.node.*
 import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.value.FunctionExpr
+import com.github.adriantodt.lin.ast.node.value.NullExpr
 import com.github.adriantodt.lin.lexer.TokenType
 import com.github.adriantodt.lin.parser.utils.matchAll
 import com.github.adriantodt.tartar.api.grammar.Grammar
@@ -10,6 +11,9 @@ import com.github.adriantodt.tartar.api.parser.Parser
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 
 internal fun linStdParser(grammar: Grammar<TokenType, Node>) = Parser.create(grammar) {
+    if (this.eof) {
+        return@create NullExpr()
+    }
     val start = peek()
     val list = mutableListOf<Node>()
     matchAll(TokenType.NL, TokenType.SEMICOLON)

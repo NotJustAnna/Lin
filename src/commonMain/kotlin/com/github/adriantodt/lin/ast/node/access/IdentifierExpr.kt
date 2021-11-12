@@ -7,7 +7,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class IdentifierExpr(val name: String, override val section: Section) : Expr {
+data class IdentifierExpr(val name: String, override val section: Section? = null) : Expr {
     /* @automation(ast.impl IdentifierExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitIdentifierExpr(this)
 

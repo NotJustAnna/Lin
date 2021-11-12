@@ -17,7 +17,7 @@ data class TryExpr(
     val tryBranch: Node,
     val catchBranch: CatchBranch?,
     val finallyBranch: Node?,
-    override val section: Section
+    override val section: Section? = null
 ) : Expr {
     /* @automation(ast.impl TryExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitTryExpr(this)

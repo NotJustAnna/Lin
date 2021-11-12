@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class BooleanExpr(val value: Boolean, override val section: Section) : ConstExpr {
+data class BooleanExpr(val value: Boolean, override val section: Section? = null) : ConstExpr {
     /* @automation(ast.impl BooleanExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitBooleanExpr(this)
 

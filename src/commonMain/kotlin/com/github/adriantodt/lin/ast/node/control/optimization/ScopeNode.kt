@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.ast.node.control.optimization
 
-//data class ScopeNode(val body: Node, override val section: Section) : Node {
+//data class ScopeNode(val body: Node, override val section: Section? = null) : Node {
 //    /* @automation-disabled(ast.impl ScopeNode,Node)-start */
 //    override fun accept(visitor: NodeVisitor) = visitor.visitScopeNode(this)
 //

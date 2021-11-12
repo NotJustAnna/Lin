@@ -9,7 +9,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
 data class DeclareVariableNode(
-    val name: String, val mutable: Boolean, val value: Expr?, override val section: Section
+    val name: String, val mutable: Boolean, val value: Expr?, override val section: Section? = null
 ) : Node {
     /* @automation(ast.impl DeclareVariableNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitDeclareVariableNode(this)

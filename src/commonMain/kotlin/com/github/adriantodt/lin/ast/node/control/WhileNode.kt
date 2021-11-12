@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class WhileNode(val condition: Expr, val body: Node?, override val section: Section) : Node {
+data class WhileNode(val condition: Expr, val body: Node?, override val section: Section? = null) : Node {
     /* @automation(ast.impl WhileNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitWhileNode(this)
 

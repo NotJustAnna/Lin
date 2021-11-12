@@ -7,7 +7,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class TypeofExpr(val value: Expr, override val section: Section) : Expr {
+data class TypeofExpr(val value: Expr, override val section: Section? = null) : Expr {
     /* @automation(ast.impl TypeofExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitTypeofExpr(this)
 
