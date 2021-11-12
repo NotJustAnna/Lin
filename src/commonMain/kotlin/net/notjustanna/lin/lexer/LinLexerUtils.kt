@@ -114,7 +114,7 @@ fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
             } else {
                 buf.append(next())
             }
-        } else if (c == '\\' && raw) {
+        } else if (c == '\\' && !raw) {
             next()
             if (!hasNext()) break
             when (next()) {
@@ -127,7 +127,9 @@ fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
                 '\\' -> buf.append('\\')
                 'u' -> {
                     val u = peekString(4)
-                    if (u.length != 4) throw IllegalStateException("File terminated before escaping")
+                    if (u.length != 4) {
+                        throw SyntaxException("File terminated before escaping")
+                    }
                     buf.append(u.toIntOrNull(16)?.toChar() ?: throw IllegalStateException("Illegal unicode escaping"))
                     nextString(4)
                 }
