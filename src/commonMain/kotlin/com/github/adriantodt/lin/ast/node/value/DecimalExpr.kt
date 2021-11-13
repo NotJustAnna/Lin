@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class DecimalExpr(val value: Double, override val section: Section) : ConstExpr {
+data class DecimalExpr(val value: Double, override val section: Section? = null) : ConstExpr {
     /* @automation(ast.impl DecimalExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitDecimalExpr(this)
 

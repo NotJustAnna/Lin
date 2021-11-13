@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.ast.node.control.optimization
 
-//data class LoopNode(val body: Node?, override val section: Section) : Node {
+//data class LoopNode(val body: Node?, override val section: Section? = null) : Node {
 //    /* @automation-disabled(ast.impl LoopNode,Node)-start */
 //    override fun accept(visitor: NodeVisitor) = visitor.visitLoopNode(this)
 //

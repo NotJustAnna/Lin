@@ -1,11 +1,11 @@
 plugins {
-    kotlin("multiplatform") version "1.5.31"
+    kotlin("multiplatform") version "1.6.0-RC2"
     `maven-publish`
     id("org.jetbrains.dokka") version "1.5.31"
 }
 
 group = "com.github.adriantodt"
-version = "0.1"
+version = "0.2"
 
 repositories {
     mavenCentral()
@@ -46,8 +46,8 @@ kotlin {
         all { languageSettings.optIn("kotlin.RequiresOptIn") }
         val commonMain by getting {
             dependencies {
-                implementation("com.github.adriantodt:tartar:3.0.2")
-                implementation("com.squareup.okio:okio:3.0.0")
+                api("com.github.adriantodt:tartar:3.1.0")
+                api("com.squareup.okio:okio:3.0.0")
             }
         }
         val commonTest by getting {

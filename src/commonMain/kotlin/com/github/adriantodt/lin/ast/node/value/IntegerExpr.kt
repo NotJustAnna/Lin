@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class IntegerExpr(val value: Long, override val section: Section) : ConstExpr {
+data class IntegerExpr(val value: Long, override val section: Section? = null) : ConstExpr {
     /* @automation(ast.impl IntegerExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitIntegerExpr(this)
 

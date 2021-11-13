@@ -2,6 +2,8 @@ package com.github.adriantodt.lin.vm.types
 
 import com.github.adriantodt.lin.bytecode.CompiledFunction
 import com.github.adriantodt.lin.bytecode.CompiledSource
+import com.github.adriantodt.lin.vm.LinVirtualMachine
+import com.github.adriantodt.lin.vm.impl.FunctionSetupLayer
 import com.github.adriantodt.lin.vm.scope.Scope
 
 class LCompiledFunction(
@@ -13,9 +15,6 @@ class LCompiledFunction(
         get() = source.stringConstOrNull(data.nameConst)
 
     override fun call(thisValue: LAny?, args: List<LAny>): LAny {
-        if (data.bodyId == -1) {
-            return LNull
-        }
-        TODO("Not yet implemented (Depends on Kotlin 1.6)")
+        return LinVirtualMachine { FunctionSetupLayer(it, this, thisValue, args.toList()) }.run().getOrThrow()
     }
 }

@@ -8,7 +8,7 @@ package com.github.adriantodt.lin.ast.node.invoke
 //import com.github.adriantodt.tartar.api.lexer.Section
 
 //data class InvokeExtensionExpr(
-//    val left: Expr, val nullSafe: Boolean, val right: Expr, val arguments: List<Expr>, override val section: Section
+//    val left: Expr, val nullSafe: Boolean, val right: Expr, val arguments: List<Expr>, override val section: Section? = null
 //) : Expr {
 //    /* @automation-disabled(ast.impl InvokeExtensionExpr,Expr)-start */
 //    override fun accept(visitor: NodeVisitor) = visitor.visitInvokeExtensionExpr(this)

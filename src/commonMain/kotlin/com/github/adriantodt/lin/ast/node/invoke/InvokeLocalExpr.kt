@@ -7,7 +7,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class InvokeLocalExpr(val name: String, val arguments: List<Expr>, override val section: Section) : Expr {
+data class InvokeLocalExpr(val name: String, val arguments: List<Expr>, override val section: Section? = null) : Expr {
     /* @automation(ast.impl InvokeLocalExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitInvokeLocalExpr(this)
 

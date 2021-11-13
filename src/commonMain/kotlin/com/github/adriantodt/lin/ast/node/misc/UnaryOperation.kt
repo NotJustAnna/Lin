@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.lin.utils.UnaryOperationType
 import com.github.adriantodt.tartar.api.lexer.Section
 
-class UnaryOperation(val target: Expr, val operator: UnaryOperationType, override val section: Section) : Expr {
+class UnaryOperation(val target: Expr, val operator: UnaryOperationType, override val section: Section? = null) : Expr {
     /* @automation(ast.impl UnaryOperation,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitUnaryOperation(this)
 

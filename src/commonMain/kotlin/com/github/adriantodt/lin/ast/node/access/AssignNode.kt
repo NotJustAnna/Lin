@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class AssignNode(val name: String, val value: Expr, override val section: Section) : Node {
+data class AssignNode(val name: String, val value: Expr, override val section: Section? = null) : Node {
     /* @automation(ast.impl AssignNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitAssignNode(this)
 

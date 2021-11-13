@@ -11,7 +11,7 @@ data class IfExpr(
     val condition: Expr,
     val thenBranch: Expr,
     val elseBranch: Expr,
-    override val section: Section
+    override val section: Section? = null
 ) : Expr {
     /* @automation(ast.impl IfExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitIfExpr(this)

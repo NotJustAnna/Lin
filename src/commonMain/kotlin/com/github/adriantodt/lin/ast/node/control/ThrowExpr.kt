@@ -7,7 +7,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class ThrowExpr(val value: Expr, override val section: Section) : Expr {
+data class ThrowExpr(val value: Expr, override val section: Section? = null) : Expr {
     /* @automation(ast.impl ThrowExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitThrowExpr(this)
 

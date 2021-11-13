@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class DoWhileNode(val body: Node?, val condition: Expr, override val section: Section) : Node {
+data class DoWhileNode(val body: Node?, val condition: Expr, override val section: Section? = null) : Node {
     /* @automation(ast.impl DoWhileNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitDoWhileNode(this)
 

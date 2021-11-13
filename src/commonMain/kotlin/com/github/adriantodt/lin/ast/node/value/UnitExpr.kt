@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.ast.node.value
 
-//data class UnitExpr(override val section: Section) : ConstExpr {
+//data class UnitExpr(override val section: Section? = null) : ConstExpr {
 //    /* @automation-disabled(ast.impl UnitExpr,Expr)-start */
 //    override fun accept(visitor: NodeVisitor) = visitor.visitUnitExpr(this)
 //
