@@ -5,7 +5,7 @@ import net.notjustanna.tartar.api.dsl.CharPredicate
 import net.notjustanna.tartar.api.lexer.Lexer
 import net.notjustanna.tartar.api.parser.Token
 import net.notjustanna.tartar.extensions.LexicalNumber
-import net.notjustanna.tartar.extensions.makeToken
+import net.notjustanna.tartar.extensions.processToken
 import net.notjustanna.tartar.extensions.readNumber
 import net.notjustanna.tartar.extensions.readString
 
@@ -15,97 +15,92 @@ internal fun linStdLexer() = Lexer.create<LinToken> {
     ' ' { while (hasNext()) if (!match(' ')) break }
     '\r' {
         match('\n')
-        process(makeToken(NL))
+        processToken(NL)
     }
-    '\n' { process(makeToken(NL)) }
-    '{' { process(makeToken(L_BRACE)) }
-    '}' { process(makeToken(R_BRACE)) }
-    '(' { process(makeToken(L_PAREN)) }
-    ')' { process(makeToken(R_PAREN)) }
-    '[' { process(makeToken(L_BRACKET)) }
-    ']' { process(makeToken(R_BRACKET)) }
-    ".." { process(makeToken(RANGE, 2)) }
-    '.' { process(makeToken(DOT)) }
-    ',' { process(makeToken(COMMA)) }
-    "::" { process(makeToken(DOUBLE_COLON, 2)) }
-    ':' { process(makeToken(COLON)) }
-    ';' { process(makeToken(SEMICOLON)) }
-    '\u037E' { process(makeToken(SEMICOLON)) } // Greek question mark
-    "+=" { process(makeToken(PLUS_ASSIGN, 2)) }
-    "++" { process(makeToken(INCREMENT, 2)) }
-    '+' { process(makeToken(PLUS)) }
-    "->" { process(makeToken(ARROW, 2)) }
-    "-=" { process(makeToken(MINUS_ASSIGN, 2)) }
-    "--" { process(makeToken(DECREMENT, 2)) }
-    '-' { process(makeToken(MINUS)) }
-    "%=" { process(makeToken(REM_ASSIGN, 2)) }
-    '%' { process(makeToken(REM)) }
-    "*=" { process(makeToken(ASTERISK_ASSIGN, 2)) }
-    '*' { process(makeToken(ASTERISK)) }
+    '\n' { processToken(NL) }
+    '{' { processToken(L_BRACE) }
+    '}' { processToken(R_BRACE) }
+    '(' { processToken(L_PAREN) }
+    ')' { processToken(R_PAREN) }
+    '[' { processToken(L_BRACKET) }
+    ']' { processToken(R_BRACKET) }
+    ".." { processToken(RANGE, 2) }
+    '.' { processToken(DOT) }
+    ',' { processToken(COMMA) }
+    "::" { processToken(DOUBLE_COLON, 2) }
+    ':' { processToken(COLON) }
+    ';' { processToken(SEMICOLON) }
+    '\u037E' { processToken(SEMICOLON) } // Greek question mark
+    "+=" { processToken(PLUS_ASSIGN, 2) }
+    "++" { processToken(INCREMENT, 2) }
+    '+' { processToken(PLUS) }
+    "->" { processToken(ARROW, 2) }
+    "-=" { processToken(MINUS_ASSIGN, 2) }
+    "--" { processToken(DECREMENT, 2) }
+    '-' { processToken(MINUS) }
+    "%=" { processToken(REM_ASSIGN, 2) }
+    '%' { processToken(REM) }
+    "*=" { processToken(ASTERISK_ASSIGN, 2) }
+    '*' { processToken(ASTERISK) }
     "//" { while (hasNext()) if (next() == '\n') break }
     "/*" { while (hasNext()) if (next() == '*' && match('/')) break }
-    "/=" { process(makeToken(SLASH_ASSIGN, 2)) }
-    '/' { process(makeToken(SLASH)) }
-    '\\' { process(makeToken(BACKSLASH)) }
-    "!=" { process(makeToken(NEQ, 2)) }
-    "!!" { process(makeToken(DOUBLE_BANG, 2)) }
-    '!' { process(makeToken(BANG)) }
-    "?:" { process(makeToken(ELVIS)) }
-    "?." { process(makeToken(QUESTION_DOT, 2)) }
-    '?' { process(makeToken(QUESTION)) }
-    "==" { process(makeToken(EQ, 2)) }
-    '=' { process(makeToken(ASSIGN)) }
-    "||" { process(makeToken(OR, 2)) }
-    "|" { process(makeToken(PIPE)) }
-    "&&" { process(makeToken(AND, 2)) }
-    "&" { process(makeToken(AMP)) }
-    "<=" { process(makeToken(LTE, 2)) }
-    '<' { process(makeToken(LT)) }
-    ">=" { process(makeToken(GTE, 2)) }
-    '>' { process(makeToken(GT)) }
-    '\'' { readLinTemplateString(it.toString(), false) }
-    "\"\"\"" { readLinTemplateString(it.toString(), true) }
-    "\"\"" { process(makeToken(STRING, 2)) }
-    '"' { readLinTemplateString(it.toString(), false) }
-    "`" { process(makeToken(IDENTIFIER, readString(it))) }
+    "/=" { processToken(SLASH_ASSIGN, 2) }
+    '/' { processToken(SLASH) }
+    '\\' { processToken(BACKSLASH) }
+    "!=" { processToken(NEQ, 2) }
+    "!!" { processToken(DOUBLE_BANG, 2) }
+    '!' { processToken(BANG) }
+    "?:" { processToken(ELVIS) }
+    "?." { processToken(QUESTION_DOT, 2) }
+    '?' { processToken(QUESTION) }
+    "==" { processToken(EQ, 2) }
+    '=' { processToken(ASSIGN) }
+    "||" { processToken(OR, 2) }
+    "|" { processToken(PIPE) }
+    "&&" { processToken(AND, 2) }
+    "&" { processToken(AMP) }
+    "<=" { processToken(LTE, 2) }
+    '<' { processToken(LT) }
+    ">=" { processToken(GTE, 2) }
+    '>' { processToken(GT) }
+    '\'' { readLinTemplateString("'", false) }
+    "\"\"\"" { readLinTemplateString("\"\"\"", true) }
+    "\"\"" { processToken(STRING, 2) }
+    '"' { readLinTemplateString("\"", false) }
+    "`" { processToken(IDENTIFIER, readString(it), offset = 2) }
     matching(CharPredicate.isDigit).configure {
-        process(
-            when (val n = readNumber(it)) {
-                is LexicalNumber.Invalid -> makeToken(INVALID, n.string)
-                is LexicalNumber.Decimal -> makeToken(DECIMAL, n.value.toString())
-                is LexicalNumber.Integer -> makeToken(INTEGER, n.value.toString())
-            }
-        )
+        when (val n = readNumber(it)) {
+            is LexicalNumber.Invalid -> processToken(INVALID, n.string)
+            is LexicalNumber.Decimal -> processToken(DECIMAL, n.value.toString(), n.string.length)
+            is LexicalNumber.Integer -> processToken(INTEGER, n.value.toString(), n.string.length)
+        }
     }
     matching { it.isLetter() || it == '_' || it == '@' }.configure {
-        process(
-            when (val s = readLinIdentifier(it)) {
-                "break" -> makeToken(BREAK, 5)
-                "continue" -> makeToken(CONTINUE, 8)
-                "do" -> makeToken(DO, 2)
-                "else" -> makeToken(ELSE, 4)
-                "false" -> makeToken(FALSE, 4)
-                "for" -> makeToken(FOR, 3)
-                "fun" -> makeToken(FUN, 3)
-                "if" -> makeToken(IF, 2)
-                "in" -> makeToken(IN, 2)
-                "is" -> makeToken(IS, 2)
-                "null" -> makeToken(NULL, 4)
-                "return" -> makeToken(RETURN, 6)
-                "this" -> makeToken(THIS, 4)
-                "throw" -> makeToken(THROW, 5)
-                "true" -> makeToken(TRUE, 4)
-                "try" -> makeToken(TRY, 3)
-                "typeof" -> makeToken(TYPEOF, 6)
-                //"unit" -> makeToken(UNIT, 4)
-                "val" -> makeToken(VAL, 3)
-                "var" -> makeToken(VAR, 3)
-                "when" -> makeToken(WHEN, 4)
-                "while" -> makeToken(WHILE, 5)
+        when (val s = readLinIdentifier(it)) {
+            "break" -> processToken(BREAK, 5)
+            "continue" -> processToken(CONTINUE, 8)
+            "do" -> processToken(DO, 2)
+            "else" -> processToken(ELSE, 4)
+            "false" -> processToken(FALSE, 4)
+            "for" -> processToken(FOR, 3)
+            "fun" -> processToken(FUN, 3)
+            "if" -> processToken(IF, 2)
+            "in" -> processToken(IN, 2)
+            "is" -> processToken(IS, 2)
+            "null" -> processToken(NULL, 4)
+            "return" -> processToken(RETURN, 6)
+            "this" -> processToken(THIS, 4)
+            "throw" -> processToken(THROW, 5)
+            "true" -> processToken(TRUE, 4)
+            "try" -> processToken(TRY, 3)
+            "typeof" -> processToken(TYPEOF, 6)
+            "val" -> processToken(VAL, 3)
+            "var" -> processToken(VAR, 3)
+            "when" -> processToken(WHEN, 4)
+            "while" -> processToken(WHILE, 5)
 
-                else -> makeToken(IDENTIFIER, s)
-            }
-        )
+            else -> processToken(IDENTIFIER, s)
+        }
     }
-    configure { process(makeToken(INVALID, next().toString())) }
+    configure { processToken(INVALID, next().toString()) }
 }

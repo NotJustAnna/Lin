@@ -46,7 +46,7 @@ kotlin {
         all { languageSettings.optIn("kotlin.RequiresOptIn") }
         val commonMain by getting {
             dependencies {
-                api("net.notjustanna:tartar:3.1.0")
+                api("net.notjustanna:tartar:3.2.0")
                 api("com.squareup.okio:okio:3.0.0")
             }
         }
