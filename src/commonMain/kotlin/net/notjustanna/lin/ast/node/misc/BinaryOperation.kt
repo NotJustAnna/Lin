@@ -9,7 +9,7 @@ import net.notjustanna.lin.utils.BinaryOperationType
 import net.notjustanna.tartar.api.lexer.Section
 
 data class BinaryOperation(
-    val left: Expr, val right: Expr, val operator: BinaryOperationType, override val section: Section
+    val left: Expr, val right: Expr, val operator: BinaryOperationType, override val section: Section? = null
 ) : Expr {
     /* @automation(ast.impl BinaryOperation,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitBinaryOperation(this)

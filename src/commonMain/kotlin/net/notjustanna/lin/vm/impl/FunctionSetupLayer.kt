@@ -2,6 +2,7 @@ package net.notjustanna.lin.vm.impl
 
 import net.notjustanna.lin.bytecode.CompiledNode
 import net.notjustanna.lin.bytecode.CompiledParameter
+import net.notjustanna.lin.vm.StackTrace
 import net.notjustanna.lin.vm.scope.DefaultMutableScope
 import net.notjustanna.lin.vm.types.LAny
 import net.notjustanna.lin.vm.types.LCompiledFunction
@@ -21,7 +22,7 @@ class FunctionSetupLayer(
 
     init {
         val (parametersId, _, bodyId) = function.data
-        body = function.source.nodes.getOrElse(bodyId) { CompiledNode(emptyList(), emptyList()) }
+        body = function.source.nodes.getOrElse(bodyId) { CompiledNode(emptyList(), emptyList(), emptyList()) }
         scope = DefaultMutableScope(function.rootScope)
 
         paramsLeft = function.source.functionParameters[parametersId].toMutableList()
@@ -50,17 +51,31 @@ class FunctionSetupLayer(
                 resolvedParamName = paramName
                 scope.declareVariable(paramName, true)
                 events.pushLayer(
-                    DefaultExecutionLayer(events, scope, function.source, paramBody, thisValue)
+                    DefaultExecutionLayer(
+                        events,
+                        scope,
+                        function.source,
+                        function.name ?: "<anonymous function>",
+                        paramBody,
+                        thisValue
+                    )
                 )
                 return
             }
 
-            events.onThrow(Exceptions.mismatchedArgs())
+            events.onThrow(Exceptions.mismatchedArgs(events.stackTrace()))
             return
         }
 
         events.replaceLayer(
-            DefaultExecutionLayer(events, DefaultMutableScope(scope), function.source, body, thisValue)
+            DefaultExecutionLayer(
+                events,
+                DefaultMutableScope(scope),
+                function.source,
+                function.name ?: "<anonymous function>",
+                body,
+                thisValue
+            )
         )
     }
 
@@ -71,5 +86,9 @@ class FunctionSetupLayer(
 
     override fun onThrow(value: LAny) {
         events.onThrow(value) // Keep cascading.
+    }
+
+    override fun trace(): StackTrace? {
+        return null
     }
 }

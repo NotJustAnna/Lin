@@ -8,7 +8,7 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-data class DoWhileNode(val body: Node?, val condition: Expr, override val section: Section) : Node {
+data class DoWhileNode(val body: Node?, val condition: Expr, override val section: Section? = null) : Node {
     /* @automation(ast.impl DoWhileNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitDoWhileNode(this)
 

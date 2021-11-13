@@ -1,17 +1,18 @@
 package net.notjustanna.lin.vm
 
-import net.notjustanna.lin.vm.impl.Exceptions
+import net.notjustanna.lin.compiler.LinNullPointerException
+import net.notjustanna.lin.exception.LinUnsupportedOperationException
 import net.notjustanna.lin.vm.types.*
 
 object LinRuntime {
-    val ensureNotNull = LNativeFunction { _, args ->
+    val ensureNotNull = LNativeFunction("ensureNotNull") { _, args ->
         if (args.any { it == LNull }) {
-            throw LAnyException(Exceptions.nullPointer())
+            throw LinNullPointerException()
         }
         LTrue
     }
 
-    val iterator = LNativeFunction { thisValue, _ ->
+    val iterator = LNativeFunction("iterator") { thisValue, _ ->
         val it = when (thisValue) {
             is LArray -> {
                 thisValue.value.iterator()
@@ -23,15 +24,15 @@ object LinRuntime {
                 thisValue.value.asSequence().map(::LInteger).iterator()
             }
             null -> {
-                throw LAnyException(Exceptions.nullPointer())
+                throw LinNullPointerException()
             }
             else -> {
-                throw LAnyException(Exceptions.unsupportedOperation("iterator", thisValue.linType))
+                throw LinUnsupportedOperationException("iterator", thisValue.linType)
             }
         }
         LObject.of(
-            LString("__hasNext") to LNativeFunction { _, _ -> LAny.of(it.hasNext()) },
-            LString("__next") to LNativeFunction { _, _ -> it.next() },
+            LString("__hasNext") to LNativeFunction("hasNext") { _, _ -> LAny.of(it.hasNext()) },
+            LString("__next") to LNativeFunction("next") { _, _ -> it.next() },
         )
     }
 }

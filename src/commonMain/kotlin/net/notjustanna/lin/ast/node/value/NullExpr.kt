@@ -8,7 +8,7 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-data class NullExpr(override val section: Section) : ConstExpr {
+data class NullExpr(override val section: Section? = null) : ConstExpr {
     /* @automation(ast.impl NullExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitNullExpr(this)
 

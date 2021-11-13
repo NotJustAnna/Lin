@@ -30,6 +30,7 @@ internal fun linStdLexer() = Lexer.create<LinToken> {
     "::" { process(makeToken(DOUBLE_COLON, 2)) }
     ':' { process(makeToken(COLON)) }
     ';' { process(makeToken(SEMICOLON)) }
+    '\u037E' { process(makeToken(SEMICOLON)) } // Greek question mark
     "+=" { process(makeToken(PLUS_ASSIGN, 2)) }
     "++" { process(makeToken(INCREMENT, 2)) }
     '+' { process(makeToken(PLUS)) }

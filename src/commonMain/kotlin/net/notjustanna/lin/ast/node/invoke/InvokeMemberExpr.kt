@@ -8,7 +8,11 @@ import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
 data class InvokeMemberExpr(
-    val target: Expr, val nullSafe: Boolean, val name: String, val arguments: List<Expr>, override val section: Section
+    val target: Expr,
+    val nullSafe: Boolean,
+    val name: String,
+    val arguments: List<Expr>,
+    override val section: Section? = null
 ) : Expr {
     /* @automation(ast.impl InvokeMemberExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitInvokeMemberExpr(this)

@@ -9,12 +9,16 @@ import net.notjustanna.lin.vm.scope.Scope
 import net.notjustanna.lin.vm.types.LAny
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class LinVirtualMachine(scope: Scope, source: CompiledSource) {
-    private val layerStack = mutableListOf<ExecutionLayer>()
-    private var currentLayer: ExecutionLayer = DefaultExecutionLayer(Events(), DefaultMutableScope(scope), source)
-    private var result: VMResult? = null
+class LinVirtualMachine(layerInitializer: (VMEvents) -> ExecutionLayer) {
+    constructor(source: CompiledSource, scope: Scope) : this({
+        DefaultExecutionLayer(it, DefaultMutableScope(scope), source, "<main>")
+    })
 
-    fun run(): LAny {
+    private val layerStack = mutableListOf<ExecutionLayer>()
+    private var currentLayer: ExecutionLayer = layerInitializer(EventsImpl(this))
+    private var result: LinResult? = null
+
+    fun run(): LinResult {
         while (hasNextStep()) {
             step()
         }
@@ -29,47 +33,42 @@ class LinVirtualMachine(scope: Scope, source: CompiledSource) {
         currentLayer.step()
     }
 
-    fun result(): LAny {
-        when (val r = result) {
-            is VMResult.Returned -> return r.value
-            is VMResult.Thrown -> throw LAnyException(r.value)
-            null -> throw RuntimeException("Execution not finished")
-        }
+    fun result(): LinResult {
+        return result ?: throw RuntimeException("Execution not finished")
     }
 
-    private sealed class VMResult {
-        class Returned(val value: LAny) : VMResult()
-        class Thrown(val value: LAny) : VMResult()
-    }
-
-    private inner class Events : VMEvents {
+    private class EventsImpl(private val vm: LinVirtualMachine) : VMEvents {
         override fun pushLayer(layer: ExecutionLayer) {
-            layerStack += currentLayer
-            currentLayer = layer
+            vm.layerStack += vm.currentLayer
+            vm.currentLayer = layer
         }
 
         override fun replaceLayer(layer: ExecutionLayer) {
-            currentLayer = layer
+            vm.currentLayer = layer
         }
 
         override fun onReturn(value: LAny) {
-            val layer = layerStack.removeLastOrNull()
+            val layer = vm.layerStack.removeLastOrNull()
             if (layer == null) {
-                result = VMResult.Returned(value)
+                vm.result = LinResult.Returned(value)
                 return
             }
-            currentLayer = layer
+            vm.currentLayer = layer
             layer.onReturn(value)
         }
 
         override fun onThrow(value: LAny) {
-            val layer = layerStack.removeLastOrNull()
+            val layer = vm.layerStack.removeLastOrNull()
             if (layer == null) {
-                result = VMResult.Thrown(value)
+                vm.result = LinResult.Thrown(value)
                 return
             }
-            currentLayer = layer
+            vm.currentLayer = layer
             layer.onThrow(value)
+        }
+
+        override fun stackTrace(): List<StackTrace> {
+            return (vm.layerStack + vm.currentLayer).asReversed().mapNotNull(ExecutionLayer::trace)
         }
     }
 }

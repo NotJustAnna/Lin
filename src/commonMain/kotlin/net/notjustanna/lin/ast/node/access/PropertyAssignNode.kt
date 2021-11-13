@@ -13,7 +13,7 @@ data class PropertyAssignNode(
     val nullSafe: Boolean,
     val name: String,
     val value: Expr,
-    override val section: Section
+    override val section: Section? = null
 ) : Node {
     /* @automation(ast.impl PropertyAssignNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitPropertyAssignNode(this)

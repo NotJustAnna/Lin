@@ -101,7 +101,7 @@ class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBui
     override fun visitDeclareFunctionExpr(node: DeclareFunctionExpr) {
         builder.markSection(node) {
             builder.declareVariableInsn(node.name, false)
-            node.accept(this)
+            node.value.accept(this)
             builder.dupInsn()
             builder.setVariableInsn(node.name)
         }
@@ -109,12 +109,11 @@ class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBui
 
     override fun visitDeclareVariableNode(node: DeclareVariableNode) {
         builder.markSection(node) {
-
-        }
-        builder.declareVariableInsn(node.name, node.mutable)
-        if (node.value != null) {
-            node.value.accept(this)
-            builder.setVariableInsn(node.name)
+            builder.declareVariableInsn(node.name, node.mutable)
+            if (node.value != null) {
+                node.value.accept(this)
+                builder.setVariableInsn(node.name)
+            }
         }
     }
 

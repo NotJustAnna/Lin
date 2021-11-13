@@ -5,17 +5,18 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor
 import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
-import net.notjustanna.lin.ast.node.Expr
 
-data class InvalidNode(override val section: Section, val children: List<Node>, val errors: List<Exception>) : Expr {
+data class InvalidNode(override val section: Section?, val children: List<Node>, val errors: List<Exception>) : Expr {
 
     class Builder {
         var section: Section? = null
         val children = mutableListOf<Node>()
         val errors = mutableListOf<Exception>()
 
-        fun section(value: Section) = apply {
-            section = value
+        fun section(value: Section?) = apply {
+            if (value != null) {
+                section = value
+            }
         }
 
         fun child(vararg values: Node?) = apply {
@@ -41,6 +42,6 @@ data class InvalidNode(override val section: Section, val children: List<Node>, 
 
     companion object {
         operator fun invoke(block: Builder.() -> Unit) = Builder().apply(block).build()
-        private fun Builder.build() = InvalidNode(section ?: error("Section wasn't set!"), children, errors)
+        private fun Builder.build() = InvalidNode(section, children, errors)
     }
 }

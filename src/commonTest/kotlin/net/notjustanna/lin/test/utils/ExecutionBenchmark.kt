@@ -11,7 +11,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 @OptIn(ExperimentalTime::class)
-class ExecutionBenchmark(private val name: String, source: Source, inputValues: List<LAny> = emptyList()) {
+class ExecutionBenchmark(private val source: Source, inputValues: List<LAny> = emptyList()) {
     val result: LAny
     val input: MutableList<LAny>
     val output: MutableList<LAny>
@@ -24,9 +24,9 @@ class ExecutionBenchmark(private val name: String, source: Source, inputValues: 
         val (node, parseDuration) = measureTimedValue { Lin.parser.parse(source) }
         val (compiledSource, compileDuration) = measureTimedValue { NodeCompiler.compile(node) }
         val (input, output, scope) = TestScope(inputValues)
-        val (result, executionDuration) = measureTimedValue { LinVirtualMachine(scope, compiledSource).run() }
+        val (result, executionDuration) = measureTimedValue { LinVirtualMachine(compiledSource, scope).run() }
 
-        this.result = result
+        this.result = result.getOrThrow()
         this.input = input
         this.output = output
 
@@ -39,7 +39,7 @@ class ExecutionBenchmark(private val name: String, source: Source, inputValues: 
 
     private fun reportBenchmark() {
         val title = """
-            Benchmark -- $name $currentPlatform
+            Benchmark -- ${source.name} $currentPlatform
         """.trimIndent()
         val report = """
             Parsing:    $parseDuration

@@ -7,7 +7,7 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-data class TypeofExpr(val value: Expr, override val section: Section) : Expr {
+data class TypeofExpr(val value: Expr, override val section: Section? = null) : Expr {
     /* @automation(ast.impl TypeofExpr,Expr)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitTypeofExpr(this)
 

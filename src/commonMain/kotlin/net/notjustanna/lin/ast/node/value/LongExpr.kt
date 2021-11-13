@@ -1,14 +1,6 @@
 package net.notjustanna.lin.ast.node.value
 
-import net.notjustanna.lin.ast.node.ConstExpr
-import net.notjustanna.lin.ast.node.Expr
-import net.notjustanna.lin.ast.visitor.NodeMapVisitor
-import net.notjustanna.lin.ast.visitor.NodeVisitor
-import net.notjustanna.lin.ast.visitor.NodeVisitor1
-import net.notjustanna.lin.ast.visitor.NodeVisitorR
-import net.notjustanna.tartar.api.lexer.Section
-
-//data class LongExpr(val value: Long, override val section: Section) : ConstExpr {
+//data class LongExpr(val value: Long, override val section: Section? = null) : ConstExpr {
 //    /* @automation-disabled(ast.impl LongExpr,Expr)-start */
 //    override fun accept(visitor: NodeVisitor) = visitor.visitLongExpr(this)
 //

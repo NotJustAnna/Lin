@@ -5,13 +5,20 @@ import net.notjustanna.lin.utils.Deserializer
 import net.notjustanna.lin.utils.Serializable
 import okio.Buffer
 
-data class CompiledNode(val instructions: List<Insn>, val jumpLabels: List<JumpLabel>) : Serializable {
+data class CompiledNode(
+    val instructions: List<Insn>,
+    val jumpLabels: List<JumpLabel>,
+    val sectionLabels: List<SectionLabel>
+) : Serializable {
     override fun serializeTo(buffer: Buffer) {
         buffer.writeInt(instructions.size)
         for (insn in instructions) insn.serializeTo(buffer)
 
         buffer.writeInt(jumpLabels.size)
         for (label in jumpLabels.sortedBy { it.code }) label.serializeTo(buffer)
+
+        buffer.writeInt(sectionLabels.size)
+        for (label in sectionLabels) label.serializeTo(buffer)
     }
 
     fun resolveLabel(code: Int): Int {
@@ -32,7 +39,12 @@ data class CompiledNode(val instructions: List<Insn>, val jumpLabels: List<JumpL
                 jumpLabels += JumpLabel.deserializeFrom(buffer)
             }
 
-            return CompiledNode(instructions, jumpLabels)
+            val sectionLabels = mutableListOf<SectionLabel>()
+            repeat(buffer.readInt()) {
+                sectionLabels += SectionLabel.deserializeFrom(buffer)
+            }
+
+            return CompiledNode(instructions, jumpLabels, sectionLabels)
         }
     }
 }

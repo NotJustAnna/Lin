@@ -9,6 +9,7 @@ import net.notjustanna.lin.ast.node.value.*
 import net.notjustanna.lin.lexer.TokenType
 import net.notjustanna.lin.lexer.TokenType.*
 import net.notjustanna.lin.parser.utils.matchAll
+import net.notjustanna.lin.parser.utils.maybeIgnoreNL
 import net.notjustanna.lin.parser.utils.skipOnlyUntil
 import net.notjustanna.tartar.api.grammar.PrefixParselet
 import net.notjustanna.tartar.api.parser.ParserContext
@@ -90,7 +91,9 @@ object ObjectParser : PrefixParselet<TokenType, Node> {
 
                 ctx.matchAll(NL)
             } while (ctx.match(COMMA))
+            ctx.matchAll(NL)
             ctx.eat(R_BRACE)
+            ctx.maybeIgnoreNL()
         }
         return ObjectExpr(contents, token.section)
     }

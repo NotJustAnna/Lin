@@ -12,7 +12,7 @@ data class SubscriptAssignNode(
     val target: Expr,
     val arguments: List<Expr>,
     val value: Expr,
-    override val section: Section
+    override val section: Section? = null
 ) : Node {
     /* @automation(ast.impl SubscriptAssignNode,Node)-start */
     override fun accept(visitor: NodeVisitor) = visitor.visitSubscriptAssignNode(this)

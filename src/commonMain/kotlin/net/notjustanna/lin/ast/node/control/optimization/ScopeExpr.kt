@@ -1,6 +1,6 @@
 package net.notjustanna.lin.ast.node.control.optimization
 
-//data class ScopeExpr(val body: Expr, override val section: Section) : Expr {
+//data class ScopeExpr(val body: Expr, override val section: Section? = null) : Expr {
 //    /* @automation-disabled(ast.impl ScopeExpr,Expr)-start */
 //    override fun accept(visitor: NodeVisitor) = visitor.visitScopeExpr(this)
 //
