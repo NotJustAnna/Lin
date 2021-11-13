@@ -1,8 +1,9 @@
 package com.github.adriantodt.lin.lexer
 
 import com.github.adriantodt.tartar.api.lexer.LexerContext
+import com.github.adriantodt.tartar.api.lexer.Section
 import com.github.adriantodt.tartar.api.parser.SyntaxException
-import com.github.adriantodt.tartar.extensions.makeToken
+import com.github.adriantodt.tartar.extensions.processToken
 import com.github.adriantodt.tartar.extensions.section
 
 fun LexerContext<*>.readLinIdentifier(firstChar: Char? = null): String {
@@ -60,6 +61,9 @@ fun LexerContext<*>.readLinString(delimiter: Char): String {
 
 
 fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
+    val absoluteStart = index - delim.length
+    var sectionOffset = delim.length
+    var start = index
     val buf = StringBuilder()
     var eol = false
 
@@ -71,13 +75,16 @@ fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
             if (peek() == '{') {
                 next()
 
-                process(makeToken(TokenType.STRING, buf.toString()))
-                process(makeToken(TokenType.PLUS))
+                processToken(
+                    TokenType.STRING, buf.toString(), index - start, index - start - 2, sectionOffset
+                )
+                processToken(TokenType.PLUS)
+                sectionOffset = 0
                 buf.clear()
 
                 var braces = 0
 
-                process(makeToken(TokenType.L_PAREN))
+                processToken(TokenType.L_PAREN)
 
                 while (hasNext()) {
                     val cc = peek()
@@ -94,11 +101,15 @@ fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
                     parseOnce().forEach(this::process)
                 }
 
-                process(makeToken(TokenType.R_PAREN))
-                process(makeToken(TokenType.PLUS))
+                start = index
+                processToken(TokenType.R_PAREN)
+                processToken(TokenType.PLUS)
             } else if (peek().isLetter()) {
-                process(makeToken(TokenType.STRING, buf.toString()))
-                process(makeToken(TokenType.PLUS))
+                processToken(
+                    TokenType.STRING, buf.toString(), index - start, index - start - 1, sectionOffset
+                )
+                processToken(TokenType.PLUS)
+                sectionOffset = 0
                 buf.clear()
 
                 buf.append(next())
@@ -106,15 +117,16 @@ fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
                 while (hasNext() && peek().isLetterOrDigit()) {
                     buf.append(next())
                 }
+                start = index
 
-                process(makeToken(TokenType.IDENTIFIER, buf.toString()))
+                processToken(TokenType.IDENTIFIER, buf.toString())
                 buf.clear()
 
-                process(makeToken(TokenType.PLUS))
+                processToken(TokenType.PLUS, 0)
             } else {
                 buf.append(next())
             }
-        } else if (c == '\\' && raw) {
+        } else if (c == '\\' && !raw) {
             next()
             if (!hasNext()) break
             when (next()) {
@@ -127,11 +139,16 @@ fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
                 '\\' -> buf.append('\\')
                 'u' -> {
                     val u = peekString(4)
-                    if (u.length != 4) throw IllegalStateException("File terminated before escaping")
-                    buf.append(u.toIntOrNull(16)?.toChar() ?: throw IllegalStateException("Illegal unicode escaping"))
+                    if (u.length != 4) {
+                        throw SyntaxException("File terminated before escaping", section(2, u.length + 2))
+                    }
+                    buf.append(
+                        u.toIntOrNull(16)?.toChar()
+                            ?: throw SyntaxException("Illegal unicode escaping", section(2, 6))
+                    )
                     nextString(4)
                 }
-                else -> throw IllegalStateException("Unknown escaping")
+                else -> throw SyntaxException("Unknown escaping", section(2))
             }
         } else if (this.peekString(delim.length) == delim) {
             this.nextString(delim.length)
@@ -144,8 +161,8 @@ fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
     }
 
     if (!eol) {
-        throw IllegalStateException("Unterminated string")
+        throw SyntaxException("Unterminated string", Section(source, absoluteStart, index - absoluteStart))
     }
 
-    process(makeToken(TokenType.STRING, buf.toString(), 2))
+    processToken(TokenType.STRING, buf.toString(), index - start, index - start, sectionOffset)
 }
