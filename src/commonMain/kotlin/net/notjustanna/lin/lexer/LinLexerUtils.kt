@@ -3,8 +3,8 @@ package net.notjustanna.lin.lexer
 import net.notjustanna.tartar.api.lexer.LexerContext
 import net.notjustanna.tartar.api.lexer.Section
 import net.notjustanna.tartar.api.parser.SyntaxException
-import net.notjustanna.tartar.extensions.processToken
-import net.notjustanna.tartar.extensions.section
+import net.notjustanna.tartar.extensions.lexer.processToken
+import net.notjustanna.tartar.extensions.lexer.section
 
 fun LexerContext<*>.readLinIdentifier(firstChar: Char? = null): String {
     val buf = StringBuilder()

@@ -8,8 +8,8 @@ import net.notjustanna.tartar.api.grammar.PrefixParselet
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.Token
 
-class BooleanParser(val value: Boolean) : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+class BooleanParser(val value: Boolean) : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.maybeIgnoreNL()
         return BooleanExpr(value, token.section)
     }

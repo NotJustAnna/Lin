@@ -11,13 +11,14 @@ import net.notjustanna.lin.parser.utils.parseBlock
 import net.notjustanna.lin.parser.utils.skipOnlyUntil
 import net.notjustanna.tartar.api.grammar.PrefixParselet
 import net.notjustanna.tartar.api.parser.ParserContext
+import net.notjustanna.tartar.api.parser.StringToken
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object FunctionParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+object FunctionParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
-        val ident = if (ctx.nextIs(TokenType.IDENTIFIER)) ctx.eat(TokenType.IDENTIFIER) else null
+        val ident = if (ctx.nextIs(TokenType.IDENTIFIER)) ctx.eat(TokenType.IDENTIFIER) as StringToken else null
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)
@@ -28,10 +29,10 @@ object FunctionParser : PrefixParselet<TokenType, Node> {
             do {
                 ctx.matchAll(TokenType.NL)
                 val isVarargs: Boolean
-                val paramName = ctx.eat(TokenType.IDENTIFIER).let {
+                val paramName = (ctx.eat(TokenType.IDENTIFIER) as StringToken).let {
                     if (it.value == "vararg" && ctx.nextIs(TokenType.IDENTIFIER)) {
                         isVarargs = true
-                        ctx.eat(TokenType.IDENTIFIER).value
+                        (ctx.eat(TokenType.IDENTIFIER) as StringToken).value
                     } else {
                         isVarargs = false
                         it.value

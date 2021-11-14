@@ -14,8 +14,8 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object IfParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+object IfParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.skipOnlyUntil(TokenType.L_PAREN)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)

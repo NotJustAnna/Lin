@@ -13,10 +13,14 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object SubscriptParser : InfixParselet<TokenType, Node> {
+object SubscriptParser : InfixParselet<TokenType, Token<TokenType>, Node> {
     override val precedence: Int = Precedence.POSTFIX
 
-    override fun parse(ctx: ParserContext<TokenType, Node>, left: Node, token: Token<TokenType>): Node {
+    override fun parse(
+        ctx: ParserContext<TokenType, Token<TokenType>, Node>,
+        left: Node,
+        token: Token<TokenType>
+    ): Node {
         if (left !is Expr) {
             return InvalidNode {
                 section(token.section)

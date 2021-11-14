@@ -1,7 +1,7 @@
 package net.notjustanna.lin.parser.parselets.value
 
-//object CharParser : PrefixParselet<TokenType, Node> {
-//    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+//object CharParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+//    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
 //        ctx.maybeIgnoreNL()
 //        val value = token.value
 //        if (value.length > 1) {

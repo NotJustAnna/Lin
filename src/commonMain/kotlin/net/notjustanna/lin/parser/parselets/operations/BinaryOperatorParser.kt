@@ -17,8 +17,12 @@ class BinaryOperatorParser(
     override val precedence: Int,
     private val operator: BinaryOperationType,
     private val leftAssoc: Boolean = true
-) : InfixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, left: Node, token: Token<TokenType>): Node {
+) : InfixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(
+        ctx: ParserContext<TokenType, Token<TokenType>, Node>,
+        left: Node,
+        token: Token<TokenType>
+    ): Node {
         if (left !is Expr) {
             return InvalidNode {
                 section(token.section)

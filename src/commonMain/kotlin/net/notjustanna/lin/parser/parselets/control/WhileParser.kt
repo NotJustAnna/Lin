@@ -13,8 +13,8 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object WhileParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+object WhileParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)

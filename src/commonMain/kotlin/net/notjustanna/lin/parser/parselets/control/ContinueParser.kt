@@ -7,8 +7,8 @@ import net.notjustanna.tartar.api.grammar.PrefixParselet
 import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.Token
 
-object ContinueParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+object ContinueParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         return ContinueExpr(token.section)
     }
 }

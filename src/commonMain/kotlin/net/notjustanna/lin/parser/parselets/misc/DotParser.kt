@@ -11,13 +11,18 @@ import net.notjustanna.lin.parser.utils.matchAll
 import net.notjustanna.lin.parser.utils.maybeIgnoreNL
 import net.notjustanna.tartar.api.grammar.InfixParselet
 import net.notjustanna.tartar.api.parser.ParserContext
+import net.notjustanna.tartar.api.parser.StringToken
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-class DotParser(private val nullSafe: Boolean) : InfixParselet<TokenType, Node> {
+class DotParser(private val nullSafe: Boolean) : InfixParselet<TokenType, Token<TokenType>, Node> {
     override val precedence: Int = Precedence.POSTFIX
 
-    override fun parse(ctx: ParserContext<TokenType, Node>, left: Node, token: Token<TokenType>): Node {
+    override fun parse(
+        ctx: ParserContext<TokenType, Token<TokenType>, Node>,
+        left: Node,
+        token: Token<TokenType>
+    ): Node {
         if (left !is Expr) {
             return InvalidNode {
                 section(token.section)
@@ -29,7 +34,7 @@ class DotParser(private val nullSafe: Boolean) : InfixParselet<TokenType, Node> 
         ctx.matchAll(TokenType.NL)
         val identifier = ctx.eat()
         if (identifier.type == TokenType.IDENTIFIER) {
-            val name = identifier.value
+            val name = (identifier as StringToken).value
 
             return if (ctx.match(TokenType.ASSIGN)) {
                 val value = ctx.parseExpression().let {

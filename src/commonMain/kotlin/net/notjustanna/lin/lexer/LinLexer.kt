@@ -4,10 +4,7 @@ import net.notjustanna.lin.lexer.TokenType.*
 import net.notjustanna.tartar.api.dsl.CharPredicate
 import net.notjustanna.tartar.api.lexer.Lexer
 import net.notjustanna.tartar.api.parser.Token
-import net.notjustanna.tartar.extensions.LexicalNumber
-import net.notjustanna.tartar.extensions.processToken
-import net.notjustanna.tartar.extensions.readNumber
-import net.notjustanna.tartar.extensions.readString
+import net.notjustanna.tartar.extensions.lexer.*
 
 typealias LinToken = Token<TokenType>
 
@@ -69,11 +66,13 @@ internal fun linStdLexer() = Lexer.create<LinToken> {
     '"' { readLinTemplateString("\"", false) }
     "`" { processToken(IDENTIFIER, readString(it), offset = 2) }
     matching(CharPredicate.isDigit).configure {
-        when (val n = readNumber(it)) {
-            is LexicalNumber.Invalid -> processToken(INVALID, n.string)
-            is LexicalNumber.Decimal -> processToken(DECIMAL, n.value.toString(), n.string.length)
-            is LexicalNumber.Integer -> processToken(INTEGER, n.value.toString(), n.string.length)
-        }
+        process(
+            when (val n = readNumber(it)) {
+                is LexicalNumber.Invalid -> token(INVALID, n.string)
+                is LexicalNumber.Decimal -> DoubleToken(DECIMAL, n.value, section(n.string.length))
+                is LexicalNumber.Integer -> LongToken(INTEGER, n.value, section(n.string.length))
+            }
+        )
     }
     matching { it.isLetter() || it == '_' || it == '@' }.configure {
         when (val s = readLinIdentifier(it)) {

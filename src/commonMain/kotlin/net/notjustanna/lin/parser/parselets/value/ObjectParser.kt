@@ -6,6 +6,8 @@ import net.notjustanna.lin.ast.node.Node
 import net.notjustanna.lin.ast.node.access.IdentifierExpr
 import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.value.*
+import net.notjustanna.lin.lexer.DoubleToken
+import net.notjustanna.lin.lexer.LongToken
 import net.notjustanna.lin.lexer.TokenType
 import net.notjustanna.lin.lexer.TokenType.*
 import net.notjustanna.lin.parser.utils.matchAll
@@ -13,11 +15,12 @@ import net.notjustanna.lin.parser.utils.maybeIgnoreNL
 import net.notjustanna.lin.parser.utils.skipOnlyUntil
 import net.notjustanna.tartar.api.grammar.PrefixParselet
 import net.notjustanna.tartar.api.parser.ParserContext
+import net.notjustanna.tartar.api.parser.StringToken
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object ObjectParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+object ObjectParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         val contents = mutableListOf<Pair<Expr, Expr>>()
 
         ctx.matchAll(NL)
@@ -27,11 +30,11 @@ object ObjectParser : PrefixParselet<TokenType, Node> {
 
                 val key: Expr
                 if (ctx.nextIsAny(STRING, IDENTIFIER)) {
-                    val (type, value, section) = ctx.eat()
-                    key = StringExpr(value, section)
+                    val keyToken = ctx.eat() as StringToken
+                    key = StringExpr(keyToken.value, keyToken.section)
                     // TODO Implement `operator` modifier for functions (Yes it is implemented here)
-                    if (type == IDENTIFIER && ctx.skipOnlyUntil(COMMA)) {
-                        contents += key to IdentifierExpr(value, section)
+                    if (keyToken.type == IDENTIFIER && ctx.skipOnlyUntil(COMMA)) {
+                        contents += key to IdentifierExpr(keyToken.value, keyToken.section)
                         continue
                     }
                 } else if (ctx.nextIs(FUN)) {
@@ -48,12 +51,12 @@ object ObjectParser : PrefixParselet<TokenType, Node> {
                     }
                     continue
                 } else if (ctx.nextIsAny(INTEGER, DECIMAL, TRUE, FALSE)) {
-                    val (type, value, section) = ctx.eat()
-                    key = when (type) {
-                        INTEGER -> IntegerExpr(value.toLong(), section)
-                        DECIMAL -> DecimalExpr(value.toDouble(), section)
-                        TRUE -> BooleanExpr(true, section)
-                        FALSE -> BooleanExpr(false, section)
+                    val keyToken = ctx.eat()
+                    key = when (keyToken.type) {
+                        INTEGER -> IntegerExpr((keyToken as LongToken).value, keyToken.section)
+                        DECIMAL -> DecimalExpr((keyToken as DoubleToken).value, keyToken.section)
+                        TRUE -> BooleanExpr(true, keyToken.section)
+                        FALSE -> BooleanExpr(false, keyToken.section)
                         else -> throw AssertionError("[INTERNAL] Impossible token type")
                     }
                 } else if (ctx.match(L_BRACKET)) {

@@ -9,8 +9,9 @@ import net.notjustanna.lin.parser.utils.matchAll
 import net.notjustanna.tartar.api.grammar.Grammar
 import net.notjustanna.tartar.api.parser.Parser
 import net.notjustanna.tartar.api.parser.SyntaxException
+import net.notjustanna.tartar.api.parser.Token
 
-internal fun linStdParser(grammar: Grammar<TokenType, Node>) = Parser.create(grammar) {
+internal fun linStdParser(grammar: Grammar<TokenType, Token<TokenType>, Node>) = Parser.create(grammar) {
     if (this.eof) {
         return@create NullExpr()
     }

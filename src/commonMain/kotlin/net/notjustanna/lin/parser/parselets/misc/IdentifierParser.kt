@@ -11,12 +11,13 @@ import net.notjustanna.lin.parser.utils.maybeIgnoreNL
 import net.notjustanna.lin.parser.utils.skipOnlyUntil
 import net.notjustanna.tartar.api.grammar.PrefixParselet
 import net.notjustanna.tartar.api.parser.ParserContext
+import net.notjustanna.tartar.api.parser.StringToken
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object IdentifierParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
-        val name = token.value
+object IdentifierParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
+        val name = (token as StringToken).value
 
         // Modifiers are implemented here (eg. `operator` modifier for functions)
 

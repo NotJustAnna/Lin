@@ -9,16 +9,17 @@ import net.notjustanna.lin.parser.utils.matchAll
 import net.notjustanna.lin.parser.utils.parseBlock
 import net.notjustanna.tartar.api.grammar.PrefixParselet
 import net.notjustanna.tartar.api.parser.ParserContext
+import net.notjustanna.tartar.api.parser.StringToken
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object ForParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+object ForParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)
 
-        val variableName = ctx.eat(TokenType.IDENTIFIER).value
+        val variableName = (ctx.eat(TokenType.IDENTIFIER) as StringToken).value
         // Destructuring is implemented here
 
         ctx.matchAll(TokenType.NL)

@@ -14,10 +14,14 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object InfixBangParser : InfixParselet<TokenType, Node> {
+object InfixBangParser : InfixParselet<TokenType, Token<TokenType>, Node> {
     override val precedence = Precedence.NAMED_CHECKS
 
-    override fun parse(ctx: ParserContext<TokenType, Node>, left: Node, token: Token<TokenType>): Node {
+    override fun parse(
+        ctx: ParserContext<TokenType, Token<TokenType>, Node>,
+        left: Node,
+        token: Token<TokenType>
+    ): Node {
         val target = if (ctx.match(TokenType.IN)) {
             BinaryOperatorParser(Precedence.NAMED_CHECKS, BinaryOperationType.IN).parse(ctx, left, ctx.last).let {
                 it as? Expr ?: return InvalidNode {
