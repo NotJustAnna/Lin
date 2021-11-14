@@ -5,11 +5,10 @@ plugins {
 }
 
 group = "com.github.adriantodt"
-version = "0.2"
+version = "0.3"
 
 repositories {
     mavenCentral()
-    mavenLocal()
     maven { url = uri("https://maven.cafeteria.dev") }
 }
 
@@ -46,7 +45,7 @@ kotlin {
         all { languageSettings.optIn("kotlin.RequiresOptIn") }
         val commonMain by getting {
             dependencies {
-                api("com.github.adriantodt:tartar:3.2.0")
+                api("com.github.adriantodt:tartar:4.0.0")
                 api("com.squareup.okio:okio:3.0.0")
             }
         }

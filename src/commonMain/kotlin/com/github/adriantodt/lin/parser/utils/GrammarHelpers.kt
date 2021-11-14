@@ -8,19 +8,20 @@ import com.github.adriantodt.lin.ast.node.declare.DeclareFunctionExpr
 import com.github.adriantodt.lin.ast.node.value.FunctionExpr
 import com.github.adriantodt.lin.lexer.TokenType
 import com.github.adriantodt.tartar.api.parser.ParserContext
+import com.github.adriantodt.tartar.api.parser.Token
 
 /**
  * This method consumes [TokenType.NL] tokens to allow some multiline neatness.
  *
  * This method usually is called at the end of expressions to allow some neat chaining.
  */
-fun ParserContext<TokenType, Node>.maybeIgnoreNL() {
+fun ParserContext<TokenType, Token<TokenType>, Node>.maybeIgnoreNL() {
     skipOnlyUntil(
         TokenType.DOT, TokenType.QUESTION_DOT, TokenType.AND, TokenType.OR
     )
 }
 
-fun ParserContext<TokenType, Node>.skipOnlyUntil(vararg type: TokenType): Boolean {
+fun ParserContext<TokenType, Token<TokenType>, Node>.skipOnlyUntil(vararg type: TokenType): Boolean {
     check(TokenType.NL !in type) { "[INTERNAL] NL was supplied as a token" }
     if (peekAheadUntil(*type).all { it.type == TokenType.NL }) {
         skipUntil(*type)
@@ -29,7 +30,10 @@ fun ParserContext<TokenType, Node>.skipOnlyUntil(vararg type: TokenType): Boolea
     return false
 }
 
-fun ParserContext<TokenType, Node>.parseBlock(smartToExpr: Boolean = true, braceConsumed: Boolean = false): Node? {
+fun ParserContext<TokenType, Token<TokenType>, Node>.parseBlock(
+    smartToExpr: Boolean = true,
+    braceConsumed: Boolean = false
+): Node? {
     if (braceConsumed || match(TokenType.L_BRACE)) {
         val start = last
         val list = mutableListOf<Node>()

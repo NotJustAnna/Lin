@@ -9,13 +9,14 @@ import com.github.adriantodt.lin.parser.utils.matchAll
 import com.github.adriantodt.lin.parser.utils.skipOnlyUntil
 import com.github.adriantodt.tartar.api.grammar.PrefixParselet
 import com.github.adriantodt.tartar.api.parser.ParserContext
+import com.github.adriantodt.tartar.api.parser.StringToken
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-class DeclareVariableParser(val mutable: Boolean) : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+class DeclareVariableParser(val mutable: Boolean) : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         // TODO Variable destructuring goes here (Check Lin/old)
-        val ident = ctx.eat(TokenType.IDENTIFIER)
+        val ident = ctx.eat(TokenType.IDENTIFIER) as StringToken
         ctx.skipOnlyUntil(TokenType.ASSIGN)
         if (ctx.match(TokenType.ASSIGN)) {
             ctx.matchAll(TokenType.NL)

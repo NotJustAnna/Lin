@@ -11,13 +11,18 @@ import com.github.adriantodt.lin.parser.utils.matchAll
 import com.github.adriantodt.lin.parser.utils.maybeIgnoreNL
 import com.github.adriantodt.tartar.api.grammar.InfixParselet
 import com.github.adriantodt.tartar.api.parser.ParserContext
+import com.github.adriantodt.tartar.api.parser.StringToken
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-class DotParser(private val nullSafe: Boolean) : InfixParselet<TokenType, Node> {
+class DotParser(private val nullSafe: Boolean) : InfixParselet<TokenType, Token<TokenType>, Node> {
     override val precedence: Int = Precedence.POSTFIX
 
-    override fun parse(ctx: ParserContext<TokenType, Node>, left: Node, token: Token<TokenType>): Node {
+    override fun parse(
+        ctx: ParserContext<TokenType, Token<TokenType>, Node>,
+        left: Node,
+        token: Token<TokenType>
+    ): Node {
         if (left !is Expr) {
             return InvalidNode {
                 section(token.section)
@@ -29,7 +34,7 @@ class DotParser(private val nullSafe: Boolean) : InfixParselet<TokenType, Node> 
         ctx.matchAll(TokenType.NL)
         val identifier = ctx.eat()
         if (identifier.type == TokenType.IDENTIFIER) {
-            val name = identifier.value
+            val name = (identifier as StringToken).value
 
             return if (ctx.match(TokenType.ASSIGN)) {
                 val value = ctx.parseExpression().let {

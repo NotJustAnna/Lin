@@ -3,8 +3,8 @@ package com.github.adriantodt.lin.lexer
 import com.github.adriantodt.tartar.api.lexer.LexerContext
 import com.github.adriantodt.tartar.api.lexer.Section
 import com.github.adriantodt.tartar.api.parser.SyntaxException
-import com.github.adriantodt.tartar.extensions.processToken
-import com.github.adriantodt.tartar.extensions.section
+import com.github.adriantodt.tartar.extensions.lexer.processToken
+import com.github.adriantodt.tartar.extensions.lexer.section
 
 fun LexerContext<*>.readLinIdentifier(firstChar: Char? = null): String {
     val buf = StringBuilder()

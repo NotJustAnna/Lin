@@ -9,16 +9,17 @@ import com.github.adriantodt.lin.parser.utils.matchAll
 import com.github.adriantodt.lin.parser.utils.parseBlock
 import com.github.adriantodt.tartar.api.grammar.PrefixParselet
 import com.github.adriantodt.tartar.api.parser.ParserContext
+import com.github.adriantodt.tartar.api.parser.StringToken
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-object ForParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+object ForParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         ctx.eat(TokenType.L_PAREN)
         ctx.matchAll(TokenType.NL)
 
-        val variableName = ctx.eat(TokenType.IDENTIFIER).value
+        val variableName = (ctx.eat(TokenType.IDENTIFIER) as StringToken).value
         // Destructuring is implemented here
 
         ctx.matchAll(TokenType.NL)

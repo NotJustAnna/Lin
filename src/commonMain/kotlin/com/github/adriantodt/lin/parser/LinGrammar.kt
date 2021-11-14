@@ -11,8 +11,9 @@ import com.github.adriantodt.lin.parser.parselets.value.*
 import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.lin.utils.UnaryOperationType
 import com.github.adriantodt.tartar.api.grammar.Grammar
+import com.github.adriantodt.tartar.api.parser.Token
 
-internal fun linStdGrammar() = Grammar.create<TokenType, Node> {
+internal fun linStdGrammar() = Grammar.create<TokenType, Token<TokenType>, Node> {
     // Simple Expressions
     prefix(INTEGER, IntegerParser)
     //prefix(LONG, LongParser)

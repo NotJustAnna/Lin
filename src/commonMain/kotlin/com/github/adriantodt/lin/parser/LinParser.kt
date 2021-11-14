@@ -9,8 +9,9 @@ import com.github.adriantodt.lin.parser.utils.matchAll
 import com.github.adriantodt.tartar.api.grammar.Grammar
 import com.github.adriantodt.tartar.api.parser.Parser
 import com.github.adriantodt.tartar.api.parser.SyntaxException
+import com.github.adriantodt.tartar.api.parser.Token
 
-internal fun linStdParser(grammar: Grammar<TokenType, Node>) = Parser.create(grammar) {
+internal fun linStdParser(grammar: Grammar<TokenType, Token<TokenType>, Node>) = Parser.create(grammar) {
     if (this.eof) {
         return@create NullExpr()
     }

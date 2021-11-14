@@ -9,11 +9,12 @@ import com.github.adriantodt.lin.parser.utils.parseBlock
 import com.github.adriantodt.lin.parser.utils.skipOnlyUntil
 import com.github.adriantodt.tartar.api.grammar.PrefixParselet
 import com.github.adriantodt.tartar.api.parser.ParserContext
+import com.github.adriantodt.tartar.api.parser.StringToken
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-object TryParser : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+object TryParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.skipOnlyUntil(TokenType.L_BRACE)
         ctx.eat(TokenType.L_BRACE)
         val tryBranch = ctx.parseBlock(braceConsumed = true) ?: error("Impossible to be null.")
@@ -24,14 +25,14 @@ object TryParser : PrefixParselet<TokenType, Node> {
         loop@ while (catchBranch == null || finallyBranch == null) {
             ctx.skipOnlyUntil(TokenType.IDENTIFIER)
             if (ctx.nextIs(TokenType.IDENTIFIER)) {
-                when (ctx.eat().value) {
+                when ((ctx.eat() as StringToken).value) {
                     "catch" -> {
                         val catchToken = ctx.last
                         ctx.skipOnlyUntil(TokenType.L_PAREN)
                         val name = if (ctx.match(TokenType.L_PAREN)) {
                             ctx.eat(TokenType.L_PAREN)
                             ctx.skipOnlyUntil(TokenType.IDENTIFIER)
-                            val value = if (ctx.match(TokenType.IDENTIFIER)) ctx.last.value else null
+                            val value = if (ctx.match(TokenType.IDENTIFIER)) (ctx.last as StringToken).value else null
                             ctx.skipOnlyUntil(TokenType.R_PAREN)
                             ctx.eat(TokenType.R_PAREN)
                             value

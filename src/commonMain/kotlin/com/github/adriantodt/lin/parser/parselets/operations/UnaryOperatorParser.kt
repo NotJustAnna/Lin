@@ -14,8 +14,9 @@ import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-class UnaryOperatorParser(private val operator: UnaryOperationType) : PrefixParselet<TokenType, Node> {
-    override fun parse(ctx: ParserContext<TokenType, Node>, token: Token<TokenType>): Node {
+class UnaryOperatorParser(private val operator: UnaryOperationType) :
+    PrefixParselet<TokenType, Token<TokenType>, Node> {
+    override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         val target = ctx.parseExpression(Precedence.PREFIX).let {
             it as? Expr ?: return InvalidNode {

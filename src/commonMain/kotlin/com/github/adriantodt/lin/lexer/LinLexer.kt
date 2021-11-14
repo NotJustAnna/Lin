@@ -4,10 +4,7 @@ import com.github.adriantodt.lin.lexer.TokenType.*
 import com.github.adriantodt.tartar.api.dsl.CharPredicate
 import com.github.adriantodt.tartar.api.lexer.Lexer
 import com.github.adriantodt.tartar.api.parser.Token
-import com.github.adriantodt.tartar.extensions.LexicalNumber
-import com.github.adriantodt.tartar.extensions.processToken
-import com.github.adriantodt.tartar.extensions.readNumber
-import com.github.adriantodt.tartar.extensions.readString
+import com.github.adriantodt.tartar.extensions.lexer.*
 
 typealias LinToken = Token<TokenType>
 
@@ -69,11 +66,13 @@ internal fun linStdLexer() = Lexer.create<LinToken> {
     '"' { readLinTemplateString("\"", false) }
     "`" { processToken(IDENTIFIER, readString(it), offset = 2) }
     matching(CharPredicate.isDigit).configure {
-        when (val n = readNumber(it)) {
-            is LexicalNumber.Invalid -> processToken(INVALID, n.string)
-            is LexicalNumber.Decimal -> processToken(DECIMAL, n.value.toString(), n.string.length)
-            is LexicalNumber.Integer -> processToken(INTEGER, n.value.toString(), n.string.length)
-        }
+        process(
+            when (val n = readNumber(it)) {
+                is LexicalNumber.Invalid -> token(INVALID, n.string)
+                is LexicalNumber.Decimal -> DoubleToken(DECIMAL, n.value, section(n.string.length))
+                is LexicalNumber.Integer -> LongToken(INTEGER, n.value, section(n.string.length))
+            }
+        )
     }
     matching { it.isLetter() || it == '_' || it == '@' }.configure {
         when (val s = readLinIdentifier(it)) {
