@@ -141,6 +141,10 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      * Stack Outputs: (value)
      */
     fun pushStringInsn(value: String) {
+        if (value.length <= 1) {
+            instructions += PushCharInsn(value.firstOrNull() ?: (-1).toChar())
+            return
+        }
         instructions += LoadStringInsn(parent.constantId(value))
     }
 
