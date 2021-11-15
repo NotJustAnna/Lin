@@ -9,12 +9,16 @@ import net.notjustanna.tartar.extensions.lexer.*
 typealias LinToken = Token<TokenType>
 
 internal fun linStdLexer() = Lexer.create<LinToken> {
-    ' ' { while (hasNext()) if (!match(' ')) break }
+    ' ' { matchSpaceAndNL() }
     '\r' {
         match('\n')
         processToken(NL)
+        matchSpaceAndNL()
     }
-    '\n' { processToken(NL) }
+    '\n' {
+        processToken(NL)
+        matchSpaceAndNL()
+    }
     '{' { processToken(L_BRACE) }
     '}' { processToken(R_BRACE) }
     '(' { processToken(L_PAREN) }

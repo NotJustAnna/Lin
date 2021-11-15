@@ -8,8 +8,6 @@ import net.notjustanna.lin.vm.types.LObject
 import net.notjustanna.lin.vm.types.LString
 
 object Exceptions {
-    // TODO Add support for scope/lines
-
     fun create(type: String, description: String, stackTrace: List<StackTrace>): LObject {
         return LObject(
             LString("errorType") to LString(type),
