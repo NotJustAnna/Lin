@@ -189,19 +189,20 @@ class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBui
 
     override fun visitFunctionExpr(node: FunctionExpr) {
         builder.markSection(node) {
-            val parameters = node.parameters.map { (name, varargs, defaultValue) ->
+            val parameters = node.parameters.map { (name, _, defaultValue) ->
                 CompiledParameter(
                     source.constantId(name),
-                    varargs,
                     defaultValue?.let {
                         NodeCompiler(source).also { c -> it.accept(c) }.builder.nodeId
                     } ?: -1
                 )
             }
 
+            val varargsParam = node.parameters.indexOfFirst { it.varargs }
+
             val bodyId = node.body?.let { NodeCompiler(source).also { c -> it.accept(c) }.builder.nodeId } ?: -1
 
-            builder.newFunctionInsn(parameters, node.name, bodyId)
+            builder.newFunctionInsn(parameters, node.name, bodyId, varargsParam)
         }
     }
 

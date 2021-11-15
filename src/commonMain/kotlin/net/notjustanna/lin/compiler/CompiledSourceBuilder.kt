@@ -55,8 +55,8 @@ class CompiledSourceBuilder {
         return stringPool.lastIndex
     }
 
-    fun registerFunction(parametersId: Int, name: String?, bodyId: Int): Int {
-        functions += CompiledFunction(parametersId, name?.let(this::constantId) ?: -1, bodyId)
+    fun registerFunction(parametersId: Int, name: String?, bodyId: Int, varargsParam: Int): Int {
+        functions += CompiledFunction(parametersId, name?.let(this::constantId) ?: -1, bodyId, varargsParam)
         return functions.lastIndex
     }
 
