@@ -192,21 +192,28 @@ class DefaultExecutionLayer(
         if (parent is LArray && size == 1) {
             val arg = arguments.first()
             val list = parent.value
+            val listSize = list.size
             val lastIndex = list.lastIndex
             if (arg is LInteger) {
                 val index = arg.value
-                if (index < 0 || index > lastIndex) {
+                if (index < -listSize || index > lastIndex) {
                     TODO("Error: argument is out of bounds")
                 }
-                stack.add(list[index.toInt()])
+
+                stack.add(list[if (index < 0) listSize + index.toInt() else index.toInt()])
+
                 return
             } else if (arg is LRange) {
                 val start = arg.value.first
                 val end = arg.value.last
-                if (start < 0 || end < 0 || start > lastIndex || arg.value.last > lastIndex) {
+                if (start < -listSize || end < -listSize || start > lastIndex || end > lastIndex) {
                     TODO("Error: argument is out of bounds")
                 }
-                stack.add(LArray(list.subList(start.toInt(), end.toInt()).toMutableList()))
+                // TODO There's probably a faster way to do this.
+                val select = arg.value.mapTo(mutableListOf()) {
+                    list[if (it < 0) listSize + it.toInt() else it.toInt()]
+                }
+                stack.add(LArray(select))
                 return
             }
         }
@@ -221,21 +228,26 @@ class DefaultExecutionLayer(
         if (parent is LString && size == 1) {
             val arg = arguments.first()
             val string = parent.value
+            val length = string.length
             val lastIndex = string.lastIndex
             if (arg is LInteger) {
                 val index = arg.value
-                if (index < 0 || index > lastIndex) {
+                if (index < -length || index > lastIndex) {
                     TODO("Error: argument is out of bounds")
                 }
-                stack.add(LString(string[index.toInt()].toString()))
+                stack.add(LString(string[if (index < 0) length + index.toInt() else index.toInt()].toString()))
                 return
             } else if (arg is LRange) {
                 val start = arg.value.first
                 val end = arg.value.last
-                if (start < 0 || end < 0 || start > lastIndex || arg.value.last > lastIndex) {
+                if (start < -length || end < -length || start > lastIndex || end > lastIndex) {
                     TODO("Error: argument is out of bounds")
                 }
-                stack.add(LString(string.substring(start.toInt(), end.toInt())))
+                // TODO There's probably a faster way to do this.
+                val select = arg.value.map {
+                    string[if (it < 0) length + it.toInt() else it.toInt()]
+                }
+                stack.add(LString(select.toCharArray().concatToString()))
                 return
             }
         }
