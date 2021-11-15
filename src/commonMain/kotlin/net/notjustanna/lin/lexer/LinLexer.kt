@@ -66,7 +66,7 @@ internal fun linStdLexer() = Lexer.create<LinToken> {
     '>' { processToken(GT) }
     '\'' { readLinTemplateString("'", false) }
     "\"\"\"" { readLinTemplateString("\"\"\"", true) }
-    "\"\"" { processToken(STRING, 2) }
+    "\"\"" { processToken(STRING, "", 2) }
     '"' { readLinTemplateString("\"", false) }
     "`" { processToken(IDENTIFIER, readString(it), offset = 2) }
     matching(CharPredicate.isDigit).configure {

@@ -284,4 +284,26 @@ class VirtualMachineRegressionTests {
         val execution = ExecutionBenchmark(Source("", "emptySource.lin"))
         assertEquals(LNull, execution.result, "Code should not produce result.")
     }
+
+    @Test
+    fun emptyAndSingleCharacterStrings() {
+
+        val code = """
+            publish(
+                "", "A", "B"
+            )
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark(Source(code, "emptyAndSingleCharacterStrings.lin"))
+
+        assertEquals(LNull, execution.result, "Code should not produce result.")
+        val array = listOf(
+            LString(""), LString("A"), LString("B")
+        )
+
+        for ((index, any) in array.withIndex()) {
+            assertEquals(any, execution.output.removeFirst(), "Error at index $index")
+        }
+        assertTrue(execution.output.isEmpty(), "Output array: ${execution.output}")
+    }
 }

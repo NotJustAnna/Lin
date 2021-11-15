@@ -88,6 +88,7 @@ class DefaultExecutionLayer(
                 UnaryNotOperationInsn -> handleUnaryNotOperation()
                 UnaryPositiveOperationInsn -> handleUnaryPositiveOperation()
                 UnaryTruthOperationInsn -> handleUnaryTruthOperation()
+                is PushCharInsn -> handlePushChar(insn.value)
             }
         } catch (e: Exception) {
             onThrow(
@@ -318,6 +319,14 @@ class DefaultExecutionLayer(
 
     private fun handlePushBoolean(value: Boolean) {
         stack.add(if (value) LTrue else LFalse)
+    }
+
+    private fun handlePushChar(value: Char) {
+        if (value != (-1).toChar()) {
+            stack.add(LString(value.toString()))
+        } else {
+            stack.add(LString(""))
+        }
     }
 
     private fun handlePushDecimal(immediateValue: Int) {

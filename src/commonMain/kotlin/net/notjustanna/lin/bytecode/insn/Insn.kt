@@ -15,7 +15,7 @@ sealed class Insn : Serializable {
     enum class Opcode {
         PARAMETERLESS, ASSIGN, BRANCH_IF_FALSE, BRANCH_IF_TRUE, DECLARE_VARIABLE_IMMUTABLE,
         DECLARE_VARIABLE_MUTABLE, GET_MEMBER_PROPERTY, GET_SUBSCRIPT, GET_VARIABLE, INVOKE, INVOKE_LOCAL, INVOKE_MEMBER,
-        JUMP, LOAD_DECIMAL, LOAD_INTEGER, LOAD_STRING, NEW_FUNCTION, PUSH_DECIMAL,
+        JUMP, LOAD_DECIMAL, LOAD_INTEGER, LOAD_STRING, NEW_FUNCTION, PUSH_CHAR, PUSH_DECIMAL,
         PUSH_INTEGER, PUSH_EXCEPTION_HANDLING, PUSH_LOOP_HANDLING, SET_MEMBER_PROPERTY, SET_SUBSCRIPT, SET_VARIABLE
     }
 
@@ -102,6 +102,9 @@ sealed class Insn : Serializable {
                 }
                 Opcode.SET_VARIABLE -> {
                     SetVariableInsn(buffer.readU24())
+                }
+                Opcode.PUSH_CHAR -> {
+                    PushCharInsn(buffer.skipByte().readShort().toInt().toChar())
                 }
             }
         }
