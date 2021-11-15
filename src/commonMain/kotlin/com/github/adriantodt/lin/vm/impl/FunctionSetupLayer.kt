@@ -35,10 +35,7 @@ class FunctionSetupLayer(
             val value = argsLeft.removeFirstOrNull()
 
             val paramName = function.source.stringConst(parameter.nameConst)
-
-            if (parameter.varargs) {
-                TODO("Not yet implemented: varargs parameter")
-            }
+            // TODO Not yet implemented: varargs parameter
 
             if (value != null) {
                 scope.declareVariable(paramName, true)

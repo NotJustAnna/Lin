@@ -331,12 +331,13 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         instructions += SetSubscriptInsn(size)
     }
 
-    fun newFunctionInsn(parameters: List<CompiledParameter>, name: String?, bodyId: Int) {
+    fun newFunctionInsn(parameters: List<CompiledParameter>, name: String?, bodyId: Int, varargsParam: Int) {
         instructions += NewFunctionInsn(
             parent.registerFunction(
                 parent.registerParameters(parameters),
                 name,
-                bodyId
+                bodyId,
+                varargsParam
             )
         )
     }
