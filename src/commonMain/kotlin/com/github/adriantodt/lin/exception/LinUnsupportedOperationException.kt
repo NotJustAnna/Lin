@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.exception
 
-class LinUnsupportedOperationException : NoSuchElementException, LinNativeException {
+class LinUnsupportedOperationException : UnsupportedOperationException, LinNativeException {
     constructor(operation: String, type: String) : super(
         "Cannot apply operation '$operation' for type '$type'."
     )

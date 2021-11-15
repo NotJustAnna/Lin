@@ -1,5 +1,6 @@
 package com.github.adriantodt.lin.bytecode
 
+import com.github.adriantodt.lin.bytecode.utils.readU8
 import com.github.adriantodt.lin.utils.Deserializer
 import com.github.adriantodt.lin.utils.Serializable
 import okio.Buffer
@@ -11,7 +12,14 @@ data class CompiledFunction(
     val varargsParam: Int
 ) : Serializable {
     override fun serializeTo(buffer: Buffer) {
-        buffer.writeInt(parametersId).writeInt(nameConst).writeInt(bodyId).writeByte(varargsParam)
+        buffer.writeInt(parametersId)
+            .writeInt(nameConst)
+            .writeInt(bodyId)
+            .writeByte(if (varargsParam == -1) 0 else 1)
+
+        if (varargsParam != -1) {
+            buffer.writeByte(varargsParam)
+        }
     }
 
     companion object : Deserializer<CompiledFunction> {
@@ -20,7 +28,7 @@ data class CompiledFunction(
                 buffer.readInt(),
                 buffer.readInt(),
                 buffer.readInt(),
-                buffer.readByte().toInt() and 0xFF
+                if (buffer.readU8() != 0) buffer.readU8() else -1
             )
         }
     }

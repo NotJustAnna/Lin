@@ -19,13 +19,13 @@ data class CompiledSource(
 ) : Serializable {
     override fun serializeTo(buffer: Buffer) {
         check(longPool.size < maxU24) {
-            "Compiled Source cannot be compiled as the long pool exceeds the maximum size (${longPool.size} >= $maxU24)"
+            "Compiled Source cannot be serialized as the long pool exceeds the maximum size (${longPool.size} >= $maxU24)"
         }
         buffer.writeU24(longPool.size)
         for (l in longPool) buffer.writeLong(l)
 
         check(stringPool.size < maxU24) {
-            "Compiled Source cannot be compiled as the string pool exceeds the maximum size (${stringPool.size} >= $maxU24)"
+            "Compiled Source cannot be serialized as the string pool exceeds the maximum size (${stringPool.size} >= $maxU24)"
         }
         buffer.writeU24(stringPool.size)
         for (s in stringPool) {
@@ -33,17 +33,20 @@ data class CompiledSource(
             buffer.writeInt(encoded.size).write(encoded)
         }
 
-        buffer.writeInt(functionParameters.size)
+        check(functionParameters.size < maxU24) {
+            "Compiled Source cannot be serialized as the function parameter definitions exceeds the maximum size (${functionParameters.size} >= $maxU24)"
+        }
+        buffer.writeU24(functionParameters.size)
         for (list in functionParameters) {
             check(list.size < 256) {
-                "Compiled Source cannot be compiled as a function parameter definition exceeded the maximum size (${list.size} > 255)"
+                "Compiled Source cannot be serialized as a function parameter definition exceeded the maximum size (${list.size} > 255)"
             }
             buffer.writeByte(list.size)
             for (parameter in list) parameter.serializeTo(buffer)
         }
 
-        check(stringPool.size < maxU24) {
-            "Compiled Source cannot be compiled as the function definitions exceeds the maximum size (${functions.size} >= $maxU24)"
+        check(functions.size < maxU24) {
+            "Compiled Source cannot be serialized as the function definitions exceeds the maximum size (${functions.size} >= $maxU24)"
         }
         buffer.writeU24(functions.size)
         for (function in functions) function.serializeTo(buffer)
@@ -85,7 +88,7 @@ data class CompiledSource(
             }
 
             val functionParameters = mutableListOf<List<CompiledParameter>>()
-            repeat(buffer.readInt()) {
+            repeat(buffer.readU24()) {
                 val list = mutableListOf<CompiledParameter>()
                 repeat(buffer.readByte().toInt() and 0xFF) {
                     list += CompiledParameter.deserializeFrom(buffer)

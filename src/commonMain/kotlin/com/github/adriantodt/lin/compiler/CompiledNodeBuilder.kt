@@ -19,7 +19,6 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     private val sectionStack = mutableListOf<Int>()
     private var lastSectionInsn = 0
 
-
     private var nextLabelCode = 0
 
     fun nextLabel(): Int {
