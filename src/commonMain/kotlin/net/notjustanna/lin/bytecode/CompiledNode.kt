@@ -1,6 +1,8 @@
 package net.notjustanna.lin.bytecode
 
 import net.notjustanna.lin.bytecode.insn.Insn
+import net.notjustanna.lin.bytecode.utils.readU24
+import net.notjustanna.lin.bytecode.utils.writeU24
 import net.notjustanna.lin.utils.Deserializer
 import net.notjustanna.lin.utils.Serializable
 import okio.Buffer
@@ -14,7 +16,7 @@ data class CompiledNode(
         buffer.writeInt(instructions.size)
         for (insn in instructions) insn.serializeTo(buffer)
 
-        buffer.writeInt(jumpLabels.size)
+        buffer.writeU24(jumpLabels.size)
         for (label in jumpLabels.sortedBy { it.code }) label.serializeTo(buffer)
 
         buffer.writeInt(sectionLabels.size)
@@ -35,7 +37,7 @@ data class CompiledNode(
             }
 
             val jumpLabels = mutableListOf<JumpLabel>()
-            repeat(buffer.readInt()) {
+            repeat(buffer.readU24()) {
                 jumpLabels += JumpLabel.deserializeFrom(buffer)
             }
 

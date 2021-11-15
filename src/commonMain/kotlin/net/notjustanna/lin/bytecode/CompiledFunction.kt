@@ -1,5 +1,6 @@
 package net.notjustanna.lin.bytecode
 
+import net.notjustanna.lin.bytecode.utils.readU8
 import net.notjustanna.lin.utils.Deserializer
 import net.notjustanna.lin.utils.Serializable
 import okio.Buffer
@@ -11,7 +12,14 @@ data class CompiledFunction(
     val varargsParam: Int
 ) : Serializable {
     override fun serializeTo(buffer: Buffer) {
-        buffer.writeInt(parametersId).writeInt(nameConst).writeInt(bodyId).writeByte(varargsParam)
+        buffer.writeInt(parametersId)
+            .writeInt(nameConst)
+            .writeInt(bodyId)
+            .writeByte(if (varargsParam == -1) 0 else 1)
+
+        if (varargsParam != -1) {
+            buffer.writeByte(varargsParam)
+        }
     }
 
     companion object : Deserializer<CompiledFunction> {
@@ -20,7 +28,7 @@ data class CompiledFunction(
                 buffer.readInt(),
                 buffer.readInt(),
                 buffer.readInt(),
-                buffer.readByte().toInt() and 0xFF
+                if (buffer.readU8() != 0) buffer.readU8() else -1
             )
         }
     }

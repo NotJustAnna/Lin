@@ -1,9 +1,6 @@
 package net.notjustanna.lin.bytecode.insn
 
-import net.notjustanna.lin.bytecode.utils.readI24
-import net.notjustanna.lin.bytecode.utils.readU12Pair
-import net.notjustanna.lin.bytecode.utils.readU24
-import net.notjustanna.lin.bytecode.utils.skipByte
+import net.notjustanna.lin.bytecode.utils.*
 import net.notjustanna.lin.utils.Deserializer
 import net.notjustanna.lin.utils.Serializable
 import okio.Buffer
@@ -30,7 +27,7 @@ sealed class Insn : Serializable {
 
     companion object : Deserializer<Insn> {
         override fun deserializeFrom(buffer: Buffer): Insn {
-            val opcodeNum = buffer.readByte().toInt()
+            val opcodeNum = buffer.readU8()
             return when (Opcode.values()[opcodeNum]) {
                 Opcode.PARAMETERLESS -> deserializeParameterlessFrom(buffer)
                 Opcode.ASSIGN -> {
@@ -52,19 +49,19 @@ sealed class Insn : Serializable {
                     GetMemberPropertyInsn(buffer.readU24())
                 }
                 Opcode.GET_SUBSCRIPT -> {
-                    GetSubscriptInsn(buffer.skipByte().skipByte().readByte().toInt())
+                    GetSubscriptInsn(buffer.skipByte().skipByte().readU8())
                 }
                 Opcode.GET_VARIABLE -> {
                     GetVariableInsn(buffer.readU24())
                 }
                 Opcode.INVOKE -> {
-                    InvokeInsn(buffer.skipByte().skipByte().readByte().toInt())
+                    InvokeInsn(buffer.skipByte().skipByte().readU8())
                 }
                 Opcode.INVOKE_LOCAL -> {
-                    InvokeLocalInsn(buffer.readShort().toInt(), buffer.readByte().toInt())
+                    InvokeLocalInsn(buffer.readU16(), buffer.readU8())
                 }
                 Opcode.INVOKE_MEMBER -> {
-                    InvokeMemberInsn(buffer.readShort().toInt(), buffer.readByte().toInt())
+                    InvokeMemberInsn(buffer.readU16(), buffer.readU8())
                 }
                 Opcode.JUMP -> {
                     JumpInsn(buffer.readU24())
@@ -93,19 +90,19 @@ sealed class Insn : Serializable {
                 }
                 Opcode.PUSH_LOOP_HANDLING -> {
                     val (first, second) = buffer.readU12Pair()
-                    PushExceptionHandlingInsn(first, second)
+                    PushLoopHandlingInsn(first, second)
                 }
                 Opcode.SET_MEMBER_PROPERTY -> {
                     SetMemberPropertyInsn(buffer.readU24())
                 }
                 Opcode.SET_SUBSCRIPT -> {
-                    SetSubscriptInsn(buffer.skipByte().skipByte().readByte().toInt())
+                    SetSubscriptInsn(buffer.skipByte().skipByte().readU8())
                 }
                 Opcode.SET_VARIABLE -> {
                     SetVariableInsn(buffer.readU24())
                 }
                 Opcode.PUSH_CHAR -> {
-                    PushCharInsn(buffer.skipByte().readShort().toInt().toChar())
+                    PushCharInsn(buffer.skipByte().readU16().toChar())
                 }
             }
         }

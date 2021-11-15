@@ -1,11 +1,12 @@
 package net.notjustanna.lin.test.regression.bytecode
 
 import net.notjustanna.lin.bytecode.insn.Insn
+import net.notjustanna.lin.bytecode.insn.InvokeInsn
 import net.notjustanna.lin.bytecode.insn.PushCharInsn
 import net.notjustanna.lin.bytecode.insn.PushIntegerInsn
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
+import kotlin.test.assertFails
 
 class BytecodeRegressionTests {
     @Test
@@ -31,6 +32,17 @@ class BytecodeRegressionTests {
         assertEquals(-100, reserialize(-100))
         assertEquals(70000, reserialize(70000))
         assertEquals(4194302, reserialize(4194302))
-        assertNotEquals(16777215, reserialize(16777215))
+        assertFails { reserialize(16777215) }
+    }
+
+    @Test
+    fun invokeInsn() {
+        fun reserialize(value: Int) = (Insn.fromBytes(InvokeInsn(value).toBytes()) as InvokeInsn).size
+
+        assertEquals(0, reserialize(0))
+        assertEquals(1, reserialize(1))
+        assertEquals(100, reserialize(100))
+        assertEquals(200, reserialize(200))
+        assertFails { reserialize(300) }
     }
 }
