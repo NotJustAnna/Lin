@@ -287,7 +287,6 @@ class VirtualMachineRegressionTests {
 
     @Test
     fun emptyAndSingleCharacterStrings() {
-
         val code = """
             publish(
                 "", "A", "B"
@@ -299,6 +298,30 @@ class VirtualMachineRegressionTests {
         assertEquals(LNull, execution.result, "Code should not produce result.")
         val array = listOf(
             LString(""), LString("A"), LString("B")
+        )
+
+        for ((index, any) in array.withIndex()) {
+            assertEquals(any, execution.output.removeFirst(), "Error at index $index")
+        }
+        assertTrue(execution.output.isEmpty(), "Output array: ${execution.output}")
+    }
+
+    @Test
+    fun negativeIndexing() {
+        val code = """
+            val array = ["A", "B", "C", "D"]
+            val string = "ABCD"
+            publish(array[-1], string[-1], array[-1..1], string[-1..1])
+        """.trimIndent()
+
+        val execution = ExecutionBenchmark(Source(code, "emptyAndSingleCharacterStrings.lin"))
+
+        assertEquals(LNull, execution.result, "Code should not produce result.")
+        val array = listOf(
+            LString("D"),
+            LString("D"),
+            LArray(mutableListOf(LString("D"), LString("A"), LString("B"))),
+            LString("DAB")
         )
 
         for ((index, any) in array.withIndex()) {
