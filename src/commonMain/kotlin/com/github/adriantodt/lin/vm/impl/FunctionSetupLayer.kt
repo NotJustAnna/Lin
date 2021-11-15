@@ -7,7 +7,7 @@ import com.github.adriantodt.lin.vm.scope.DefaultMutableScope
 import com.github.adriantodt.lin.vm.types.LAny
 import com.github.adriantodt.lin.vm.types.LCompiledFunction
 
-class FunctionSetupLayer(
+public class FunctionSetupLayer(
     private val events: VMEvents,
     private val function: LCompiledFunction,
     private val thisValue: LAny? = null,

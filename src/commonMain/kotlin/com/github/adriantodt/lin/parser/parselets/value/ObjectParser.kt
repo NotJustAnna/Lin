@@ -19,7 +19,7 @@ import com.github.adriantodt.tartar.api.parser.StringToken
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-object ObjectParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+public object ObjectParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
     override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         val contents = mutableListOf<Pair<Expr, Expr>>()
 

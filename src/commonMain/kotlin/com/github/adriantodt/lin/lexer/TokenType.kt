@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.lexer
 
-enum class TokenType {
+public enum class TokenType {
     L_BRACE, // {
     R_BRACE, // }
 

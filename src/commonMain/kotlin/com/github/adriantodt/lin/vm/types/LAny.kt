@@ -1,14 +1,14 @@
 package com.github.adriantodt.lin.vm.types
 
-sealed class LAny {
-    abstract fun truth(): Boolean
+public sealed class LAny {
+    public abstract fun truth(): Boolean
 
-    abstract val linType: String
+    public abstract val linType: String
 
-    abstract fun getMember(name: String): LAny?
+    public abstract fun getMember(name: String): LAny?
 
-    companion object {
-        fun of(value: Any?): LAny {
+    public companion object {
+        public fun of(value: Any?): LAny {
             return when (value) {
                 null, is Unit -> LNull
                 true -> LTrue
@@ -26,11 +26,11 @@ sealed class LAny {
             }
         }
 
-        fun ofBoolean(value: Boolean): LAny {
+        public fun ofBoolean(value: Boolean): LAny {
             return if (value) LTrue else LFalse
         }
 
-        fun ofEntry(entry: Map.Entry<LAny, LAny>): LAny {
+        public fun ofEntry(entry: Map.Entry<LAny, LAny>): LAny {
             return LObject(LString("key") to entry.key, LString("value") to entry.value)
         }
     }

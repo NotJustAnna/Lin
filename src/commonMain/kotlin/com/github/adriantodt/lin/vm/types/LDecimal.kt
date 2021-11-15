@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.vm.types
 
-data class LDecimal(val value: Double) : LNumber() {
+public data class LDecimal(val value: Double) : LNumber() {
     override fun compareTo(other: LNumber): Int {
         return when (other) {
             is LDecimal -> value.compareTo(other.value)

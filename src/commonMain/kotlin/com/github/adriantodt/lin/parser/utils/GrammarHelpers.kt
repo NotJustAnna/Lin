@@ -15,13 +15,13 @@ import com.github.adriantodt.tartar.api.parser.Token
  *
  * This method usually is called at the end of expressions to allow some neat chaining.
  */
-fun ParserContext<TokenType, Token<TokenType>, Node>.maybeIgnoreNL() {
+internal fun ParserContext<TokenType, Token<TokenType>, Node>.maybeIgnoreNL() {
     skipOnlyUntil(
         TokenType.DOT, TokenType.QUESTION_DOT, TokenType.AND, TokenType.OR
     )
 }
 
-fun ParserContext<TokenType, Token<TokenType>, Node>.skipOnlyUntil(vararg type: TokenType): Boolean {
+internal fun ParserContext<TokenType, Token<TokenType>, Node>.skipOnlyUntil(vararg type: TokenType): Boolean {
     check(TokenType.NL !in type) { "[INTERNAL] NL was supplied as a token" }
     if (peekAheadUntil(*type).all { it.type == TokenType.NL }) {
         skipUntil(*type)
@@ -30,7 +30,7 @@ fun ParserContext<TokenType, Token<TokenType>, Node>.skipOnlyUntil(vararg type: 
     return false
 }
 
-fun ParserContext<TokenType, Token<TokenType>, Node>.parseBlock(
+internal fun ParserContext<TokenType, Token<TokenType>, Node>.parseBlock(
     smartToExpr: Boolean = true,
     braceConsumed: Boolean = false
 ): Node? {

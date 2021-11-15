@@ -1,48 +1,48 @@
 package com.github.adriantodt.lin.parser
 
-object Precedence {
+public object Precedence {
     /* a++ | a-- | a.b | a?.b | A? | a(b) | a[b] | a!! */
-    const val POSTFIX = 15
+    public const val POSTFIX: Int = 15
 
     /* -a | +a | ++a | --a | !a */
-    const val PREFIX = 14
+    public const val PREFIX: Int = 14
 
     /* : A | b as A | b as? A */
-    const val TYPE_RHS = 13
+    public const val TYPE_RHS: Int = 13
 
     /* a * b | a / b | a % b */
-    const val MULTIPLICATIVE = 12
+    public const val MULTIPLICATIVE: Int = 12
 
     /* a + b | a - b */
-    const val ADDITIVE = 11
+    public const val ADDITIVE: Int = 11
 
     /* a..b */
-    const val RANGE = 10
+    public const val RANGE: Int = 10
 
     /* a to b */
-    const val INFIX = 9
+    public const val INFIX: Int = 9
 
     /* a ?: b */
-    const val ELVIS = 8
+    public const val ELVIS: Int = 8
 
     /* a in b | a !in b | a is b | a !is b */
-    const val NAMED_CHECKS = 7
+    public const val NAMED_CHECKS: Int = 7
 
     /* a > b | a < b | a >= b | a <= b */
-    const val COMPARISON = 6
+    public const val COMPARISON: Int = 6
 
     /* a == b | a != b */
-    const val EQUALITY = 5
+    public const val EQUALITY: Int = 5
 
     /* a && b */
-    const val CONJUNCTION = 4
+    public const val CONJUNCTION: Int = 4
 
     /* a || b */
-    const val DISJUNCTION = 3
+    public const val DISJUNCTION: Int = 3
 
     /* *array */
-    const val SPREAD_OPERATOR = 2
+    public const val SPREAD_OPERATOR: Int = 2
 
     /* a = b | a += b | a -= b | a *= b | a /= b | a %= b */
-    const val ASSIGNMENT = 1
+    public const val ASSIGNMENT: Int = 1
 }

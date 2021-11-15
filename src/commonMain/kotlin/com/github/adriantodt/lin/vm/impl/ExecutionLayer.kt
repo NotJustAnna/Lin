@@ -3,12 +3,12 @@ package com.github.adriantodt.lin.vm.impl
 import com.github.adriantodt.lin.vm.StackTrace
 import com.github.adriantodt.lin.vm.types.LAny
 
-interface ExecutionLayer {
-    fun step()
+public interface ExecutionLayer {
+    public fun step()
 
-    fun onReturn(value: LAny)
+    public fun onReturn(value: LAny)
 
-    fun onThrow(value: LAny)
+    public fun onThrow(value: LAny)
 
-    fun trace(): StackTrace?
+    public fun trace(): StackTrace?
 }

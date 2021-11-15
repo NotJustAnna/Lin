@@ -7,7 +7,7 @@ import com.github.adriantodt.lin.utils.Deserializer
 import com.github.adriantodt.lin.utils.Serializable
 import okio.Buffer
 
-data class CompiledNode(
+public data class CompiledNode(
     val instructions: List<Insn>,
     val jumpLabels: List<JumpLabel>,
     val sectionLabels: List<SectionLabel>
@@ -23,13 +23,13 @@ data class CompiledNode(
         for (label in sectionLabels) label.serializeTo(buffer)
     }
 
-    fun resolveLabel(code: Int): Int {
+    public fun resolveLabel(code: Int): Int {
         val indexOf = jumpLabels.binarySearchBy(code) { it.code }
         check(indexOf >= 0) { "Label $code was not found." }
         return jumpLabels[indexOf].at
     }
 
-    companion object : Deserializer<CompiledNode> {
+    public companion object : Deserializer<CompiledNode> {
         override fun deserializeFrom(buffer: Buffer): CompiledNode {
             val instructions = mutableListOf<Insn>()
             repeat(buffer.readInt()) {

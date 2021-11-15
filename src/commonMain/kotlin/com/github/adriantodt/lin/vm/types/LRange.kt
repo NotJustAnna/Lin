@@ -2,7 +2,7 @@ package com.github.adriantodt.lin.vm.types
 
 import com.github.adriantodt.lin.vm.LinRuntime
 
-class LRange(val value: LongRange) : LAny() {
+public data class LRange(val value: LongRange) : LAny() {
     override fun truth(): Boolean {
         return true
     }

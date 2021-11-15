@@ -1,11 +1,11 @@
 package com.github.adriantodt.lin.exception
 
-class LinUnsupportedOperationException : UnsupportedOperationException, LinNativeException {
-    constructor(operation: String, type: String) : super(
+public class LinUnsupportedOperationException : UnsupportedOperationException, LinNativeException {
+    public constructor(operation: String, type: String) : super(
         "Cannot apply operation '$operation' for type '$type'."
     )
 
-    constructor(operation: String, leftType: String, rightType: String) : super(
+    public constructor(operation: String, leftType: String, rightType: String) : super(
         "Cannot apply operation '$operation' for types '$leftType' and '$rightType'."
     )
 

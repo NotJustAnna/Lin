@@ -14,8 +14,8 @@ import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-object InfixBangParser : InfixParselet<TokenType, Token<TokenType>, Node> {
-    override val precedence = Precedence.NAMED_CHECKS
+public object InfixBangParser : InfixParselet<TokenType, Token<TokenType>, Node> {
+    override val precedence: Int = Precedence.NAMED_CHECKS
 
     override fun parse(
         ctx: ParserContext<TokenType, Token<TokenType>, Node>,

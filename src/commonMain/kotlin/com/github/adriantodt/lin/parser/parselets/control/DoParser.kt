@@ -12,7 +12,7 @@ import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-object DoParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+public object DoParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
     override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)
         val expr = if (ctx.match(TokenType.WHILE)) null else ctx.parseBlock() ?: ctx.parseExpression()

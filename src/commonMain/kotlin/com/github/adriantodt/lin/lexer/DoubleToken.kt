@@ -3,7 +3,7 @@ package com.github.adriantodt.lin.lexer
 import com.github.adriantodt.tartar.api.lexer.Section
 import com.github.adriantodt.tartar.api.parser.Token
 
-class DoubleToken<T>(type: T, val value: Double, section: Section? = null) : Token<T>(type, section) {
+public class DoubleToken<T>(type: T, public val value: Double, section: Section? = null) : Token<T>(type, section) {
     /**
      * Returns a string representation of the token.
      */

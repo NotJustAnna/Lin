@@ -6,7 +6,7 @@ import com.github.adriantodt.lin.bytecode.CompiledSection
 import com.github.adriantodt.lin.bytecode.CompiledSource
 import com.github.adriantodt.tartar.api.lexer.Section
 
-class CompiledSourceBuilder {
+public class CompiledSourceBuilder {
     private val longPool = mutableListOf<Long>()
     private val stringPool = mutableListOf<String>()
 
@@ -17,13 +17,13 @@ class CompiledSourceBuilder {
 
     private val nodeBuilders = mutableListOf<CompiledNodeBuilder>()
 
-    fun newNodeBuilder(): CompiledNodeBuilder {
+    public fun newNodeBuilder(): CompiledNodeBuilder {
         val builder = CompiledNodeBuilder(this, nodeBuilders.size)
         nodeBuilders += builder
         return builder
     }
 
-    fun sectionId(section: Section): Int {
+    public fun sectionId(section: Section): Int {
         val source = section.source
         val nameConst = constantId(source.name)
         val value = CompiledSection(
@@ -37,40 +37,42 @@ class CompiledSourceBuilder {
         return sections.lastIndex
     }
 
-    fun constantId(value: String): Int {
+    public fun constantId(value: String): Int {
         val indexOf = stringPool.indexOf(value)
         if (indexOf != -1) return indexOf
         stringPool.add(value)
         return stringPool.lastIndex
     }
 
-    fun constantId(value: Double): Int {
+    public fun constantId(value: Double): Int {
         return constantId(value.toBits())
     }
 
-    fun constantId(value: Long): Int {
+    public fun constantId(value: Long): Int {
         val indexOf = longPool.indexOf(value)
         if (indexOf != -1) return indexOf
         longPool.add(value)
         return stringPool.lastIndex
     }
 
-    fun registerFunction(parametersId: Int, name: String?, bodyId: Int, varargsParam: Int): Int {
+    public fun registerFunction(parametersId: Int, name: String?, bodyId: Int, varargsParam: Int): Int {
         functions += CompiledFunction(parametersId, name?.let(this::constantId) ?: -1, bodyId, varargsParam)
         return functions.lastIndex
     }
 
-    fun registerParameters(parameters: List<CompiledParameter>): Int {
+    public fun registerParameters(parameters: List<CompiledParameter>): Int {
         functionParameters += parameters
         return functionParameters.lastIndex
     }
 
-    fun build() = CompiledSource(
-        longPool.toList(),
-        stringPool.toList(),
-        functionParameters.toList(),
-        functions.toList(),
-        sections.toList(),
-        nodeBuilders.map { it.build() }
-    )
+    public fun build(): CompiledSource {
+        return CompiledSource(
+            longPool.toList(),
+            stringPool.toList(),
+            functionParameters.toList(),
+            functions.toList(),
+            sections.toList(),
+            nodeBuilders.map { it.build() }
+        )
+    }
 }

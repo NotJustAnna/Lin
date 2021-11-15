@@ -13,7 +13,7 @@ import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-class BinaryOperatorParser(
+public class BinaryOperatorParser(
     override val precedence: Int,
     private val operator: BinaryOperationType,
     private val leftAssoc: Boolean = true

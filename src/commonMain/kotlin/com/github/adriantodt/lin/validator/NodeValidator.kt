@@ -18,7 +18,7 @@ import com.github.adriantodt.lin.ast.node.value.*
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Sectional
 
-object NodeValidator : NodeVisitorR<InvalidNode?> {
+public object NodeValidator : NodeVisitorR<InvalidNode?> {
     override fun visitArrayExpr(node: ArrayExpr): InvalidNode? {
         return node.value.mapNotNull { it.accept(this) }.wrap()
     }

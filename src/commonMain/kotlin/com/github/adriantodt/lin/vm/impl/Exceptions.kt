@@ -7,8 +7,8 @@ import com.github.adriantodt.lin.vm.types.LArray
 import com.github.adriantodt.lin.vm.types.LObject
 import com.github.adriantodt.lin.vm.types.LString
 
-object Exceptions {
-    fun create(type: String, description: String, stackTrace: List<StackTrace>): LObject {
+public object Exceptions {
+    public fun create(type: String, description: String, stackTrace: List<StackTrace>): LObject {
         return LObject(
             LString("errorType") to LString(type),
             LString("description") to LString(description),
@@ -16,7 +16,7 @@ object Exceptions {
         )
     }
 
-    fun mismatchedArgs(stackTrace: List<StackTrace>): LObject {
+    public fun mismatchedArgs(stackTrace: List<StackTrace>): LObject {
         return create(
             "mismatchedArguments",
             "Invocation failed due to mismatched arguments.",
@@ -24,7 +24,7 @@ object Exceptions {
         )
     }
 
-    fun notAFunction(type: String, stackTrace: List<StackTrace>): LObject {
+    public fun notAFunction(type: String, stackTrace: List<StackTrace>): LObject {
         return create(
             "notAFunction",
             "Cannot invoke function for type '$type'.",
@@ -32,7 +32,7 @@ object Exceptions {
         )
     }
 
-    fun noElementExists(element: String, stackTrace: List<StackTrace>): LObject {
+    public fun noElementExists(element: String, stackTrace: List<StackTrace>): LObject {
         return create(
             "noElementExists",
             "Element '$element' does not exist.",
@@ -40,7 +40,7 @@ object Exceptions {
         )
     }
 
-    fun unsupportedOperation(
+    public fun unsupportedOperation(
         operation: String,
         leftType: String,
         rightType: String,
@@ -53,7 +53,7 @@ object Exceptions {
         )
     }
 
-    fun unsupportedOperation(operation: String, type: String, stackTrace: List<StackTrace>): LObject {
+    public fun unsupportedOperation(operation: String, type: String, stackTrace: List<StackTrace>): LObject {
         return create(
             "unsupportedOperation",
             "Cannot apply operation '$operation' for type '$type'.",
@@ -61,11 +61,11 @@ object Exceptions {
         )
     }
 
-    fun toObject(e: LinNativeException, stackTrace: List<StackTrace>): LObject {
+    public fun toObject(e: LinNativeException, stackTrace: List<StackTrace>): LObject {
         return create(e.exceptionType, e.exceptionDescription, stackTrace)
     }
 
-    fun fromNative(e: Exception, stackTrace: List<StackTrace>): LAny {
+    public fun fromNative(e: Exception, stackTrace: List<StackTrace>): LAny {
         return create("nativeException", e.toString(), stackTrace)
     }
 }

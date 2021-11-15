@@ -13,7 +13,7 @@ import com.github.adriantodt.tartar.api.parser.StringToken
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-class DeclareVariableParser(private val mutable: Boolean) : PrefixParselet<TokenType, Token<TokenType>, Node> {
+public class DeclareVariableParser(private val mutable: Boolean) : PrefixParselet<TokenType, Token<TokenType>, Node> {
     override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         // TODO Variable destructuring goes here (Check Lin/old)
         val ident = ctx.eat(TokenType.IDENTIFIER) as StringToken

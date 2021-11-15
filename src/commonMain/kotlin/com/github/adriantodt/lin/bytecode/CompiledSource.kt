@@ -9,7 +9,7 @@ import com.github.adriantodt.lin.utils.Serializable
 import okio.Buffer
 import okio.ByteString.Companion.encodeUtf8
 
-data class CompiledSource(
+public data class CompiledSource(
     val longPool: List<Long>,
     val stringPool: List<String>,
     val functionParameters: List<List<CompiledParameter>>,
@@ -58,23 +58,23 @@ data class CompiledSource(
         for (node in nodes) node.serializeTo(buffer)
     }
 
-    fun longConstOrNull(index: Int): Long? {
+    public fun longConstOrNull(index: Int): Long? {
         return longPool.getOrNull(index)
     }
 
-    fun longConst(index: Int): Long {
+    public fun longConst(index: Int): Long {
         return longConstOrNull(index) ?: throw IllegalConstantIndexException(index)
     }
 
-    fun stringConstOrNull(index: Int): String? {
+    public fun stringConstOrNull(index: Int): String? {
         return stringPool.getOrNull(index)
     }
 
-    fun stringConst(index: Int): String {
+    public fun stringConst(index: Int): String {
         return stringConstOrNull(index) ?: throw IllegalConstantIndexException(index)
     }
 
-    companion object : Deserializer<CompiledSource> {
+    public companion object : Deserializer<CompiledSource> {
         override fun deserializeFrom(buffer: Buffer): CompiledSource {
             val longPool = mutableListOf<Long>()
             repeat(buffer.readU24()) {

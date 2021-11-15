@@ -17,7 +17,9 @@ import com.github.adriantodt.lin.ast.node.misc.UnaryOperation
 import com.github.adriantodt.lin.ast.node.value.*
 import com.github.adriantodt.lin.ast.visitor.NodeVisitor
 
-class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : NodeVisitor, Appendable by builder {
+public class NodeTreePrinter(
+    private val builder: StringBuilder = StringBuilder()
+) : NodeVisitor, Appendable by builder {
     private var indent = 0
     private var name: String? = null
 

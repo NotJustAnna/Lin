@@ -2,7 +2,7 @@ package com.github.adriantodt.lin.vm.types
 
 import com.github.adriantodt.lin.vm.LinRuntime
 
-data class LArray(val value: MutableList<LAny> = mutableListOf()) : LAny() {
+public data class LArray(val value: MutableList<LAny> = mutableListOf()) : LAny() {
     override fun truth(): Boolean {
         return value.isNotEmpty()
     }

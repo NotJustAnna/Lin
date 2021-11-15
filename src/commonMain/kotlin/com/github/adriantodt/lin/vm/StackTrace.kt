@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.vm
 
-data class StackTrace(
+public data class StackTrace(
     val functionName: String,
     val sourceName: String? = null,
     val line: Int = -1,

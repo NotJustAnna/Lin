@@ -12,7 +12,7 @@ import com.github.adriantodt.tartar.api.parser.ParserContext
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-object DoubleBangParser : InfixParselet<TokenType, Token<TokenType>, Node> {
+public object DoubleBangParser : InfixParselet<TokenType, Token<TokenType>, Node> {
     override val precedence: Int = Precedence.POSTFIX
 
     override fun parse(

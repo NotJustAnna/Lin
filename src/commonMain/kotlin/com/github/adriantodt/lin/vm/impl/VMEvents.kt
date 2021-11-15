@@ -3,14 +3,14 @@ package com.github.adriantodt.lin.vm.impl
 import com.github.adriantodt.lin.vm.StackTrace
 import com.github.adriantodt.lin.vm.types.LAny
 
-interface VMEvents {
-    fun pushLayer(layer: ExecutionLayer)
+public interface VMEvents {
+    public fun pushLayer(layer: ExecutionLayer)
 
-    fun replaceLayer(layer: ExecutionLayer)
+    public fun replaceLayer(layer: ExecutionLayer)
 
-    fun onReturn(value: LAny)
+    public fun onReturn(value: LAny)
 
-    fun onThrow(value: LAny)
+    public fun onThrow(value: LAny)
 
-    fun stackTrace(): List<StackTrace>
+    public fun stackTrace(): List<StackTrace>
 }

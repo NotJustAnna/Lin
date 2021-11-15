@@ -2,8 +2,8 @@ package com.github.adriantodt.lin.vm.scope
 
 import com.github.adriantodt.lin.vm.types.LAny
 
-sealed class MutableScope : Scope() {
-    abstract fun declareVariable(name: String, mutable: Boolean)
+public sealed class MutableScope : Scope() {
+    public abstract fun declareVariable(name: String, mutable: Boolean)
 
     protected abstract fun implSet(name: String, value: LAny)
 

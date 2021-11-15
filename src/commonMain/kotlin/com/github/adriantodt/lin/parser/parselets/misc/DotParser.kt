@@ -15,7 +15,7 @@ import com.github.adriantodt.tartar.api.parser.StringToken
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.api.parser.Token
 
-class DotParser(private val nullSafe: Boolean) : InfixParselet<TokenType, Token<TokenType>, Node> {
+public class DotParser(private val nullSafe: Boolean) : InfixParselet<TokenType, Token<TokenType>, Node> {
     override val precedence: Int = Precedence.POSTFIX
 
     override fun parse(

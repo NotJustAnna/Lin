@@ -1,8 +1,8 @@
 package com.github.adriantodt.lin.vm.types
 
-class LNativeFunction(
+public class LNativeFunction(
     override val name: String? = null,
-    val block: (thisValue: LAny?, args: List<LAny>) -> LAny
+    public val block: (thisValue: LAny?, args: List<LAny>) -> LAny
 ) : LFunction() {
     override fun invoke(vararg args: LAny): LAny {
         return block(null, args.toList())

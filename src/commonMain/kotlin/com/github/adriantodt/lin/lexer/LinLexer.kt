@@ -6,7 +6,7 @@ import com.github.adriantodt.tartar.api.lexer.Lexer
 import com.github.adriantodt.tartar.api.parser.Token
 import com.github.adriantodt.tartar.extensions.lexer.*
 
-typealias LinToken = Token<TokenType>
+public typealias LinToken = Token<TokenType>
 
 internal fun linStdLexer() = Lexer.create<LinToken> {
     ' ' { matchSpaceAndNL() }

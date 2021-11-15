@@ -13,7 +13,7 @@ import com.github.adriantodt.lin.vm.scope.MutableScope
 import com.github.adriantodt.lin.vm.scope.Scope
 import com.github.adriantodt.lin.vm.types.*
 
-class DefaultExecutionLayer(
+public class DefaultExecutionLayer(
     private val events: VMEvents,
     private var scope: Scope,
     private val source: CompiledSource,
@@ -120,8 +120,8 @@ class DefaultExecutionLayer(
         stack.add(value)
     }
 
-    data class ExceptionHandler(val keepOnStack: Int, val jumpOnException: Int, val jumpOnEnd: Int)
-    data class LoopHandler(val keepOnStack: Int, val jumpOnBreak: Int, val jumpOnContinue: Int)
+    public data class ExceptionHandler(val keepOnStack: Int, val jumpOnException: Int, val jumpOnEnd: Int)
+    public data class LoopHandler(val keepOnStack: Int, val jumpOnBreak: Int, val jumpOnContinue: Int)
 
     private val stack = mutableListOf<LAny>()
     private val exceptionHandlers = mutableListOf<ExceptionHandler>()
@@ -595,7 +595,7 @@ class DefaultExecutionLayer(
         return -1
     }
 
-    companion object {
+    private companion object {
         private val GT: (Int) -> Boolean = { it > 0 }
         private val GTE: (Int) -> Boolean = { it >= 0 }
         private val LT: (Int) -> Boolean = { it < 0 }

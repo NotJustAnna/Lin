@@ -19,9 +19,9 @@ import com.github.adriantodt.lin.bytecode.CompiledSource
 import com.github.adriantodt.lin.utils.BinaryOperationType
 import com.github.adriantodt.tartar.api.parser.SyntaxException
 
-class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBuilder()) : NodeVisitor {
-    companion object {
-        fun compile(node: Node): CompiledSource {
+public class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBuilder()) : NodeVisitor {
+    public companion object {
+        public fun compile(node: Node): CompiledSource {
             val compiler = NodeCompiler()
             node.accept(compiler)
             return compiler.compiledSource()
@@ -30,7 +30,7 @@ class NodeCompiler(private val source: CompiledSourceBuilder = CompiledSourceBui
 
     private val builder = source.newNodeBuilder()
 
-    fun compiledSource(): CompiledSource {
+    public fun compiledSource(): CompiledSource {
         return source.build()
     }
 

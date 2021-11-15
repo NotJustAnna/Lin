@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.vm.types
 
-data class LInteger(val value: Long) : LNumber() {
+public data class LInteger(val value: Long) : LNumber() {
     override fun compareTo(other: LNumber): Int {
         return when (other) {
             is LDecimal -> value.compareTo(other.value)
@@ -66,7 +66,7 @@ data class LInteger(val value: Long) : LNumber() {
         return value.toString()
     }
 
-    operator fun rangeTo(right: LInteger): LAny {
+    public operator fun rangeTo(right: LInteger): LAny {
         return LRange(value..right.value)
     }
 }

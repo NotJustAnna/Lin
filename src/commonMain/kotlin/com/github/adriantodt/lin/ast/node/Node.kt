@@ -11,23 +11,23 @@ import com.github.adriantodt.tartar.api.lexer.Sectional
  * Nodes that don't extend [Expr] are meant to have no value.
  * If you have to extract a value from a Node which doesn't extend [Expr], consider it's value `unit`.
  */
-interface Node : Sectional {
+public interface Node : Sectional {
     /* @automation(ast.root Node)-start */
-    fun accept(visitor: NodeVisitor)
+    public fun accept(visitor: NodeVisitor)
 
-    fun accept(visitor: NodeMapVisitor): Node
+    public fun accept(visitor: NodeMapVisitor): Node
 
-    fun <R> accept(visitor: NodeVisitorR<R>): R
+    public fun <R> accept(visitor: NodeVisitorR<R>): R
 
-    fun <T> accept(visitor: NodeVisitor1<T>, param0: T)
+    public fun <T> accept(visitor: NodeVisitor1<T>, param0: T)
     /* @automation-end */
 
     /**
      * Interfaces implementing this have multiple nodes inside.
      */
-    interface Multi : Node {
-        fun nodes(): List<Node>
+    public interface Multi : Node {
+        public fun nodes(): List<Node>
 
-        fun lastNode() : Node
+        public fun lastNode(): Node
     }
 }

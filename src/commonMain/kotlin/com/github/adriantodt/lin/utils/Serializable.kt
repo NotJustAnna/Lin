@@ -3,10 +3,10 @@ package com.github.adriantodt.lin.utils
 import okio.Buffer
 import okio.ByteString
 
-interface Serializable {
-    fun serializeTo(buffer: Buffer)
+public interface Serializable {
+    public fun serializeTo(buffer: Buffer)
 
-    fun toBytes(): ByteString {
+    public fun toBytes(): ByteString {
         val buffer = Buffer()
         serializeTo(buffer)
         return buffer.snapshot()

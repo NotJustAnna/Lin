@@ -5,7 +5,7 @@ import com.github.adriantodt.lin.utils.Deserializer
 import com.github.adriantodt.lin.utils.Serializable
 import okio.Buffer
 
-data class CompiledFunction(
+public data class CompiledFunction(
     val parametersId: Int,
     val nameConst: Int,
     val bodyId: Int,
@@ -22,7 +22,7 @@ data class CompiledFunction(
         }
     }
 
-    companion object : Deserializer<CompiledFunction> {
+    public companion object : Deserializer<CompiledFunction> {
         override fun deserializeFrom(buffer: Buffer): CompiledFunction {
             return CompiledFunction(
                 buffer.readInt(),

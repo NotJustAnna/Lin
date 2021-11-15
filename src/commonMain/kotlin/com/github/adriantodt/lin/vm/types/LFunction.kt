@@ -1,6 +1,6 @@
 package com.github.adriantodt.lin.vm.types
 
-sealed class LFunction : LAny() {
+public sealed class LFunction : LAny() {
     override fun truth(): Boolean {
         return true
     }
@@ -8,13 +8,13 @@ sealed class LFunction : LAny() {
     override val linType: String
         get() = "function"
 
-    open operator fun invoke(vararg args: LAny): LAny {
+    public open operator fun invoke(vararg args: LAny): LAny {
         return call(null, args.toList())
     }
 
-    abstract fun call(thisValue: LAny?, args: List<LAny>): LAny
+    public abstract fun call(thisValue: LAny?, args: List<LAny>): LAny
 
-    abstract val name: String?
+    public abstract val name: String?
 
     override fun getMember(name: String): LAny? {
         return null

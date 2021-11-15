@@ -8,7 +8,7 @@ import com.github.adriantodt.lin.ast.visitor.NodeVisitor1
 import com.github.adriantodt.lin.ast.visitor.NodeVisitorR
 import com.github.adriantodt.tartar.api.lexer.Section
 
-data class PropertyAssignNode(
+public data class PropertyAssignNode(
     val target: Expr,
     val nullSafe: Boolean,
     val name: String,
@@ -16,12 +16,20 @@ data class PropertyAssignNode(
     override val section: Section? = null
 ) : Node {
     /* @automation(ast.impl PropertyAssignNode,Node)-start */
-    override fun accept(visitor: NodeVisitor) = visitor.visitPropertyAssignNode(this)
+    override fun accept(visitor: NodeVisitor) {
+        visitor.visitPropertyAssignNode(this)
+    }
 
-    override fun accept(visitor: NodeMapVisitor): Node = visitor.visitPropertyAssignNode(this)
+    override fun accept(visitor: NodeMapVisitor): Node {
+        return visitor.visitPropertyAssignNode(this)
+    }
 
-    override fun <R> accept(visitor: NodeVisitorR<R>): R = visitor.visitPropertyAssignNode(this)
+    override fun <R> accept(visitor: NodeVisitorR<R>): R {
+        return visitor.visitPropertyAssignNode(this)
+    }
 
-    override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) = visitor.visitPropertyAssignNode(this, param0)
+    override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) {
+        visitor.visitPropertyAssignNode(this, param0)
+    }
     /* @automation-end */
 }

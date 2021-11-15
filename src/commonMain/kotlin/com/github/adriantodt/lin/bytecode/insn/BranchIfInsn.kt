@@ -4,7 +4,7 @@ import com.github.adriantodt.lin.bytecode.utils.requireU24
 import com.github.adriantodt.lin.bytecode.utils.writeU24
 import okio.Buffer
 
-data class BranchIfInsn(val value: Boolean, val labelCode: Int) : Insn() {
+public data class BranchIfInsn(val value: Boolean, val labelCode: Int) : Insn() {
     override fun serializeTo(buffer: Buffer) {
         buffer.writeByte((if (value) Opcode.BRANCH_IF_TRUE else Opcode.BRANCH_IF_FALSE).ordinal)
             .writeU24(labelCode.requireU24("BranchIfInsn#labelCode"))
