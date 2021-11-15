@@ -1,5 +1,6 @@
 package com.github.adriantodt.lin.bytecode.insn
 
+import com.github.adriantodt.lin.bytecode.utils.readI24
 import com.github.adriantodt.lin.bytecode.utils.readU12Pair
 import com.github.adriantodt.lin.bytecode.utils.readU24
 import com.github.adriantodt.lin.bytecode.utils.skipByte
@@ -81,10 +82,10 @@ sealed class Insn : Serializable {
                     NewFunctionInsn(buffer.readU24())
                 }
                 Opcode.PUSH_DECIMAL -> {
-                    PushDecimalInsn(buffer.readU24())
+                    PushDecimalInsn(buffer.readI24())
                 }
                 Opcode.PUSH_INTEGER -> {
-                    PushIntegerInsn(buffer.readU24())
+                    PushIntegerInsn(buffer.readI24())
                 }
                 Opcode.PUSH_EXCEPTION_HANDLING -> {
                     val (first, second) = buffer.readU12Pair()

@@ -1,5 +1,8 @@
 package com.github.adriantodt.lin.bytecode
 
+import com.github.adriantodt.lin.bytecode.utils.maxU24
+import com.github.adriantodt.lin.bytecode.utils.readU24
+import com.github.adriantodt.lin.bytecode.utils.writeU24
 import com.github.adriantodt.lin.exception.IllegalConstantIndexException
 import com.github.adriantodt.lin.utils.Deserializer
 import com.github.adriantodt.lin.utils.Serializable
@@ -15,10 +18,16 @@ data class CompiledSource(
     val nodes: List<CompiledNode>
 ) : Serializable {
     override fun serializeTo(buffer: Buffer) {
-        buffer.writeInt(longPool.size)
+        check(longPool.size < maxU24) {
+            "Compiled Source cannot be compiled as the long pool exceeds the maximum size (${longPool.size} >= $maxU24)"
+        }
+        buffer.writeU24(longPool.size)
         for (l in longPool) buffer.writeLong(l)
 
-        buffer.writeInt(stringPool.size)
+        check(stringPool.size < maxU24) {
+            "Compiled Source cannot be compiled as the string pool exceeds the maximum size (${stringPool.size} >= $maxU24)"
+        }
+        buffer.writeU24(stringPool.size)
         for (s in stringPool) {
             val encoded = s.encodeUtf8()
             buffer.writeInt(encoded.size).write(encoded)
@@ -30,7 +39,10 @@ data class CompiledSource(
             for (parameter in list) parameter.serializeTo(buffer)
         }
 
-        buffer.writeInt(functions.size)
+        check(stringPool.size < maxU24) {
+            "Compiled Source cannot be compiled as the function definitions exceeds the maximum size (${functions.size} >= $maxU24)"
+        }
+        buffer.writeU24(functions.size)
         for (function in functions) function.serializeTo(buffer)
 
         buffer.writeInt(sections.size)
@@ -59,12 +71,12 @@ data class CompiledSource(
     companion object : Deserializer<CompiledSource> {
         override fun deserializeFrom(buffer: Buffer): CompiledSource {
             val longPool = mutableListOf<Long>()
-            repeat(buffer.readInt()) {
+            repeat(buffer.readU24()) {
                 longPool += buffer.readLong()
             }
 
             val stringPool = mutableListOf<String>()
-            repeat(buffer.readInt()) {
+            repeat(buffer.readU24()) {
                 val size = buffer.readInt()
                 stringPool += buffer.readByteString(size.toLong()).utf8()
             }
@@ -79,7 +91,7 @@ data class CompiledSource(
             }
 
             val functions = mutableListOf<CompiledFunction>()
-            repeat(buffer.readInt()) {
+            repeat(buffer.readU24()) {
                 functions += CompiledFunction.deserializeFrom(buffer)
             }
 

@@ -1,0 +1,36 @@
+package com.github.adriantodt.lin.test.regression.bytecode
+
+import com.github.adriantodt.lin.bytecode.insn.Insn
+import com.github.adriantodt.lin.bytecode.insn.PushCharInsn
+import com.github.adriantodt.lin.bytecode.insn.PushIntegerInsn
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+
+class BytecodeRegressionTests {
+    @Test
+    fun pushCharInsn() {
+        fun reserialize(value: Char) = (Insn.fromBytes(PushCharInsn(value).toBytes()) as PushCharInsn).value
+
+        assertEquals('A', reserialize('A'))
+        assertEquals('a', reserialize('a'))
+        assertEquals('0', reserialize('0'))
+        assertEquals('ã', reserialize('ã'))
+        assertEquals((-1).toChar(), reserialize((-1).toChar()))
+    }
+
+    @Test
+    fun pushIntegerInsn() {
+        fun reserialize(value: Int) =
+            (Insn.fromBytes(PushIntegerInsn(value).toBytes()) as PushIntegerInsn).immediateValue
+
+        assertEquals(0, reserialize(0))
+        assertEquals(1, reserialize(1))
+        assertEquals(100, reserialize(100))
+        assertEquals(-1, reserialize(-1))
+        assertEquals(-100, reserialize(-100))
+        assertEquals(70000, reserialize(70000))
+        assertEquals(4194302, reserialize(4194302))
+        assertNotEquals(16777215, reserialize(16777215))
+    }
+}
