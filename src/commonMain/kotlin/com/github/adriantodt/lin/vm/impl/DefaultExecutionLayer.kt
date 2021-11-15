@@ -74,11 +74,11 @@ class DefaultExecutionLayer(
                 BinaryAddOperationInsn -> handleBinaryAddOperation()
                 BinaryDivideOperationInsn -> handleBinaryDivideOperation()
                 BinaryEqualsOperationInsn -> handleBinaryEqualsOperation()
-                BinaryGtOperationInsn -> handleBinaryComparison(Comparison.GT)
-                BinaryGteOperationInsn -> handleBinaryComparison(Comparison.GTE)
+                BinaryGtOperationInsn -> handleBinaryComparison(GT)
+                BinaryGteOperationInsn -> handleBinaryComparison(GTE)
                 BinaryInOperationInsn -> handleBinaryInOperation()
-                BinaryLtOperationInsn -> handleBinaryComparison(Comparison.LT)
-                BinaryLteOperationInsn -> handleBinaryComparison(Comparison.LTE)
+                BinaryLtOperationInsn -> handleBinaryComparison(LT)
+                BinaryLteOperationInsn -> handleBinaryComparison(LTE)
                 BinaryMultiplyOperationInsn -> handleBinaryMultiplyOperation()
                 BinaryNotEqualsOperationInsn -> handleBinaryNotEqualsOperation()
                 BinaryRangeOperationInsn -> handleBinaryRangeOperation()
@@ -155,11 +155,13 @@ class DefaultExecutionLayer(
     }
 
     private fun handleBreak() {
+        // TODO error on empty loop handlers
         val last = loopHandlers.removeLast()
         next = last.jumpOnBreak
     }
 
     private fun handleContinue() {
+        // TODO error on empty loop handlers
         val last = loopHandlers.removeLast()
         next = last.jumpOnContinue
     }
@@ -188,12 +190,23 @@ class DefaultExecutionLayer(
         val parent = popStack()
         if (parent is LArray && size == 1) {
             val arg = arguments.first()
+            val list = parent.value
+            val lastIndex = list.lastIndex
             if (arg is LInteger) {
-                val element = parent.value.getOrNull(arg.value.toInt())
-                if (element != null) {
-                    stack.add(element)
-                    return
+                val index = arg.value
+                if (index < 0 || index > lastIndex) {
+                    TODO("Error: argument is out of bounds")
                 }
+                stack.add(list[index.toInt()])
+                return
+            } else if (arg is LRange) {
+                val start = arg.value.first
+                val end = arg.value.last
+                if (start < 0 || end < 0 || start > lastIndex || arg.value.last > lastIndex) {
+                    TODO("Error: argument is out of bounds")
+                }
+                stack.add(LArray(list.subList(start.toInt(), end.toInt()).toMutableList()))
+                return
             }
         }
         if (parent is LObject && size == 1) {
@@ -201,6 +214,27 @@ class DefaultExecutionLayer(
             val element = parent.value[arg]
             if (element != null) {
                 stack.add(element)
+                return
+            }
+        }
+        if (parent is LString && size == 1) {
+            val arg = arguments.first()
+            val string = parent.value
+            val lastIndex = string.lastIndex
+            if (arg is LInteger) {
+                val index = arg.value
+                if (index < 0 || index > lastIndex) {
+                    TODO("Error: argument is out of bounds")
+                }
+                stack.add(LString(string[index.toInt()].toString()))
+                return
+            } else if (arg is LRange) {
+                val start = arg.value.first
+                val end = arg.value.last
+                if (start < 0 || end < 0 || start > lastIndex || arg.value.last > lastIndex) {
+                    TODO("Error: argument is out of bounds")
+                }
+                stack.add(LString(string.substring(start.toInt(), end.toInt())))
                 return
             }
         }
@@ -442,35 +476,18 @@ class DefaultExecutionLayer(
         throw LinUnsupportedOperationException("subtract", left.linType, right.linType)
     }
 
-    private fun handleBinaryComparison(comparison: Comparison) {
+    private fun handleBinaryComparison(comparison: (Int) -> Boolean) {
         val right = popStack()
         val left = popStack()
         if (left is LString && right is LString) {
-            stack.add(LAny.ofBoolean(comparison.toBoolean(left.value.compareTo(right.value))))
+            stack.add(LAny.ofBoolean(comparison(left.value.compareTo(right.value))))
             return
         }
         if (left is LNumber && right is LNumber) {
-            stack.add(LAny.ofBoolean(comparison.toBoolean(left.compareTo(right))))
+            stack.add(LAny.ofBoolean(comparison(left.compareTo(right))))
             return
         }
         throw LinUnsupportedOperationException("comparison", left.linType, right.linType)
-    }
-
-    enum class Comparison {
-        GT {
-            override fun toBoolean(i: Int) = i > 0
-        },
-        GTE {
-            override fun toBoolean(i: Int) = i >= 0
-        },
-        LT {
-            override fun toBoolean(i: Int) = i < 0
-        },
-        LTE {
-            override fun toBoolean(i: Int) = i <= 0
-        };
-
-        abstract fun toBoolean(i: Int): Boolean
     }
 
     private fun handleBinaryInOperation() {
@@ -555,5 +572,12 @@ class DefaultExecutionLayer(
             return index
         }
         return -1
+    }
+
+    companion object {
+        private val GT: (Int) -> Boolean = { it > 0 }
+        private val GTE: (Int) -> Boolean = { it >= 0 }
+        private val LT: (Int) -> Boolean = { it < 0 }
+        private val LTE: (Int) -> Boolean = { it <= 0 }
     }
 }

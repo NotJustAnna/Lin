@@ -16,12 +16,14 @@ class ExecutionBenchmark(private val source: Source, inputValues: List<LAny> = e
     val input: MutableList<LAny>
     val output: MutableList<LAny>
 
+    private val lexerDuration: Duration
     private val parseDuration: Duration
     private val compileDuration: Duration
     private val executionDuration: Duration
 
     init {
-        val (node, parseDuration) = measureTimedValue { Lin.parser.parse(source) }
+        val (tokens, lexerDuration) = measureTimedValue { Lin.parser.lexer.parseToList(source) }
+        val (node, parseDuration) = measureTimedValue { Lin.parser.parser.parse(source, tokens) }
         val (compiledSource, compileDuration) = measureTimedValue { NodeCompiler.compile(node) }
         val (input, output, scope) = TestScope(inputValues)
         val (result, executionDuration) = measureTimedValue { LinVirtualMachine(compiledSource, scope).run() }
@@ -30,6 +32,7 @@ class ExecutionBenchmark(private val source: Source, inputValues: List<LAny> = e
         this.input = input
         this.output = output
 
+        this.lexerDuration = lexerDuration
         this.parseDuration = parseDuration
         this.compileDuration = compileDuration
         this.executionDuration = executionDuration
@@ -42,6 +45,7 @@ class ExecutionBenchmark(private val source: Source, inputValues: List<LAny> = e
             Benchmark -- ${source.name} $currentPlatform
         """.trimIndent()
         val report = """
+            Lexing:     $lexerDuration
             Parsing:    $parseDuration
             Compiling:  $compileDuration
             Executing:  $executionDuration

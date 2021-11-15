@@ -6,6 +6,19 @@ import com.github.adriantodt.tartar.api.parser.SyntaxException
 import com.github.adriantodt.tartar.extensions.lexer.processToken
 import com.github.adriantodt.tartar.extensions.lexer.section
 
+fun LexerContext<LinToken>.matchSpaceAndNL() {
+    while (hasNext()) if (!match(' ')) {
+        if (match('\n')) {
+            processToken(TokenType.NL)
+        } else if (match('\r')) {
+            match('\n')
+            processToken(TokenType.NL)
+        } else {
+            break
+        }
+    }
+}
+
 fun LexerContext<*>.readLinIdentifier(firstChar: Char? = null): String {
     val buf = StringBuilder()
     firstChar?.let(buf::append)

@@ -8,8 +8,6 @@ import com.github.adriantodt.lin.vm.types.LObject
 import com.github.adriantodt.lin.vm.types.LString
 
 object Exceptions {
-    // TODO Add support for scope/lines
-
     fun create(type: String, description: String, stackTrace: List<StackTrace>): LObject {
         return LObject(
             LString("errorType") to LString(type),
