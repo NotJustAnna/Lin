@@ -75,6 +75,23 @@ object FunctionParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
         }
         ctx.maybeIgnoreNL()
 
-        return FunctionExpr(parameters, ident?.value, expr, token.section)
+        val function = FunctionExpr(parameters, ident?.value, expr, token.section)
+
+        val exceededMaxParameters = parameters.size > 255
+        val exceededVarargs = parameters.count { it.varargs } > 1
+
+        if (exceededMaxParameters || exceededVarargs) {
+            return InvalidNode {
+                if (exceededMaxParameters) {
+                    error(SyntaxException("Function exceeded maximum of 255 parameters", token.section))
+                }
+                if (exceededVarargs) {
+                    error(SyntaxException("Function has more than 1 varargs parameter", token.section))
+                }
+                child(function)
+            }
+        }
+
+        return function
     }
 }
