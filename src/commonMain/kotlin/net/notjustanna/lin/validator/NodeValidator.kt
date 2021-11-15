@@ -18,7 +18,7 @@ import net.notjustanna.lin.ast.node.value.*
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Sectional
 
-object NodeValidator : NodeVisitorR<InvalidNode?> {
+public object NodeValidator : NodeVisitorR<InvalidNode?> {
     override fun visitArrayExpr(node: ArrayExpr): InvalidNode? {
         return node.value.mapNotNull { it.accept(this) }.wrap()
     }

@@ -10,7 +10,7 @@ import net.notjustanna.lin.utils.UnaryOperationType
 import net.notjustanna.tartar.api.lexer.Section
 import net.notjustanna.tartar.api.lexer.Sectional
 
-class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId: Int) {
+public class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, public val nodeId: Int) {
     private val instructions = mutableListOf<Insn>()
 
     private val jumpLabels = mutableListOf<JumpLabel>()
@@ -21,7 +21,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
 
     private var nextLabelCode = 0
 
-    fun nextLabel(): Int {
+    public fun nextLabel(): Int {
         return nextLabelCode++
     }
 
@@ -32,7 +32,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (array)
      */
-    fun newArrayInsn() {
+    public fun newArrayInsn() {
         instructions += NewArrayInsn
     }
 
@@ -43,7 +43,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (array)
      */
-    fun arrayInsertInsn() {
+    public fun arrayInsertInsn() {
         instructions += ArrayInsertInsn
     }
 
@@ -54,7 +54,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: ()
      */
-    fun assignInsn(name: String) {
+    public fun assignInsn(name: String) {
         instructions += AssignInsn(parent.constantId(name))
     }
 
@@ -65,7 +65,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (value)
      */
-    fun pushBooleanInsn(value: Boolean) {
+    public fun pushBooleanInsn(value: Boolean) {
         instructions += PushBooleanInsn(value)
     }
 
@@ -76,7 +76,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (value)
      */
-    fun pushDecimalInsn(value: Double) {
+    public fun pushDecimalInsn(value: Double) {
         if (value % 1 == 0.0 && value.toInt() in i24Range) {
             instructions += PushDecimalInsn(value.toInt())
             return
@@ -91,7 +91,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (value)
      */
-    fun pushIntegerInsn(value: Long) {
+    public fun pushIntegerInsn(value: Long) {
         if (value % 1 == 0L && value.toInt() in i24Range) {
             instructions += PushIntegerInsn(value.toInt())
             return
@@ -106,7 +106,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (result)
      */
-    fun invokeInsn(size: Int) {
+    public fun invokeInsn(size: Int) {
         instructions += InvokeInsn(size)
     }
 
@@ -117,7 +117,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (result)
      */
-    fun invokeLocalInsn(name: String, size: Int) {
+    public fun invokeLocalInsn(name: String, size: Int) {
         instructions += InvokeLocalInsn(parent.constantId(name), size)
     }
 
@@ -128,7 +128,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (result)
      */
-    fun invokeMemberInsn(name: String, size: Int) {
+    public fun invokeMemberInsn(name: String, size: Int) {
         instructions += InvokeMemberInsn(parent.constantId(name), size)
     }
 
@@ -139,7 +139,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (value)
      */
-    fun pushStringInsn(value: String) {
+    public fun pushStringInsn(value: String) {
         if (value.length <= 1) {
             instructions += PushCharInsn(value.firstOrNull() ?: (-1).toChar())
             return
@@ -152,7 +152,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Inputs: (value)
      */
-    fun returnInsn() {
+    public fun returnInsn() {
         instructions += ReturnInsn
     }
 
@@ -163,7 +163,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (this)
      */
-    fun pushThisInsn() {
+    public fun pushThisInsn() {
         instructions += PushThisInsn
     }
 
@@ -174,7 +174,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (null)
      */
-    fun pushNullInsn() {
+    public fun pushNullInsn() {
         instructions += PushNullInsn
     }
 
@@ -185,7 +185,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (type of value)
      */
-    fun typeofInsn() {
+    public fun typeofInsn() {
         instructions += TypeofInsn
     }
 
@@ -196,7 +196,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (array)
      */
-    fun newObjectInsn() {
+    public fun newObjectInsn() {
         instructions += NewObjectInsn
     }
 
@@ -207,7 +207,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (object)
      */
-    fun objectInsertInsn() {
+    public fun objectInsertInsn() {
         instructions += ObjectInsertInsn
     }
 
@@ -216,7 +216,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Inputs: ()
      */
-    fun breakInsn() {
+    public fun breakInsn() {
         instructions += BreakInsn
     }
 
@@ -225,7 +225,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Inputs: ()
      */
-    fun continueInsn() {
+    public fun continueInsn() {
         instructions += ContinueInsn
     }
 
@@ -234,14 +234,14 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Inputs: (value)
      */
-    fun throwInsn() {
+    public fun throwInsn() {
         instructions += ThrowInsn
     }
 
     /**
      * Jumps to the label specified.
      */
-    fun jumpInsn(labelCode: Int) {
+    public fun jumpInsn(labelCode: Int) {
         instructions += JumpInsn(labelCode)
     }
 
@@ -252,7 +252,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: ()
      */
-    fun branchIfFalseInsn(labelCode: Int) {
+    public fun branchIfFalseInsn(labelCode: Int) {
         instructions += BranchIfInsn(false, labelCode)
     }
 
@@ -263,11 +263,11 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: ()
      */
-    fun branchIfTrueInsn(labelCode: Int) {
+    public fun branchIfTrueInsn(labelCode: Int) {
         instructions += BranchIfInsn(true, labelCode)
     }
 
-    fun unaryOperationInsn(operator: UnaryOperationType) {
+    public fun unaryOperationInsn(operator: UnaryOperationType) {
         instructions += when (operator) {
             UnaryOperationType.POSITIVE -> UnaryPositiveOperationInsn
             UnaryOperationType.NEGATIVE -> UnaryNegativeOperationInsn
@@ -276,7 +276,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         }
     }
 
-    fun binaryOperationInsn(operator: BinaryOperationType) {
+    public fun binaryOperationInsn(operator: BinaryOperationType) {
         instructions += when (operator) {
             BinaryOperationType.ADD -> BinaryAddOperationInsn
             BinaryOperationType.SUBTRACT -> BinarySubtractOperationInsn
@@ -295,7 +295,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         }
     }
 
-    fun declareVariableInsn(name: String, mutable: Boolean) {
+    public fun declareVariableInsn(name: String, mutable: Boolean) {
         instructions += DeclareVariableInsn(parent.constantId(name), mutable)
     }
 
@@ -306,31 +306,31 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * Stack Outputs: (value)
      */
-    fun getVariableInsn(name: String) {
+    public fun getVariableInsn(name: String) {
         instructions += GetVariableInsn(parent.constantId(name))
     }
 
-    fun setVariableInsn(name: String) {
+    public fun setVariableInsn(name: String) {
         instructions += SetVariableInsn(parent.constantId(name))
     }
 
-    fun getMemberPropertyInsn(name: String) {
+    public fun getMemberPropertyInsn(name: String) {
         instructions += GetMemberPropertyInsn(parent.constantId(name))
     }
 
-    fun setMemberPropertyInsn(name: String) {
+    public fun setMemberPropertyInsn(name: String) {
         instructions += SetMemberPropertyInsn(parent.constantId(name))
     }
 
-    fun getSubscriptInsn(size: Int) {
+    public fun getSubscriptInsn(size: Int) {
         instructions += GetSubscriptInsn(size)
     }
 
-    fun setSubscriptInsn(size: Int) {
+    public fun setSubscriptInsn(size: Int) {
         instructions += SetSubscriptInsn(size)
     }
 
-    fun newFunctionInsn(parameters: List<CompiledParameter>, name: String?, bodyId: Int, varargsParam: Int) {
+    public fun newFunctionInsn(parameters: List<CompiledParameter>, name: String?, bodyId: Int, varargsParam: Int) {
         instructions += NewFunctionInsn(
             parent.registerFunction(
                 parent.registerParameters(parameters),
@@ -341,35 +341,35 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         )
     }
 
-    fun dupInsn() {
+    public fun dupInsn() {
         instructions += DupInsn
     }
 
-    fun popInsn() {
+    public fun popInsn() {
         instructions += PopInsn
     }
 
-    fun pushScopeInsn() {
+    public fun pushScopeInsn() {
         instructions += PushScopeInsn
     }
 
-    fun popScopeInsn() {
+    public fun popScopeInsn() {
         instructions += PopScopeInsn
     }
 
-    fun pushExceptionHandlingInsn(catchLabel: Int, endLabel: Int) {
+    public fun pushExceptionHandlingInsn(catchLabel: Int, endLabel: Int) {
         instructions += PushExceptionHandlingInsn(catchLabel, endLabel)
     }
 
-    fun popExceptionHandlingInsn() {
+    public fun popExceptionHandlingInsn() {
         instructions += PopExceptionHandlingInsn
     }
 
-    fun pushLoopHandlingInsn(continueLabel: Int, breakLabel: Int) {
+    public fun pushLoopHandlingInsn(continueLabel: Int, breakLabel: Int) {
         instructions += PushLoopHandlingInsn(continueLabel, breakLabel)
     }
 
-    fun popLoopHandlingInsn() {
+    public fun popLoopHandlingInsn() {
         instructions += PopLoopHandlingInsn
     }
 
@@ -378,32 +378,32 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
      *
      * This does not produce an instruction, but rather a label.
      */
-    fun markLabel(code: Int) {
+    public fun markLabel(code: Int) {
         jumpLabels += JumpLabel(at = instructions.size, code = code)
     }
 
-    fun markSectionStart(sectionId: Int) {
+    public fun markSectionStart(sectionId: Int) {
         val last = sectionStack.lastOrNull()
         sectionStack.add(sectionId)
         if (last != null) generateSectionLabel(last)
     }
 
-    fun markSectionStart(section: Section) {
+    public fun markSectionStart(section: Section) {
         markSectionStart(parent.sectionId(section))
     }
 
-    fun markSectionEnd() {
+    public fun markSectionEnd() {
         val last = sectionStack.removeLast()
         generateSectionLabel(last)
     }
 
-    inline fun markSection(sectionId: Int, block: () -> Unit) {
+    public inline fun markSection(sectionId: Int, block: () -> Unit) {
         markSectionStart(sectionId)
         block()
         markSectionEnd()
     }
 
-    inline fun markSection(sectional: Sectional, block: () -> Unit) {
+    public inline fun markSection(sectional: Sectional, block: () -> Unit) {
         val section = sectional.section ?: return block()
         markSectionStart(section)
         block()
@@ -413,7 +413,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     /**
      * Automatically pushes/pops the required exception handlers.
      */
-    inline fun withExceptionHandling(catchLabel: Int, endLabel: Int, block: () -> Unit) {
+    public inline fun withExceptionHandling(catchLabel: Int, endLabel: Int, block: () -> Unit) {
         pushExceptionHandlingInsn(catchLabel, endLabel)
         block()
         popExceptionHandlingInsn()
@@ -422,7 +422,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     /**
      * Automatically pushes/pops the required loop handlers.
      */
-    inline fun withLoopHandling(continueLabel: Int, breakLabel: Int, block: () -> Unit) {
+    public inline fun withLoopHandling(continueLabel: Int, breakLabel: Int, block: () -> Unit) {
         pushLoopHandlingInsn(continueLabel, breakLabel)
         block()
         popLoopHandlingInsn()
@@ -431,7 +431,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
     /**
      * Automatically pushes/pops the required scope instructions.
      */
-    inline fun withScope(block: () -> Unit) {
+    public inline fun withScope(block: () -> Unit) {
         pushScopeInsn()
         block()
         popScopeInsn()
@@ -446,7 +446,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         }
     }
 
-    fun build(): CompiledNode {
+    public fun build(): CompiledNode {
         if (sectionStack.isNotEmpty()) {
             println("This should not have happened.")
             generateSectionLabel(sectionStack.last())
@@ -454,7 +454,7 @@ class CompiledNodeBuilder(private val parent: CompiledSourceBuilder, val nodeId:
         return CompiledNode(instructions.toList(), jumpLabels.toList(), sectionLabels.toList())
     }
 
-    companion object {
+    public companion object {
         private const val I24_MAX = 0x7FFFFF
         private const val I24_MIN = -0x800000
         private val i24Range = I24_MIN..I24_MAX

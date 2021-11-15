@@ -5,19 +5,19 @@ import net.notjustanna.lin.utils.Deserializer
 import net.notjustanna.lin.utils.Serializable
 import okio.Buffer
 
-sealed class Insn : Serializable {
+public sealed class Insn : Serializable {
     override fun toString(): String {
         return this::class.simpleName ?: super.toString()
     }
 
-    enum class Opcode {
+    public enum class Opcode {
         PARAMETERLESS, ASSIGN, BRANCH_IF_FALSE, BRANCH_IF_TRUE, DECLARE_VARIABLE_IMMUTABLE,
         DECLARE_VARIABLE_MUTABLE, GET_MEMBER_PROPERTY, GET_SUBSCRIPT, GET_VARIABLE, INVOKE, INVOKE_LOCAL, INVOKE_MEMBER,
         JUMP, LOAD_DECIMAL, LOAD_INTEGER, LOAD_STRING, NEW_FUNCTION, PUSH_CHAR, PUSH_DECIMAL,
         PUSH_INTEGER, PUSH_EXCEPTION_HANDLING, PUSH_LOOP_HANDLING, SET_MEMBER_PROPERTY, SET_SUBSCRIPT, SET_VARIABLE
     }
 
-    enum class ParameterlessCode {
+    public enum class ParameterlessCode {
         ARRAY_INSERT, BREAK, CONTINUE, DUP, NEW_ARRAY, NEW_OBJECT, OBJECT_INSERT, POP,
         POP_SCOPE, POP_EXCEPTION_HANDLING, POP_LOOP_HANDLING, PUSH_NULL, PUSH_SCOPE, PUSH_THIS, RETURN,
         THROW, TYPEOF, PUSH_TRUE, PUSH_FALSE, UNARY_POSITIVE, UNARY_NEGATIVE, UNARY_TRUTH, UNARY_NOT,
@@ -25,7 +25,7 @@ sealed class Insn : Serializable {
         BINARY_NOT_EQUALS, BINARY_LT, BINARY_LTE, BINARY_GT, BINARY_GTE, BINARY_IN, BINARY_RANGE
     }
 
-    companion object : Deserializer<Insn> {
+    public companion object : Deserializer<Insn> {
         override fun deserializeFrom(buffer: Buffer): Insn {
             val opcodeNum = buffer.readU8()
             return when (Opcode.values()[opcodeNum]) {

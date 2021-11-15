@@ -2,8 +2,8 @@ package net.notjustanna.lin.vm.scope
 
 import net.notjustanna.lin.vm.types.LAny
 
-sealed class Scope {
-    abstract val parent: Scope?
+public sealed class Scope {
+    public abstract val parent: Scope?
 
     /**
      * Return true if the variable is declared and mutable, false if declared and immutable, null if not declared.
@@ -17,7 +17,7 @@ sealed class Scope {
 
     protected abstract fun implGet(name: String): LAny
 
-    fun get(name: String): LAny {
+    public fun get(name: String): LAny {
         var s: Scope? = this
         while (s != null) {
             if (s.implIsDeclared(name) == null) {
@@ -32,7 +32,7 @@ sealed class Scope {
         throw IllegalStateException("Could not resolve $name")
     }
 
-    open fun set(name: String, value: LAny) {
+    public open fun set(name: String, value: LAny) {
         var s: Scope? = this
         while (s != null) {
             if (s is MutableScope) {

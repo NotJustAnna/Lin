@@ -11,18 +11,28 @@ import net.notjustanna.tartar.api.lexer.Section
  * Nodes must be executed sequentially.
  * This AST node's main use is function bodies and main scopes.
  */
-data class MultiNode(val list: List<Node>, override val section: Section? = null) : Node.Multi {
+public data class MultiNode(val list: List<Node>, override val section: Section? = null) : Node.Multi {
     /* @automation(ast.impl MultiNode,Node)-start */
-    override fun accept(visitor: NodeVisitor) = visitor.visitMultiNode(this)
+    override fun accept(visitor: NodeVisitor) {
+        visitor.visitMultiNode(this)
+    }
 
-    override fun accept(visitor: NodeMapVisitor): Node = visitor.visitMultiNode(this)
+    override fun accept(visitor: NodeMapVisitor): Node {
+        return visitor.visitMultiNode(this)
+    }
 
-    override fun <R> accept(visitor: NodeVisitorR<R>): R = visitor.visitMultiNode(this)
+    override fun <R> accept(visitor: NodeVisitorR<R>): R {
+        return visitor.visitMultiNode(this)
+    }
 
-    override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) = visitor.visitMultiNode(this, param0)
+    override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) {
+        visitor.visitMultiNode(this, param0)
+    }
     /* @automation-end */
 
-    override fun nodes() = list
+    override fun nodes(): List<Node> {
+        return list
+    }
 
-    override fun lastNode() = list.last()
+    override fun lastNode(): Node = list.last()
 }

@@ -3,7 +3,7 @@ package net.notjustanna.lin.bytecode.insn
 import net.notjustanna.lin.bytecode.utils.writeU24
 import okio.Buffer
 
-object ArrayInsertInsn : Insn() {
+public object ArrayInsertInsn : Insn() {
     override fun serializeTo(buffer: Buffer) {
         buffer.writeByte(Opcode.PARAMETERLESS.ordinal).writeU24(ParameterlessCode.ARRAY_INSERT.ordinal)
     }

@@ -7,14 +7,26 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-data class InvokeExpr(val target: Expr, val arguments: List<Expr>, override val section: Section? = null) : Expr {
+public data class InvokeExpr(
+    val target: Expr,
+    val arguments: List<Expr>,
+    override val section: Section? = null
+) : Expr {
     /* @automation(ast.impl InvokeExpr,Expr)-start */
-    override fun accept(visitor: NodeVisitor) = visitor.visitInvokeExpr(this)
+    override fun accept(visitor: NodeVisitor) {
+        visitor.visitInvokeExpr(this)
+    }
 
-    override fun accept(visitor: NodeMapVisitor): Expr = visitor.visitInvokeExpr(this)
+    override fun accept(visitor: NodeMapVisitor): Expr {
+        return visitor.visitInvokeExpr(this)
+    }
 
-    override fun <R> accept(visitor: NodeVisitorR<R>): R = visitor.visitInvokeExpr(this)
+    override fun <R> accept(visitor: NodeVisitorR<R>): R {
+        return visitor.visitInvokeExpr(this)
+    }
 
-    override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) = visitor.visitInvokeExpr(this, param0)
+    override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) {
+        visitor.visitInvokeExpr(this, param0)
+    }
     /* @automation-end */
 }

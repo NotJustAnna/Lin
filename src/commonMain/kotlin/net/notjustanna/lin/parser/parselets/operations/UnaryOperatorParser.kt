@@ -14,7 +14,7 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-class UnaryOperatorParser(private val operator: UnaryOperationType) :
+public class UnaryOperatorParser(private val operator: UnaryOperationType) :
     PrefixParselet<TokenType, Token<TokenType>, Node> {
     override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.matchAll(TokenType.NL)

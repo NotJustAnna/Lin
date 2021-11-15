@@ -6,42 +6,54 @@ import net.notjustanna.lin.ast.visitor.NodeVisitor1
 import net.notjustanna.lin.ast.visitor.NodeVisitorR
 import net.notjustanna.tartar.api.lexer.Section
 
-data class InvalidNode(override val section: Section?, val children: List<Node>, val errors: List<Exception>) : Expr {
+public data class InvalidNode(override val section: Section?, val children: List<Node>, val errors: List<Exception>) :
+    Expr {
 
-    class Builder {
-        var section: Section? = null
-        val children = mutableListOf<Node>()
-        val errors = mutableListOf<Exception>()
+    public class Builder {
+        public var section: Section? = null
+        public val children: MutableList<Node> = mutableListOf()
+        public val errors: MutableList<Exception> = mutableListOf()
 
-        fun section(value: Section?) = apply {
+        public fun section(value: Section?): Builder {
             if (value != null) {
                 section = value
             }
+            return this
         }
 
-        fun child(vararg values: Node?) = apply {
+        public fun child(vararg values: Node?): Builder {
             val list = values.filterNotNull()
             children += list
             if (section == null && list.isNotEmpty()) section = list.first().section
+            return this
         }
 
-        fun error(vararg values: Exception) = apply {
+        public fun error(vararg values: Exception): Builder {
             errors += values
+            return this
         }
     }
 
     /* @automation(ast.impl InvalidNode,Expr)-start */
-    override fun accept(visitor: NodeVisitor) = visitor.visitInvalidNode(this)
+    override fun accept(visitor: NodeVisitor) {
+        visitor.visitInvalidNode(this)
+    }
 
-    override fun accept(visitor: NodeMapVisitor): Expr = visitor.visitInvalidNode(this)
+    override fun accept(visitor: NodeMapVisitor): Expr {
+        return visitor.visitInvalidNode(this)
+    }
 
-    override fun <R> accept(visitor: NodeVisitorR<R>): R = visitor.visitInvalidNode(this)
+    override fun <R> accept(visitor: NodeVisitorR<R>): R {
+        return visitor.visitInvalidNode(this)
+    }
 
-    override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) = visitor.visitInvalidNode(this, param0)
+    override fun <T> accept(visitor: NodeVisitor1<T>, param0: T) {
+        visitor.visitInvalidNode(this, param0)
+    }
     /* @automation-end */
 
-    companion object {
-        operator fun invoke(block: Builder.() -> Unit) = Builder().apply(block).build()
+    public companion object {
+        public operator fun invoke(block: Builder.() -> Unit): InvalidNode = Builder().apply(block).build()
         private fun Builder.build() = InvalidNode(section, children, errors)
     }
 }

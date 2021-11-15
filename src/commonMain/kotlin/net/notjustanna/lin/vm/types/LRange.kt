@@ -2,7 +2,7 @@ package net.notjustanna.lin.vm.types
 
 import net.notjustanna.lin.vm.LinRuntime
 
-class LRange(val value: LongRange) : LAny() {
+public data class LRange(val value: LongRange) : LAny() {
     override fun truth(): Boolean {
         return true
     }

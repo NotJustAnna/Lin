@@ -1,8 +1,8 @@
 package net.notjustanna.lin.vm.types
 
-data class LObject(val value: MutableMap<LAny, LAny> = mutableMapOf()) : LAny() {
+public data class LObject(val value: MutableMap<LAny, LAny> = mutableMapOf()) : LAny() {
 
-    constructor(vararg pairs: Pair<LAny, LAny>) : this(pairs.toMap(mutableMapOf()))
+    public constructor(vararg pairs: Pair<LAny, LAny>) : this(pairs.toMap(mutableMapOf()))
 
     override fun truth(): Boolean {
         return value.isNotEmpty()
@@ -19,8 +19,8 @@ data class LObject(val value: MutableMap<LAny, LAny> = mutableMapOf()) : LAny() 
         return value.toString()
     }
 
-    companion object {
-        fun of(vararg pairs: Pair<LAny, LAny>): LObject {
+    public companion object {
+        public fun of(vararg pairs: Pair<LAny, LAny>): LObject {
             return LObject(pairs.toMap(mutableMapOf()))
         }
     }

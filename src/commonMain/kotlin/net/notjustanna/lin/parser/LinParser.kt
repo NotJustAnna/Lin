@@ -4,14 +4,17 @@ import net.notjustanna.lin.ast.node.*
 import net.notjustanna.lin.ast.node.declare.DeclareFunctionExpr
 import net.notjustanna.lin.ast.node.value.FunctionExpr
 import net.notjustanna.lin.ast.node.value.NullExpr
+import net.notjustanna.lin.lexer.LinToken
 import net.notjustanna.lin.lexer.TokenType
 import net.notjustanna.lin.parser.utils.matchAll
 import net.notjustanna.tartar.api.grammar.Grammar
 import net.notjustanna.tartar.api.parser.Parser
+import net.notjustanna.tartar.api.parser.SourceParser
 import net.notjustanna.tartar.api.parser.SyntaxException
-import net.notjustanna.tartar.api.parser.Token
 
-internal fun linStdParser(grammar: Grammar<TokenType, Token<TokenType>, Node>) = Parser.create(grammar) {
+public typealias LinSourceParser = SourceParser<TokenType, LinToken, Node, Node>
+
+internal fun linStdParser(grammar: Grammar<TokenType, LinToken, Node>) = Parser.create(grammar) {
     if (this.eof) {
         return@create NullExpr()
     }

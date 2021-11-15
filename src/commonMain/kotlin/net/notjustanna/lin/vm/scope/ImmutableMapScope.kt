@@ -2,7 +2,7 @@ package net.notjustanna.lin.vm.scope
 
 import net.notjustanna.lin.vm.types.LAny
 
-class ImmutableMapScope(private val map: Map<String, LAny>, override val parent: Scope?) : Scope() {
+public class ImmutableMapScope(private val map: Map<String, LAny>, override val parent: Scope?) : Scope() {
     override fun implIsDeclared(name: String): Boolean? {
         if (name in map) {
             return false

@@ -2,7 +2,7 @@ package net.notjustanna.lin.vm.scope
 
 import net.notjustanna.lin.vm.types.LAny
 
-class DefaultMutableScope(override val parent: Scope?) : AbstractMutableScope() {
+public class DefaultMutableScope(override val parent: Scope?) : AbstractMutableScope() {
     private val map = mutableMapOf<String, LAny>()
 
     override fun implSet(name: String, value: LAny) {
@@ -17,5 +17,7 @@ class DefaultMutableScope(override val parent: Scope?) : AbstractMutableScope() 
         return map.getValue(name)
     }
 
-    fun immutable() = ImmutableMapScope(map.toMap(), parent)
+    public fun immutable(): ImmutableMapScope {
+        return ImmutableMapScope(map.toMap(), parent)
+    }
 }

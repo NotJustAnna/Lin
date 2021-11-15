@@ -14,8 +14,8 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object InfixBangParser : InfixParselet<TokenType, Token<TokenType>, Node> {
-    override val precedence = Precedence.NAMED_CHECKS
+public object InfixBangParser : InfixParselet<TokenType, Token<TokenType>, Node> {
+    override val precedence: Int = Precedence.NAMED_CHECKS
 
     override fun parse(
         ctx: ParserContext<TokenType, Token<TokenType>, Node>,

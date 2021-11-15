@@ -1,6 +1,6 @@
 package net.notjustanna.lin.lexer
 
-enum class TokenType {
+public enum class TokenType {
     L_BRACE, // {
     R_BRACE, // }
 

@@ -2,7 +2,7 @@ package net.notjustanna.lin.vm.types
 
 import net.notjustanna.lin.vm.LinRuntime
 
-data class LArray(val value: MutableList<LAny> = mutableListOf()) : LAny() {
+public data class LArray(val value: MutableList<LAny> = mutableListOf()) : LAny() {
     override fun truth(): Boolean {
         return value.isNotEmpty()
     }

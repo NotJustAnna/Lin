@@ -7,7 +7,7 @@ import net.notjustanna.lin.vm.scope.DefaultMutableScope
 import net.notjustanna.lin.vm.types.LAny
 import net.notjustanna.lin.vm.types.LCompiledFunction
 
-class FunctionSetupLayer(
+public class FunctionSetupLayer(
     private val events: VMEvents,
     private val function: LCompiledFunction,
     private val thisValue: LAny? = null,

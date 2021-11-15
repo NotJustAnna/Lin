@@ -1,6 +1,6 @@
 package net.notjustanna.lin.exception
 
-interface LinNativeException {
-    val exceptionType: String
-    val exceptionDescription: String
+public interface LinNativeException {
+    public val exceptionType: String
+    public val exceptionDescription: String
 }

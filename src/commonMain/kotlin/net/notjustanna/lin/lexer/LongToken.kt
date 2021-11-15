@@ -3,7 +3,7 @@ package net.notjustanna.lin.lexer
 import net.notjustanna.tartar.api.lexer.Section
 import net.notjustanna.tartar.api.parser.Token
 
-class LongToken<T>(type: T, val value: Long, section: Section? = null) : Token<T>(type, section) {
+public class LongToken<T>(type: T, public val value: Long, section: Section? = null) : Token<T>(type, section) {
     /**
      * Returns a string representation of the token.
      */

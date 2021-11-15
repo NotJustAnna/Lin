@@ -13,7 +13,7 @@ import net.notjustanna.tartar.api.parser.StringToken
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object TryParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+public object TryParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
     override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         ctx.skipOnlyUntil(TokenType.L_BRACE)
         ctx.eat(TokenType.L_BRACE)

@@ -9,8 +9,8 @@ import net.notjustanna.lin.vm.scope.Scope
 import net.notjustanna.lin.vm.types.LAny
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class LinVirtualMachine(layerInitializer: (VMEvents) -> ExecutionLayer) {
-    constructor(source: CompiledSource, scope: Scope) : this({
+public class LinVirtualMachine(layerInitializer: (VMEvents) -> ExecutionLayer) {
+    public constructor(source: CompiledSource, scope: Scope) : this({
         DefaultExecutionLayer(it, DefaultMutableScope(scope), source, "<main>")
     })
 
@@ -18,22 +18,22 @@ class LinVirtualMachine(layerInitializer: (VMEvents) -> ExecutionLayer) {
     private var currentLayer: ExecutionLayer = layerInitializer(EventsImpl(this))
     private var result: LinResult? = null
 
-    fun run(): LinResult {
+    public fun run(): LinResult {
         while (hasNextStep()) {
             step()
         }
         return result()
     }
 
-    fun hasNextStep(): Boolean {
+    public fun hasNextStep(): Boolean {
         return result == null
     }
 
-    fun step() {
+    public fun step() {
         currentLayer.step()
     }
 
-    fun result(): LinResult {
+    public fun result(): LinResult {
         return result ?: throw RuntimeException("Execution not finished")
     }
 

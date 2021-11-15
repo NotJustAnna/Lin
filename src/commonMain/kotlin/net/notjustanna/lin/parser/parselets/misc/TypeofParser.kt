@@ -10,7 +10,7 @@ import net.notjustanna.tartar.api.parser.ParserContext
 import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.api.parser.Token
 
-object TypeofParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
+public object TypeofParser : PrefixParselet<TokenType, Token<TokenType>, Node> {
     override fun parse(ctx: ParserContext<TokenType, Token<TokenType>, Node>, token: Token<TokenType>): Node {
         val node = ctx.parseExpression().let {
             it as? Expr ?: return InvalidNode {

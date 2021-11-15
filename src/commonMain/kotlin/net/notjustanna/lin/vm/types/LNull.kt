@@ -1,6 +1,6 @@
 package net.notjustanna.lin.vm.types
 
-object LNull : LAny() {
+public object LNull : LAny() {
     override fun truth(): Boolean {
         return false
     }

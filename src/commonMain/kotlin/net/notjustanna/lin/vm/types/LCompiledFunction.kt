@@ -6,10 +6,10 @@ import net.notjustanna.lin.vm.LinVirtualMachine
 import net.notjustanna.lin.vm.impl.FunctionSetupLayer
 import net.notjustanna.lin.vm.scope.Scope
 
-class LCompiledFunction(
-    val source: CompiledSource,
-    val data: CompiledFunction,
-    val rootScope: Scope
+public class LCompiledFunction(
+    public val source: CompiledSource,
+    public val data: CompiledFunction,
+    public val rootScope: Scope
 ) : LFunction() {
     override val name: String?
         get() = source.stringConstOrNull(data.nameConst)

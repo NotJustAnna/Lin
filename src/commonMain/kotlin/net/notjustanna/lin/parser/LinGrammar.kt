@@ -1,6 +1,7 @@
 package net.notjustanna.lin.parser
 
 import net.notjustanna.lin.ast.node.Node
+import net.notjustanna.lin.lexer.LinToken
 import net.notjustanna.lin.lexer.TokenType
 import net.notjustanna.lin.lexer.TokenType.*
 import net.notjustanna.lin.parser.parselets.control.*
@@ -11,9 +12,8 @@ import net.notjustanna.lin.parser.parselets.value.*
 import net.notjustanna.lin.utils.BinaryOperationType
 import net.notjustanna.lin.utils.UnaryOperationType
 import net.notjustanna.tartar.api.grammar.Grammar
-import net.notjustanna.tartar.api.parser.Token
 
-internal fun linStdGrammar() = Grammar.create<TokenType, Token<TokenType>, Node> {
+internal fun linStdGrammar() = Grammar.create<TokenType, LinToken, Node> {
     // Simple Expressions
     prefix(INTEGER, IntegerParser)
     //prefix(LONG, LongParser)

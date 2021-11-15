@@ -2,12 +2,12 @@ package net.notjustanna.lin.vm
 
 import net.notjustanna.lin.vm.types.LAny
 
-sealed class LinResult {
-    abstract fun getOrThrow(): LAny
-    abstract fun getOrNull(): LAny?
-    abstract fun thrownOrNull(): LAny?
+public sealed class LinResult {
+    public abstract fun getOrThrow(): LAny
+    public abstract fun getOrNull(): LAny?
+    public abstract fun thrownOrNull(): LAny?
 
-    class Returned(val value: LAny) : LinResult() {
+    public class Returned(public val value: LAny) : LinResult() {
         override fun getOrThrow(): LAny {
             return value
         }
@@ -21,7 +21,7 @@ sealed class LinResult {
         }
     }
 
-    class Thrown(val value: LAny) : LinResult() {
+    public class Thrown(public val value: LAny) : LinResult() {
         override fun getOrThrow(): LAny {
             throw LAnyException(value)
         }
@@ -30,7 +30,7 @@ sealed class LinResult {
             return null
         }
 
-        override fun thrownOrNull(): LAny? {
+        override fun thrownOrNull(): LAny {
             return value
         }
     }

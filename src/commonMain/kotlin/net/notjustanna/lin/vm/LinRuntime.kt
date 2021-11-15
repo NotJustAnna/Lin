@@ -1,18 +1,18 @@
 package net.notjustanna.lin.vm
 
-import net.notjustanna.lin.compiler.LinNullPointerException
+import net.notjustanna.lin.exception.LinNullPointerException
 import net.notjustanna.lin.exception.LinUnsupportedOperationException
 import net.notjustanna.lin.vm.types.*
 
-object LinRuntime {
-    val ensureNotNull = LNativeFunction("ensureNotNull") { _, args ->
+public object LinRuntime {
+    public val ensureNotNull: LNativeFunction = LNativeFunction("ensureNotNull") { _, args ->
         if (args.any { it == LNull }) {
             throw LinNullPointerException()
         }
         LTrue
     }
 
-    val iterator = LNativeFunction("iterator") { thisValue, _ ->
+    public val iterator: LNativeFunction = LNativeFunction("iterator") { thisValue, _ ->
         val it = when (thisValue) {
             is LArray -> {
                 thisValue.value.iterator()

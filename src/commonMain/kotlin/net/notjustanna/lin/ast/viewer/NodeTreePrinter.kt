@@ -17,7 +17,9 @@ import net.notjustanna.lin.ast.node.misc.UnaryOperation
 import net.notjustanna.lin.ast.node.value.*
 import net.notjustanna.lin.ast.visitor.NodeVisitor
 
-class NodeTreePrinter(private val builder: StringBuilder = StringBuilder()) : NodeVisitor, Appendable by builder {
+public class NodeTreePrinter(
+    private val builder: StringBuilder = StringBuilder()
+) : NodeVisitor, Appendable by builder {
     private var indent = 0
     private var name: String? = null
 

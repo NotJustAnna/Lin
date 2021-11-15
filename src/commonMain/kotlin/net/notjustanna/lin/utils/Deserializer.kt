@@ -4,10 +4,10 @@ import okio.Buffer
 import okio.ByteString
 import okio.use
 
-interface Deserializer<T> {
-    fun deserializeFrom(buffer: Buffer) : T
+public interface Deserializer<T> {
+    public fun deserializeFrom(buffer: Buffer): T
 
-    fun fromBytes(source: ByteString): T {
+    public fun fromBytes(source: ByteString): T {
         Buffer().use {
             it.write(source)
             return deserializeFrom(it)

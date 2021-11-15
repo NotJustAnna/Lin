@@ -6,7 +6,7 @@ import net.notjustanna.tartar.api.lexer.Lexer
 import net.notjustanna.tartar.api.parser.Token
 import net.notjustanna.tartar.extensions.lexer.*
 
-typealias LinToken = Token<TokenType>
+public typealias LinToken = Token<TokenType>
 
 internal fun linStdLexer() = Lexer.create<LinToken> {
     ' ' { matchSpaceAndNL() }

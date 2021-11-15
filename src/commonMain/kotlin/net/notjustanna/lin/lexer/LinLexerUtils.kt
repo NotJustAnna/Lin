@@ -6,7 +6,7 @@ import net.notjustanna.tartar.api.parser.SyntaxException
 import net.notjustanna.tartar.extensions.lexer.processToken
 import net.notjustanna.tartar.extensions.lexer.section
 
-fun LexerContext<LinToken>.matchSpaceAndNL() {
+internal fun LexerContext<LinToken>.matchSpaceAndNL() {
     while (hasNext()) if (!match(' ')) {
         if (match('\n')) {
             processToken(TokenType.NL)
@@ -19,7 +19,7 @@ fun LexerContext<LinToken>.matchSpaceAndNL() {
     }
 }
 
-fun LexerContext<*>.readLinIdentifier(firstChar: Char? = null): String {
+internal fun LexerContext<*>.readLinIdentifier(firstChar: Char? = null): String {
     val buf = StringBuilder()
     firstChar?.let(buf::append)
     while (hasNext()) {
@@ -34,46 +34,46 @@ fun LexerContext<*>.readLinIdentifier(firstChar: Char? = null): String {
     return buf.toString()
 }
 
-fun LexerContext<*>.readLinString(delimiter: Char): String {
-    val buf = StringBuilder()
-    var eol = false
-    outer@ while (hasNext()) {
-        val c = peek()
-        if (c == delimiter) {
-            next()
-            eol = true
-            break
-        } else if (c == '\\') {
-            next()
-            if (!hasNext()) break
-            when (val escapingChar = next()) {
-                'n' -> buf.append('\n')
-                'r' -> buf.append('\r')
-                'b' -> buf.append('\b')
-                't' -> buf.append('\t')
-                '\'' -> buf.append('\'')
-                '"' -> buf.append('"')
-                '\\' -> buf.append('\\')
-                'u' -> {
-                    val u = nextString(4)
-                    if (u.length != 4) break@outer
-                    buf.append(u.toInt(16).toChar())
-                }
-                else -> throw SyntaxException("Unknown escaping '\\$escapingChar'", section(2))
-            }
-        } else {
-            next()
-            buf.append(c)
-        }
-    }
-    if (!eol) {
-        throw IllegalStateException("Unterminated String")
-    }
-    return buf.toString()
-}
+// internal fun LexerContext<*>.readLinString(delimiter: Char): String {
+//     val buf = StringBuilder()
+//     var eol = false
+//     outer@ while (hasNext()) {
+//         val c = peek()
+//         if (c == delimiter) {
+//             next()
+//             eol = true
+//             break
+//         } else if (c == '\\') {
+//             next()
+//             if (!hasNext()) break
+//             when (val escapingChar = next()) {
+//                 'n' -> buf.append('\n')
+//                 'r' -> buf.append('\r')
+//                 'b' -> buf.append('\b')
+//                 't' -> buf.append('\t')
+//                 '\'' -> buf.append('\'')
+//                 '"' -> buf.append('"')
+//                 '\\' -> buf.append('\\')
+//                 'u' -> {
+//                     val u = nextString(4)
+//                     if (u.length != 4) break@outer
+//                     buf.append(u.toInt(16).toChar())
+//                 }
+//                 else -> throw SyntaxException("Unknown escaping '\\$escapingChar'", section(2))
+//             }
+//         } else {
+//             next()
+//             buf.append(c)
+//         }
+//     }
+//     if (!eol) {
+//         throw IllegalStateException("Unterminated String")
+//     }
+//     return buf.toString()
+// }
 
 
-fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
+internal fun LexerContext<LinToken>.readLinTemplateString(delim: String, raw: Boolean) {
     val absoluteStart = index - delim.length
     var sectionOffset = delim.length
     var start = index
