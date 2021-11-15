@@ -35,7 +35,10 @@ data class CompiledSource(
 
         buffer.writeInt(functionParameters.size)
         for (list in functionParameters) {
-            buffer.writeInt(list.size)
+            check(list.size < 256) {
+                "Compiled Source cannot be compiled as a function parameter definition exceeded the maximum size (${list.size} > 255)"
+            }
+            buffer.writeByte(list.size)
             for (parameter in list) parameter.serializeTo(buffer)
         }
 
@@ -84,7 +87,7 @@ data class CompiledSource(
             val functionParameters = mutableListOf<List<CompiledParameter>>()
             repeat(buffer.readInt()) {
                 val list = mutableListOf<CompiledParameter>()
-                repeat(buffer.readInt()) {
+                repeat(buffer.readByte().toInt() and 0xFF) {
                     list += CompiledParameter.deserializeFrom(buffer)
                 }
                 functionParameters += list
