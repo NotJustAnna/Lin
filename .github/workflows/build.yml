@@ -45,7 +45,7 @@ jobs:
       - name: stop gradle
         run: ./gradlew --stop
       - name: capture build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ runner.os }}-Artifacts
           path: build/libs/
