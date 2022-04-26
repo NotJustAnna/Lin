@@ -1,7 +1,7 @@
 plugins {
     kotlin("multiplatform") version "1.6.21"
     `maven-publish`
-    id("org.jetbrains.dokka") version "1.6.20"
+    id("org.jetbrains.dokka") version "1.6.21"
 }
 
 group = "com.github.adriantodt"
