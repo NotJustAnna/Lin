@@ -9,7 +9,7 @@ version = "0.3"
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://maven.cafeteria.dev") }
+    maven { url = uri("https://maven.cafeteria.dev/releases") }
 }
 
 kotlin {
