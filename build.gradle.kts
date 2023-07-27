@@ -1,7 +1,7 @@
 plugins {
     kotlin("multiplatform") version "1.7.10"
     `maven-publish`
-    id("org.jetbrains.dokka") version "1.7.10"
+    id("org.jetbrains.dokka") version "1.8.20"
 }
 
 group = "net.notjustanna"
